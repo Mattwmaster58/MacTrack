@@ -4,12 +4,11 @@ from functools import partial
 import requests
 from sqlalchemy import Engine
 from sqlalchemy.dialects.sqlite import Insert
-from sqlalchemy.ext.compiler import compiles, deregister
 from sqlalchemy.orm import Session
 from tqdm import tqdm
 
-from utils import filter_raw_kwargs, create_from_datetime_json, convert_str_kwargs_to_datetime_in_place
-from models import *
+from utils import filter_raw_kwargs, convert_str_kwargs_to_datetime_in_place
+from macbidnotify.data.models import *
 
 
 def _prefix_insert_with_replace(insert, compiler, **kw):
