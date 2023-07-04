@@ -1,32 +1,14 @@
-import sqlite3
+from datetime import datetime
 from functools import partial
+from itertools import islice
 
 import requests
 from sqlalchemy import Engine
-from sqlalchemy.dialects.sqlite import Insert
 from sqlalchemy.orm import Session
 from tqdm import tqdm
 
-from utils import filter_raw_kwargs, convert_str_kwargs_to_datetime_in_place
-from macbidnotify.data.models import *
-
-
-def _prefix_insert_with_replace(insert, compiler, **kw):
-    return compiler.visit_insert(insert.prefix_with('OR IGNORE'), **kw)
-
-
-def create_prefixed_session(prefix=None):
-    if prefix is None:
-        prefix = ""
-    else:
-        prefix = prefix.rstrip('/') + '/'
-
-    def new_request(prefix, f, method, url, *args, **kwargs):
-        return f(method, prefix + url, *args, **kwargs)
-
-    s = requests.Session()
-    s.request = partial(new_request, prefix, s.request)
-    return s
+from data import AuctionLot, Building, Location, AuctionGroup
+from utils import convert_str_kwargs_to_datetime_in_place, filter_raw_kwargs
 
 
 class MacBidClient:
@@ -96,7 +78,7 @@ class MacBidClient:
         self.update_provisional_auction_groups(last_scraped_group_id)
 
     def update_definitive_auction_groups(self, last_scraped_group_id):
-        ppg = 100
+        ppg = 1000
         pg = 1
 
         def check_for_auction_group(auction_groups: list, group_id: int):
@@ -114,18 +96,25 @@ class MacBidClient:
         while len(auction_groups) == ppg and not found_auction:
             auction_groups = self.get_auction_groups(pg, ppg)
             found_auction = check_for_auction_group(auction_groups, last_scraped_group_id)
-            print(f"queued +{len(auction_groups)} auction groups")
+            print(f"queued {len(objs)}+{len(auction_groups)}={len(objs) + len(auction_groups)} auction groups")
             objs.extend(auction_groups)
             print(f"going back further to find {last_scraped_group_id=} {pg=}")
             pg += 1
+        print("inserting groups")
         with self.session.begin_nested():
-            res = self.session.execute(
-                AuctionGroup.__table__
-                .insert()
-                .values([filter_raw_kwargs(AuctionGroup.__table__, row) for row in objs])
-                .prefix_with("OR IGNORE")
-            )
-        print(f"inserted <={res.rowcount} new auction groups")
+            # todo: do proper batched insertions here
+            # I am not sure if it's possible to both batch and have this specific replacement logic
+            # this is definitely fast enough for now
+            rows = 0
+            for batch in batched([filter_raw_kwargs(AuctionGroup.__table__, row) for row in objs], n=200):
+                res = self.session.execute(
+                    AuctionGroup.__table__
+                    .insert()
+                    .values(batch)
+                    .prefix_with("OR IGNORE")
+                )
+                rows += res.rowcount
+        print(f"inserted <={rows} new auction groups")
 
     def update_auction_lots(self):
         unscraped_auction_groups = self.session.query(AuctionGroup) \
@@ -155,8 +144,29 @@ class MacBidClient:
         resp = self.client.get("auctionsummary")
 
 
-mbc = MacBidClient(engine)
-mbc.update_locations()
-mbc.update_buildings()
-mbc.update_auction_groups()
-mbc.update_auction_lots()
+def _prefix_insert_with_replace(insert, compiler, **kw):
+    return compiler.visit_insert(insert.prefix_with('OR IGNORE'), **kw)
+
+
+def create_prefixed_session(prefix=None):
+    if prefix is None:
+        prefix = ""
+    else:
+        prefix = prefix.rstrip('/') + '/'
+
+    def new_request(prefix, f, method, url, *args, **kwargs):
+        return f(method, prefix + url, *args, **kwargs)
+
+    s = requests.Session()
+    s.request = partial(new_request, prefix, s.request)
+    return s
+
+
+def batched(iterable, n):
+    "Batch data into tuples of length n. The last batch may be shorter."
+    # batched('ABCDEFG', 3) --> ABC DEF G
+    if n < 1:
+        raise ValueError('n must be at least one')
+    it = iter(iterable)
+    while batch := tuple(islice(it, n)):
+        yield batch

@@ -1,9 +1,9 @@
 from datetime import datetime
+from pathlib import Path
 
 from sqlalchemy import create_engine, String, Boolean, Integer, ForeignKey, event, DateTime, Float
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-engine = create_engine("sqlite:///mac.bid.db")
 
 
 
@@ -143,10 +143,4 @@ class AuctionLot(Base):
     image_url: Mapped[str] = mapped_column(String, nullable=True)
 
 
-# def _fk_pragma_on_connect(dbapi_con, con_record):
-#     dbapi_con.execute('PRAGMA foreign_keys=ON')
-#
-#
-# event.listen(engine, 'connect', _fk_pragma_on_connect)
 
-Base.metadata.create_all(engine)
