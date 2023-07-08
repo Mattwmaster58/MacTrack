@@ -1,9 +1,10 @@
 import itertools
-from datetime import datetime
+from datetime import datetime, timedelta
 from itertools import islice
+from typing import Iterable
 
 from sqlalchemy import Engine, false, update, select, join, func, case
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, Query
 from tqdm import tqdm
 
 from data import Building, Location, AuctionGroup, AuctionLot
@@ -31,7 +32,6 @@ class MacBidUpdater:
         print(f"inserted <={res.rowcount} new buildings")
 
     def update_locations(self):
-
         resp = self.client.get_locations()
         with self.session.begin():
             res = self.session.execute(
@@ -51,7 +51,8 @@ class MacBidUpdater:
         occurred
         """
         last_scraped_group_id = self.session.query(AuctionGroup.id) \
-            .order_by(AuctionGroup.id.desc()) \
+            .where(AuctionGroup.is_open == false()) \
+            .order_by(AuctionGroup.closing_date.desc()) \
             .first()
 
         if last_scraped_group_id is not None:
@@ -83,7 +84,7 @@ class MacBidUpdater:
             objs.extend(auction_groups)
             print(f"going back further to find {last_scraped_group_id=} {pg=}")
             pg += 1
-        print("inserting groups")
+        print("inserting past auction groups")
         with self.session.begin_nested():
             # todo: do proper batched insertions here
             # I am not sure if it's possible to both batch and have this specific replacement logic
@@ -102,6 +103,7 @@ class MacBidUpdater:
 
     def update_live_auction_groups(self):
         total_groups = 0
+        # typically only ~100 live groups at once
         live_groups = self.client.get_live_auction_groups(pg=1, ppg=1000)
         for batch in batched([filter_raw_kwargs_in_place(AuctionGroup.__table__, row) for row in live_groups],
                              n=self.BULK_INSERT_CHUNK_SIZE):
@@ -109,28 +111,37 @@ class MacBidUpdater:
                 AuctionGroup.__table__
                 .insert()
                 .values(batch)
-                .prefix_with("OR IGNORE")
+                .prefix_with("OR REPLACE")
             )
             total_groups += res.rowcount
         self.session.commit()
 
-    def update_auction_lots(self):
-        unscraped_open_auction_lots = self.session.query(AuctionGroup) \
-            .filter(AuctionGroup.date_scraped == None, AuctionGroup.is_open) \
-            .order_by(AuctionGroup.id.asc())
-
-        never_scraped = (AuctionGroup.date_completed == None) & (AuctionGroup.is_open == false())
-        # todo: should definately re-scrape auction lots that were scraped before they closed
-        # it's a little complex, but something we could do is check if the group has any lots that are open
-        # the data is kinda dirty, so we'd need to close lots that were "accidentally" left open
+    def update_final_auction_lots(self):
+        print("updating final auction lots")
+        # todo: rescrape after close, and verify it
         unscraped_closed_auction_lots = self.session.query(AuctionGroup) \
-            .filter(AuctionGroup.date_scraped == None, AuctionGroup.is_open == false()) \
-            .order_by(AuctionGroup.id.asc())
+            .where(AuctionGroup.is_open == false(), AuctionGroup.date_scraped == None) \
+            .order_by(AuctionGroup.closing_date.asc())
 
+        self._update_lots_of_groups(unscraped_closed_auction_lots)
+
+    def update_live_auction_lots(self, min_rescrape_seconds: int = None):
+        print("updating live auction lots")
+        rescrape_condition = false()
+        if min_rescrape_seconds is not None:
+            delta = timedelta(seconds=min_rescrape_seconds)
+            # past + min_rescrape < now == past < now - min_rescrape
+            rescrape_condition = AuctionGroup.date_scraped < (datetime.now() - delta)
+
+        open_auction_groups = self.session.query(AuctionGroup).where(
+            AuctionGroup.is_open & ((AuctionGroup.date_scraped == None) | rescrape_condition)
+        ).order_by(AuctionGroup.closing_date.asc())
+        # todo: this isn't updating what i want (date_scraped?)
+        self._update_lots_of_groups(open_auction_groups)
+
+    def _update_lots_of_groups(self, groups: Query):
         total_lots = 0
-        all_unscraped = itertools.chain(unscraped_closed_auction_lots, unscraped_open_auction_lots)
-        total_groups = unscraped_open_auction_lots.count() + unscraped_closed_auction_lots.count()
-        for group in tqdm(all_unscraped, total=total_groups):
+        for group in tqdm(groups, total=groups.count()):
             try:
                 lots = self.client.get_auction_lots(group.id)
             except Exception as e:
@@ -176,7 +187,16 @@ class MacBidUpdater:
             AuctionGroup.is_open & ((now > AuctionGroup.closing_date) | (now > AuctionGroup.abandon_date))
         ).values(is_open=False)
 
-        breakpoint()
+        step_explantions = [
+            (close_lots_where_closed_date_is_passed, "closing lots where closed_date is passed"),
+            (close_groups_where_all_lots_are_closed, "closing groups where all lots within are closed"),
+            (close_groups_if_date_completed_or_abandoned_past,
+             "closing groups where date completed/abandoned is in the past")
+        ]
+        for stmt, explanation in step_explantions:
+            res = self.session.execute(stmt)
+            self.session.commit()
+            print(f"{explanation} resulted in {res.rowcount} rows effected")
 
 
 def batched(iterable, n):

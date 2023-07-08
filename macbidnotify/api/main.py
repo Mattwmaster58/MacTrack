@@ -16,7 +16,8 @@ def update(db_path: Path):
     mbc.update_locations()
     mbc.update_buildings()
     mbc.update_auction_groups()
-    mbc.update_auction_lots()
+    mbc.update_final_auction_lots()
+    mbc.update_live_auction_lots()
 
 
 if __name__ == '__main__':
