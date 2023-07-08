@@ -3,7 +3,7 @@ from pathlib import Path
 import click
 
 from data import create_and_connect
-from mac_bid_client import MacBidClient
+from updater import MacBidUpdater
 
 
 @click.command()
@@ -11,7 +11,8 @@ from mac_bid_client import MacBidClient
 def update(db_path: Path):
     db_path = Path(db_path).absolute()
     engine = create_and_connect(db_path)
-    mbc = MacBidClient(engine)
+    mbc = MacBidUpdater(engine)
+    mbc.correct_auction_groups()
     mbc.update_locations()
     mbc.update_buildings()
     mbc.update_auction_groups()

@@ -1,9 +1,9 @@
 from sqlalchemy import DDLElement, String
 from sqlalchemy.ext.compiler import compiles
-from macbidnotify.api.data.models import AuctionLot
+from sqlalchemy.orm import aliased
+
 
 # hugely useful: https://stackoverflow.com/a/49917886/3427299
-
 
 
 class CreateFtsIfNoneExistsWithTriggers(DDLElement):
@@ -83,5 +83,9 @@ def __compiles_fts_table_and_triggers(element: CreateFtsIfNoneExistsWithTriggers
     END;
     """
     return text
+
+def create_aliased_table():
+    # iterate over columns
+    table_args = []
 
 create_fts_table_and_triggers = CreateFtsIfNoneExistsWithTriggers

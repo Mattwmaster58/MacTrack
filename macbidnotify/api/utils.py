@@ -1,9 +1,10 @@
+from collections import namedtuple
 from datetime import datetime
 
 from sqlalchemy import DateTime
 
 
-def filter_raw_kwargs(table, kwargs):
+def filter_raw_kwargs_in_place(table, kwargs):
     column_names = table.columns.keys()
     return {k: v for k, v in kwargs.items() if k in column_names}
 
