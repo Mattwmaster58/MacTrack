@@ -24,8 +24,7 @@ class MacBidUpdater:
         resp = self.client.get_buildings()
         with self.session.begin():
             res = self.session.execute(
-                Building.__table__
-                .insert()
+                insert(Building)
                 .values([filter_raw_kwargs_in_place(Building, row) for row in resp])
                 .prefix_with("OR IGNORE")
             )
@@ -35,8 +34,7 @@ class MacBidUpdater:
         resp = self.client.get_locations()
         with self.session.begin():
             res = self.session.execute(
-                Location.__table__
-                .insert()
+                insert(Location)
                 .values([filter_raw_kwargs_in_place(Location, row) for row in resp])
                 .prefix_with("OR IGNORE")
             )
@@ -93,8 +91,7 @@ class MacBidUpdater:
             for batch in batched([filter_raw_kwargs_in_place(AuctionGroup, row) for row in objs],
                                  n=self.BULK_INSERT_CHUNK_SIZE):
                 res = self.session.execute(
-                    AuctionGroup.__table__
-                    .insert()
+                    insert(AuctionGroup)
                     .values(batch)
                     .prefix_with("OR IGNORE")
                 )
@@ -108,8 +105,7 @@ class MacBidUpdater:
         for batch in batched([filter_raw_kwargs_in_place(AuctionGroup, row) for row in live_groups],
                              n=self.BULK_INSERT_CHUNK_SIZE):
             res = self.session.execute(
-                AuctionGroup.__table__
-                .insert()
+                insert(AuctionGroup)
                 .values(batch)
                 .prefix_with("OR IGNORE")
             )
