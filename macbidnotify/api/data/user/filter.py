@@ -1,3 +1,12 @@
+"""
+Module to deserialize frontend filter components to SQLAlchemy clauses.
+A lot of this code instruments the creation of SQLite FTS5 queries
+
+Useful documentation:
+ - https://www.sqlite.org/fts5.html
+ - https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.bindparam
+"""
+
 import functools
 import operator
 from abc import ABC, abstractmethod
@@ -44,10 +53,29 @@ class ConditionFilter(Filter):
     @property
     def as_sqlalchemy_condition(self):
         # todo: don't think it actually works like this
-        return self.conditions in AUCTION_LOT_COLUMNS
+        return self.conditions in AuctionLot.condition_name
+
+class FtsAllMatchFilter(Filter):
+    """Matches rows that contain at least one match per token in any column"""
+    def __init__(self, columns: list[str], terms: list[str], exclude: list[str]):
+        self.columns = columns
+        self.terms = terms
+        self.exclude = exclude
+
+    def _to_fts_query(self):
+        # todo: use variable binding or smth?
+        brace_o, brace_c = "{}"
+        query = f'{brace_o} {" ".join(self.columns)} {brace_c} : {" ".join(self.terms)}'
+        if self.exclude:
+            query += f" NOT ({' OR '.join(self.exclude)})"
+        return query
+
+    @property
+    def as_sqlalchemy_condition(self):
+        return ...
 
 
-class Fts5Filter(Filter):
+class FtsFilter(Filter):
     def __init__(self, queries: list[str]):
         self.queries = queries
 
