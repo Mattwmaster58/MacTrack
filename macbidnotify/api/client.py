@@ -54,7 +54,7 @@ class Client:
         if data_key is not None:
             resp = resp[data_key]
         for group in resp:
-            group = filter_raw_kwargs_in_place(AuctionGroup.__table__, group)
+            group = filter_raw_kwargs_in_place(AuctionGroup, group)
             convert_str_kwargs_to_datetime_in_place(AuctionGroup, group)
             groups.append(group)
         return groups

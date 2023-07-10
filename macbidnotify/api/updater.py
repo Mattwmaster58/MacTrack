@@ -26,7 +26,7 @@ class MacBidUpdater:
             res = self.session.execute(
                 Building.__table__
                 .insert()
-                .values([filter_raw_kwargs_in_place(Building.__table__, row) for row in resp])
+                .values([filter_raw_kwargs_in_place(Building, row) for row in resp])
                 .prefix_with("OR IGNORE")
             )
         print(f"inserted <={res.rowcount} new buildings")
@@ -37,7 +37,7 @@ class MacBidUpdater:
             res = self.session.execute(
                 Location.__table__
                 .insert()
-                .values([filter_raw_kwargs_in_place(Location.__table__, row) for row in resp])
+                .values([filter_raw_kwargs_in_place(Location, row) for row in resp])
                 .prefix_with("OR IGNORE")
             )
             # self.session.bulk_save_objects(objs, preserve_order=False)
@@ -90,7 +90,7 @@ class MacBidUpdater:
             # I am not sure if it's possible to both batch and have this specific replacement logic
             # this is definitely fast enough for now
             rows = 0
-            for batch in batched([filter_raw_kwargs_in_place(AuctionGroup.__table__, row) for row in objs],
+            for batch in batched([filter_raw_kwargs_in_place(AuctionGroup, row) for row in objs],
                                  n=self.BULK_INSERT_CHUNK_SIZE):
                 res = self.session.execute(
                     AuctionGroup.__table__
@@ -105,7 +105,7 @@ class MacBidUpdater:
         total_groups = 0
         # typically only ~100 live groups at once
         live_groups = self.client.get_live_auction_groups(pg=1, ppg=1000)
-        for batch in batched([filter_raw_kwargs_in_place(AuctionGroup.__table__, row) for row in live_groups],
+        for batch in batched([filter_raw_kwargs_in_place(AuctionGroup, row) for row in live_groups],
                              n=self.BULK_INSERT_CHUNK_SIZE):
             res = self.session.execute(
                 AuctionGroup.__table__

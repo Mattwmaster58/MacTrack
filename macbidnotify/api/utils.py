@@ -4,7 +4,8 @@ from datetime import datetime
 from sqlalchemy import DateTime
 
 
-def filter_raw_kwargs_in_place(table, kwargs):
+def filter_raw_kwargs_in_place(table: type, kwargs):
+    table = table.__table__
     column_names = table.columns.keys()
     return {k: v for k, v in kwargs.items() if k in column_names}
 
