@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from itertools import islice
 from typing import Iterable
 
-from sqlalchemy import Engine, false, update, select, join, func, case
+from sqlalchemy import Engine, false, update, select, join, func, case, insert
 from sqlalchemy.orm import Session, Query
 from tqdm import tqdm
 
@@ -111,7 +111,7 @@ class MacBidUpdater:
                 AuctionGroup.__table__
                 .insert()
                 .values(batch)
-                .prefix_with("OR REPLACE")
+                .prefix_with("OR IGNORE")
             )
             total_groups += res.rowcount
         self.session.commit()
@@ -149,8 +149,7 @@ class MacBidUpdater:
             else:
                 if lots:
                     self.session.execute(
-                        AuctionLot.__table__
-                        .insert()
+                        insert(AuctionLot)
                         .values(lots)
                         .prefix_with("OR REPLACE")
                     )
