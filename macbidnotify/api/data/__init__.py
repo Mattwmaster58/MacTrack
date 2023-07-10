@@ -16,7 +16,7 @@ def create_and_connect(db_path: Path = Path(__file__).parent / "mac.bid.db"):
     Base.metadata.create_all(engine)
     fts_statements = create_fts_table_and_triggers(
         table=AuctionLot.__table__,
-        fts_cols={"product_name", "description"},
+        fts_cols={AuctionLot.product_name, AuctionLot.title, AuctionLot.description},
         version=5
     )
     with Session(engine) as s:

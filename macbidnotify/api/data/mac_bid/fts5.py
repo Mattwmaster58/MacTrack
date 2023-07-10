@@ -1,4 +1,4 @@
-from sqlalchemy import DDLElement, String
+from sqlalchemy import DDLElement, String, Column
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.orm import aliased
 
@@ -12,10 +12,10 @@ class CreateFtsIfNoneExistsWithTriggers(DDLElement):
     a given table.
     """
 
-    def __init__(self, table, fts_cols: set[str], version=5):
+    def __init__(self, table, fts_cols: set[Column], version=5):
         self.table = table
         self.version = version
-        self.fts_cols = fts_cols
+        self.fts_cols = [x.name for x in fts_cols]
 
 
 @compiles(CreateFtsIfNoneExistsWithTriggers)
@@ -34,9 +34,9 @@ def __compiles_fts_table_and_triggers(element: CreateFtsIfNoneExistsWithTriggers
     # warning: only uses the first stated PK as the content_rowid
     pk_column, *_ = tbl.primary_key
     all_other_columns = [col for col in tbl.columns if col is not pk_column]
+    unindexed_prop = " UNINDEXED"
     for column in all_other_columns:
         formatted_col = preparer.format_column(column)
-        unindexed_prop = " UNINDEXED"
         unindexed = not isinstance(column.type, String) or formatted_col not in element.fts_cols
         text += f"{sep}\t{formatted_col}{unindexed_prop if unindexed else ''}"
         sep = ", \n"

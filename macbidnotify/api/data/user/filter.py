@@ -3,7 +3,7 @@ import operator
 from abc import ABC, abstractmethod
 from typing import Literal
 
-from macbidnotify.api.data.models import AuctionLot
+from macbidnotify.api.data.mac_bid import AuctionLot
 
 
 class Filter(ABC):
@@ -14,8 +14,6 @@ class Filter(ABC):
     @abstractmethod
     def as_sqlalchemy_condition(self): ...
 
-
-AUCTION_LOT_COLUMNS = AuctionLot.__table__.c
 Condition = Literal["LIKE NEW", "DAMAGED", "OPEN BOX"]
 
 
@@ -31,7 +29,7 @@ class RetailPriceFilter(Filter):
     @property
     def as_sqlalchemy_condition(self):
         conditions = []
-        column = AUCTION_LOT_COLUMNS.retail_price
+        column = AuctionLot.retail_price
         if self.min_ is not None:
             conditions.append(column >= self.min_)
         if self.max_ is not None:
@@ -41,12 +39,12 @@ class RetailPriceFilter(Filter):
 
 class ConditionFilter(Filter):
     def __init__(self, conditions: list[Condition]):
-        self.condition = conditions
+        self.conditions = conditions
 
     @property
     def as_sqlalchemy_condition(self):
         # todo: don't think it actually works like this
-        return self.condition in AUCTION_LOT_COLUMNS
+        return self.conditions in AUCTION_LOT_COLUMNS
 
 
 class Fts5Filter(Filter):
