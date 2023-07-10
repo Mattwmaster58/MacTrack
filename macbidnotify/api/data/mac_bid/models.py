@@ -1,15 +1,9 @@
 from datetime import datetime
-from pathlib import Path
 
-from sqlalchemy import create_engine, String, Boolean, Integer, ForeignKey, event, DateTime, Float
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy import String, Boolean, Integer, ForeignKey, DateTime, Float
+from sqlalchemy.orm import Mapped, mapped_column
 
-
-
-
-
-class Base(DeclarativeBase):
-    pass
+from macbidnotify.api.data.base_model import Base
 
 
 # class TransferPair(Base):

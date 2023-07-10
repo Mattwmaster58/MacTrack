@@ -7,7 +7,7 @@ from sqlalchemy import Engine, false, update, select, join, func, case
 from sqlalchemy.orm import Session, Query
 from tqdm import tqdm
 
-from data import Building, Location, AuctionGroup, AuctionLot
+from macbidnotify.api.data.mac_bid import Building, Location, AuctionGroup, AuctionLot
 from client import Client
 from utils import filter_raw_kwargs_in_place
 

@@ -2,7 +2,7 @@ from functools import partial
 
 import requests
 
-from data import AuctionLot, AuctionGroup
+from macbidnotify.api.data.mac_bid import AuctionLot, AuctionGroup
 from utils import convert_str_kwargs_to_datetime_in_place, filter_raw_kwargs_in_place
 
 

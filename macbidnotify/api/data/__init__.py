@@ -1,8 +1,11 @@
+from pathlib import Path
+
+from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from macbidnotify.api.data.fts5 import create_fts_table_and_triggers
-from macbidnotify.api.data.models import *
-from macbidnotify.api.data.filter import *
+from macbidnotify.api.data.mac_bid.fts5 import create_fts_table_and_triggers
+from macbidnotify.api.data.mac_bid import AuctionLot
+from macbidnotify.api.data.base_model import Base
 
 
 def create_and_connect(db_path: Path = Path(__file__).parent / "mac.bid.db"):
@@ -14,6 +17,7 @@ def create_and_connect(db_path: Path = Path(__file__).parent / "mac.bid.db"):
         version=5
     )
     with Session(engine) as s:
+        # noinspection PyUnresolvedReferences
         s.connection().connection.connection.executescript(str(fts_statements))
-        # todo: log that we did our stuff here
+        print("created FTS mirror")
     return engine
