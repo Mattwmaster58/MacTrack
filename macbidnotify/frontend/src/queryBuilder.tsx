@@ -1,16 +1,22 @@
 import type {JsonGroup, Config, ImmutableTree, BuilderProps} from '@react-awesome-query-builder/mui'; // for TS example
-import {Query, Builder, Utils as QbUtils} from '@react-awesome-query-builder/mui';
+import {Query, Builder, Utils as QbUtils, MuiWidgets} from '@react-awesome-query-builder/mui';
 import {MuiConfig} from '@react-awesome-query-builder/mui';
 import '@react-awesome-query-builder/mui/css/styles.css';
 import React from 'react';
+import renderField from "./components/renderField";
 
+const {MuiFieldSelect} = MuiWidgets;
 // You need to provide your own config. See below 'Config format'
 const config: Config = {
     ...MuiConfig,
+    settings: {
+        ...MuiConfig.settings,
+        renderField: (props?) => <MuiFieldSelect {...props} />,
+    },
     fields: {
         terms: {
             label: "Search Terms",
-            type: "string",
+            type: "text",
             fieldSettings: {
                 min: 0
             },
