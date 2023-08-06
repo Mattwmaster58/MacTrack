@@ -1,12 +1,11 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-import {FilterContent} from "./components/filterContent";
+import React from "react";
+import "./App.css";
+import { FilterContent } from "./components/filterContent";
 
 function App() {
   return (
     <div className="App">
-      <FilterContent/>
+      <FilterContent />
     </div>
   );
 }
