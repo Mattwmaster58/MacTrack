@@ -13,8 +13,8 @@ const FilterContent: React.FC = () => {
 
   return (
     <Stack flexDirection="column" useFlexGap spacing={2}>
-      <Stack flexDirection="column" alignItems="center" useFlexGap spacing={2}>
-        <Stack flexDirection="row" alignItems="center">
+      <Stack flexDirection="column" useFlexGap spacing={2}>
+        <Stack flexDirection="row" alignItems="center" useFlexGap spacing={2}>
           <Typography alignItems={"center"}>Include items where</Typography>
           <Select
             value={matchType}

@@ -1,7 +1,6 @@
 import { Chip, TextField } from "@mui/material";
 import { Box } from "@mui/system";
 import { useRef, useState } from "react";
-import { Simulate } from "react-dom/test-utils";
 
 interface TagProps {
   data: string;
