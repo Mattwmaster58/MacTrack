@@ -1,12 +1,12 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
-import DemoQueryBuilder from "./queryBuilder";
+import {FilterContent} from "./components/filterContent";
 
 function App() {
   return (
     <div className="App">
-      <DemoQueryBuilder/>
+      <FilterContent/>
     </div>
   );
 }
