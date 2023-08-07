@@ -18,12 +18,12 @@ const Tag = ({ data, handleDelete }: TagProps) => {
 };
 
 interface TagInputProps {
-  initialTags?: TagProps["data"][];
+  value?: TagProps["data"][];
   onTagsChange?: (tag: TagProps["data"][]) => void;
 }
 
-const TagInput = ({ initialTags, onTagsChange }: TagInputProps) => {
-  const [tags, setTags] = useState<TagProps["data"][]>(initialTags ?? []);
+const TagInput = ({ value, onTagsChange }: TagInputProps) => {
+  const [tags, setTags] = useState<TagProps["data"][]>(value ?? []);
   const [errorText, setErrorText] = useState("");
   const tagRef = useRef<HTMLInputElement>();
 

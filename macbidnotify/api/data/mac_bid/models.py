@@ -126,7 +126,7 @@ class AuctionLot(Base):
     total_bids: Mapped[int] = mapped_column(Integer, nullable=True)
     winning_customer_id: Mapped[int] = mapped_column(Integer, nullable=True)
     winning_bid_id: Mapped[str] = mapped_column(String, nullable=True)
-    winning_bid_amount: Mapped[int] = mapped_column(Integer, nullable=True)
+    winning_bid_amount: Mapped[int] = mapped_column(Float, nullable=True)
     unique_bidders: Mapped[int] = mapped_column(Integer, nullable=True)
     product_name: Mapped[str] = mapped_column(String, nullable=True)
     upc: Mapped[str] = mapped_column(String, nullable=True)

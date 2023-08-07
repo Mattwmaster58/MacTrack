@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import AsyncGenerator
 
 from litestar import Litestar
+from litestar.contrib.sqlalchemy.plugins import SQLAlchemySerializationPlugin
 from litestar.datastructures import State
 from litestar.exceptions import ClientException
 from litestar.status_codes import HTTP_409_CONFLICT
@@ -65,4 +66,5 @@ app = Litestar(
     route_handlers=[search],
     dependencies={"tx": provide_transaction, "db": provide_db},
     lifespan=[db_connection],
+    plugins=[SQLAlchemySerializationPlugin()],
 )

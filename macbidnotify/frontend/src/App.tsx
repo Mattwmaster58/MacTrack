@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.css";
-import { FilterContent } from "./components/filterContent";
+import { FilterContent } from "./components/common/filterContent";
 
 function App() {
   return (
