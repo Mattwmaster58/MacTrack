@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 
 interface TagProps {
   data: string;
-  handleDelete: (a: TagProps["data"]) => void;
+  handleDelete: () => void;
 }
 
 const Tag = ({ data, handleDelete }: TagProps) => {
@@ -12,7 +12,7 @@ const Tag = ({ data, handleDelete }: TagProps) => {
     <Chip
       sx={{ marginRight: 1 }}
       label={data}
-      onDelete={() => handleDelete(data)}
+      onDelete={handleDelete}
     />
   );
 };
@@ -62,6 +62,7 @@ const TagInput = ({ initialTags, onTagsChange }: TagInputProps) => {
   };
 
   return (
+    //   todo: make the corner rounding the chip match the corner rounding of the input box
     <TextField
       multiline
       onKeyDown={handleKeypress}
@@ -77,7 +78,7 @@ const TagInput = ({ initialTags, onTagsChange }: TagInputProps) => {
           <Box sx={{ display: "flex" }}>
             {tags.map((data, index) => {
               return (
-                <Tag key={index} data={data} handleDelete={handleDelete} />
+                <Tag key={index} data={data} handleDelete={() => handleDelete(data)} />
               );
             })}
           </Box>

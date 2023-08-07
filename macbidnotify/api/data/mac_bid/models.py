@@ -1,7 +1,16 @@
 from datetime import datetime
 
-from sqlalchemy import String, Boolean, Integer, ForeignKey, DateTime, Float
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import (
+    String,
+    Boolean,
+    Integer,
+    ForeignKey,
+    DateTime,
+    Float,
+    Table,
+    Column,
+)
+from sqlalchemy.orm import Mapped, mapped_column, aliased
 
 from macbidnotify.api.data.base_model import Base
 
@@ -103,7 +112,9 @@ class AuctionGroup(Base):
 class AuctionLot(Base):
     __tablename__ = "auctionlot"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    auction_id: Mapped[int] = mapped_column(ForeignKey(AuctionGroup.id), primary_key=True)
+    auction_id: Mapped[int] = mapped_column(
+        ForeignKey(AuctionGroup.id), primary_key=True
+    )
     closed_date: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     expected_close_date: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     inventory_id: Mapped[int] = mapped_column(Integer, nullable=True)
@@ -137,4 +148,16 @@ class AuctionLot(Base):
     image_url: Mapped[str] = mapped_column(String, nullable=True)
 
 
+auction_lot_idx = Table(
+    "auctionlot_idx",
+    Base.metadata,
+    Column("rowid", Integer(), key="id", primary_key=True),
+    Column("auction_id", String),
+    Column("product_name", String),
+)
 
+AuctionLotIdx = aliased(
+    AuctionLot,
+    auction_lot_idx,
+    adapt_on_names=True
+)
