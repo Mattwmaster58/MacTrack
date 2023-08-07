@@ -1,5 +1,5 @@
 import { Card, CardContent, CardMedia, Typography } from "@mui/material";
-import { AuctionLot } from "../types/AuctionLot";
+import { AuctionLot } from "../../types/AuctionLot";
 import { Stack } from "@mui/system";
 
 const AuctionLotCard = (props: AuctionLot) => {

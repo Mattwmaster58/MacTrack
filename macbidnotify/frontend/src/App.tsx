@@ -3,7 +3,7 @@ import "./App.css";
 import {
   FilterContent,
   FilterContentValues,
-} from "./components/common/filterContent";
+} from "./components/forms/filterContent";
 
 function App() {
   const [filterValues, setFilterValues] = useState<FilterContentValues>();
