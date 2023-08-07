@@ -7,11 +7,10 @@ from sqlalchemy import (
     ForeignKey,
     DateTime,
     Float,
-    Table,
-    Column,
 )
-from sqlalchemy.orm import Mapped, mapped_column, aliased
+from sqlalchemy.orm import Mapped, mapped_column
 
+from macbidnotify.api.data.mac_bid.alias_utils import create_ftx_idx_alias
 from macbidnotify.api.data.base_model import Base
 
 
@@ -148,16 +147,4 @@ class AuctionLot(Base):
     image_url: Mapped[str] = mapped_column(String, nullable=True)
 
 
-auction_lot_idx = Table(
-    "auctionlot_idx",
-    Base.metadata,
-    Column("rowid", Integer(), key="id", primary_key=True),
-    Column("auction_id", String),
-    Column("product_name", String),
-)
-
-AuctionLotIdx = aliased(
-    AuctionLot,
-    auction_lot_idx,
-    adapt_on_names=True
-)
+AuctionLotIdx = create_ftx_idx_alias(AuctionLot)
