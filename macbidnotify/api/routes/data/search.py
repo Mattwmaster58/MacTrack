@@ -1,7 +1,7 @@
 from typing import Optional
 
 from litestar import Litestar, Router, get
-from sqlalchemy import Engine, select
+from sqlalchemy import Engine, select, text
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 
 from data.mac_bid import AuctionLotIdx
@@ -19,9 +19,14 @@ async def search(
     boolean_function: BooleanFunction = BooleanFunction.AND,
     include_description: bool = True,
 ) -> str:
+    where_clauses = []
     try:
         match_arg = boolean_function.value.upper().join([f'"{term}"' for term in terms])
-        where_clauses = [AuctionLotIdx.product_name.op("MATCH")(match_arg)]
+        match_arg = f"({match_arg})"
+        if exclude_arg := boolean_function.OR.value.upper().join([f'"{term}"' for term in exclude]):
+            match_arg += f" NOT ({exclude_arg})"
+
+        where_clauses.append(AuctionLotIdx.product_name.op("MATCH")(match_arg))
         if min_price is not None:
             where_clauses.append(AuctionLotIdx.retail_price >= min_price)
         if max_price is not None:
