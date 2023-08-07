@@ -1,26 +1,11 @@
 import { Chip, TextField } from "@mui/material";
 import { Box } from "@mui/system";
 import { useRef, useState } from "react";
-
-interface TagProps {
-  data: string;
-  handleDelete: () => void;
-}
+import { TagInputProps, TagProps } from "../types/TagInput";
 
 const Tag = ({ data, handleDelete }: TagProps) => {
-  return (
-    <Chip
-      sx={{ marginRight: 1 }}
-      label={data}
-      onDelete={handleDelete}
-    />
-  );
+  return <Chip sx={{ marginRight: 1 }} label={data} onDelete={handleDelete} />;
 };
-
-interface TagInputProps {
-  value?: TagProps["data"][];
-  onTagsChange?: (tag: TagProps["data"][]) => void;
-}
 
 const TagInput = ({ value, onTagsChange }: TagInputProps) => {
   const [tags, setTags] = useState<TagProps["data"][]>(value ?? []);
@@ -53,11 +38,19 @@ const TagInput = ({ value, onTagsChange }: TagInputProps) => {
 
   const handleKeypress = (e: any) => {
     resetErrorText();
+    const inputVal = tagRef.current?.value;
     if (["Enter", "Comma"].includes(e.code)) {
       updateTagsFromRef();
       e.preventDefault();
     } else if (e.code === "Backspace" && !tagRef.current?.value) {
       updateTags(tags.slice(0, tags.length - 1));
+    } else if (
+      e.code !== "Backspace" &&
+      inputVal &&
+      inputVal[inputVal.length - 1] === "*"
+    ) {
+      setErrorText("Wildcards can only appear at the end of a term");
+      e.preventDefault();
     }
   };
 
@@ -78,7 +71,11 @@ const TagInput = ({ value, onTagsChange }: TagInputProps) => {
           <Box sx={{ display: "flex" }}>
             {tags.map((data, index) => {
               return (
-                <Tag key={index} data={data} handleDelete={() => handleDelete(data)} />
+                <Tag
+                  key={index}
+                  data={data}
+                  handleDelete={() => handleDelete(data)}
+                />
               );
             })}
           </Box>

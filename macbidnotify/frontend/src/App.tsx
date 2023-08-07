@@ -1,11 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import "./App.css";
-import { FilterContent } from "./components/common/filterContent";
+import {
+  FilterContent,
+  FilterContentValues,
+} from "./components/common/filterContent";
 
 function App() {
+  const [filterValues, setFilterValues] = useState<FilterContentValues>();
+
   return (
     <div className="App">
-      <FilterContent />
+      <FilterContent onSubmit={setFilterValues}/>
     </div>
   );
 }
