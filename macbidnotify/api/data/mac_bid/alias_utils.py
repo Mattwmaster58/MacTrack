@@ -1,8 +1,10 @@
+from typing import Type
+
 from sqlalchemy import Table, Column, Integer, String
 from sqlalchemy.orm import aliased, DeclarativeBase, InstrumentedAttribute
 
 
-def create_ftx_idx_alias(original_table: DeclarativeBase):
+def create_ftx_idx_alias(original_table: Type[DeclarativeBase], pk_name: str):
     original_table_columns = []
     original_table_pk: Column = None
 
@@ -10,7 +12,7 @@ def create_ftx_idx_alias(original_table: DeclarativeBase):
         attr_val = getattr(original_table, attr)
         if not attr.startswith("__") and isinstance(attr_val, InstrumentedAttribute):
             col = attr_val.property.columns[0]
-            if col.primary_key:
+            if col.primary_key and col.name == pk_name:
                 original_table_pk = col
             else:
                 original_table_columns.append(Column(

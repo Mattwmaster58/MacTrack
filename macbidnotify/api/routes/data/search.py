@@ -14,19 +14,20 @@ async def search(
     tx: AsyncSession,
     terms: list[str],
     exclude: Optional[list[str]],
+    min_price: Optional[float],
+    max_price: Optional[float],
     boolean_function: BooleanFunction = BooleanFunction.AND,
     include_description: bool = True,
 ) -> str:
     try:
         match_arg = boolean_function.value.upper().join([f'"{term}"' for term in terms])
-        stmt = (
-            select(AuctionLotIdx)
-            .where(
-                AuctionLotIdx.product_name.op("MATCH")(match_arg),
-                AuctionLotIdx.retail_price > 10,
-            )
-            .limit(100)
-        )
+        where_clauses = [AuctionLotIdx.product_name.op("MATCH")(match_arg)]
+        if min_price is not None:
+            where_clauses.append(AuctionLotIdx.retail_price >= min_price)
+        if max_price is not None:
+            where_clauses.append(AuctionLotIdx.retail_price <= max_price)
+
+        stmt = select(AuctionLotIdx).where(*where_clauses).limit(100)
         res = await tx.execute(stmt)
     except Exception:
         raise

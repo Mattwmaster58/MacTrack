@@ -147,4 +147,4 @@ class AuctionLot(Base):
     image_url: Mapped[str] = mapped_column(String, nullable=True)
 
 
-AuctionLotIdx = create_ftx_idx_alias(AuctionLot)
+AuctionLotIdx = create_ftx_idx_alias(AuctionLot, "id")
