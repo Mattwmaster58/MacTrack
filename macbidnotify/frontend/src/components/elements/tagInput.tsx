@@ -68,7 +68,7 @@ const TagInput = ({ value, onTagsChange }: TagInputProps) => {
       placeholder={!tags.length ? "enter terms" : ""}
       InputProps={{
         startAdornment: (
-          <Box sx={{ display: "flex" }}>
+          <Box sx={{ display: "flex", flexWrap: "wrap" }}>
             {tags.map((data, index) => {
               return (
                 <Tag

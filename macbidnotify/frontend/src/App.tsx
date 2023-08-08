@@ -1,16 +1,14 @@
 import React, { useState } from "react";
 import "./App.css";
-import {
-  FilterContent,
-  FilterContentValues,
-} from "./components/forms/filterContent";
+import { ItemFilter } from "./components/forms/Filter/itemFilter";
+import { ItemFilterValues } from "./components/forms/Filter/types/itemFilterValues";
 
 function App() {
-  const [filterValues, setFilterValues] = useState<FilterContentValues>();
+  const [filterValues, setFilterValues] = useState<ItemFilterValues>();
 
   return (
     <div className="App">
-      <FilterContent onSubmit={setFilterValues}/>
+      <ItemFilter onSubmit={setFilterValues}/>
     </div>
   );
 }
