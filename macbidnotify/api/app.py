@@ -3,6 +3,8 @@ from pathlib import Path
 from typing import AsyncGenerator
 
 from litestar import Litestar
+from litestar.config.compression import CompressionConfig
+from litestar.config.cors import CORSConfig
 from litestar.contrib.sqlalchemy.plugins import SQLAlchemySerializationPlugin
 from litestar.datastructures import State
 from litestar.exceptions import ClientException
@@ -61,10 +63,12 @@ async def provide_transaction(state: State) -> AsyncGenerator[AsyncSession, None
                 detail=str(exc),
             ) from exc
 
-
+cors_config = CORSConfig(allow_origins=["https://localhost:3000"])
 app = Litestar(
     route_handlers=[search],
     dependencies={"tx": provide_transaction, "db": provide_db},
     lifespan=[db_connection],
     plugins=[SQLAlchemySerializationPlugin()],
+    cors_config=cors_config,
+    compression_config=CompressionConfig(backend="brotli")
 )
