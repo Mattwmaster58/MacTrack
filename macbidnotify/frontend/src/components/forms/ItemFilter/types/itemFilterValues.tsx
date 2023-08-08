@@ -1,7 +1,6 @@
 import { FilterMatchType } from "../../../../types/FilterMatchType";
 import { TagProps } from "../../../../types/TagInput";
 
-
 export interface ItemFilterValues {
   boolean_function: FilterMatchType;
   terms: TagProps["data"][];
