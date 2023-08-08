@@ -1,14 +1,8 @@
-import {
-  Button,
-  FormControl,
-  FormControlLabel,
-  FormGroup,
-  FormLabel,
-  Switch,
-} from "@mui/material";
+import { Button, FormControl } from "@mui/material";
 import React from "react";
-import { Controller, FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { FilterMatchType } from "../../../types/FilterMatchType";
+import { ColumnInput } from "./columnInput";
 
 import { RetailPriceInput } from "./retailPriceInput";
 import { TermsInput } from "./termsInput";
@@ -45,40 +39,7 @@ const ItemFilter = ({ onSubmit }: Props) => {
         <FormProvider {...methods}>
           {TermsInput(control)}
           {RetailPriceInput(control)}
-
-          <FormGroup>
-            <FormLabel component="legend">Text Columns</FormLabel>
-            <Controller
-              name="description_column"
-              control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={<Switch {...field} />}
-                  label="Description"
-                />
-              )}
-            />
-            <Controller
-              name="product_name_column"
-              control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={<Switch {...field} />}
-                  label="Product Name"
-                />
-              )}
-            />
-            <Controller
-              name="title_column"
-              control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={<Switch {...field} />}
-                  label="Title"
-                />
-              )}
-            />
-          </FormGroup>
+          {ColumnInput(control)}
         </FormProvider>
         <Button type="submit">Submit</Button>
       </form>
