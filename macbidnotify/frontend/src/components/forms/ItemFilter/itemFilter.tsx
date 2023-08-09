@@ -17,8 +17,8 @@ const ItemFilter = ({ onSubmit }: Props) => {
     mode: "all",
     defaultValues: {
       boolean_function: FilterMatchType.ANY,
-      terms: ["test?"],
-      exclude: ["do these work?"],
+      terms: [],
+      exclude: [],
       min_retail_price: null,
       max_retail_price: null,
       title_column: true,
