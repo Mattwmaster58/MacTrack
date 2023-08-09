@@ -63,7 +63,7 @@ async def provide_transaction(state: State) -> AsyncGenerator[AsyncSession, None
                 detail=str(exc),
             ) from exc
 
-cors_config = CORSConfig(allow_origins=["https://localhost:3000"])
+cors_config = CORSConfig(allow_origins=["http://localhost:3000"])
 app = Litestar(
     route_handlers=[search],
     dependencies={"tx": provide_transaction, "db": provide_db},
