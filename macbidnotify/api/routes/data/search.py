@@ -19,10 +19,11 @@ async def search(
     boolean_function: BooleanFunction = BooleanFunction.AND,
     include_description: bool = True,
 ) -> list[AuctionLot]:
+    exclude = exclude or []
     where_clauses = []
     match_arg = boolean_function.value.upper().join([f'"{term}"' for term in terms])
     match_arg = f"({match_arg})"
-    if exclude_arg := boolean_function.OR.value.upper().join([f'"{term}"' for term in exclude]):
+    if exclude_arg := BooleanFunction.OR.value.upper().join([f'"{term}"' for term in exclude]):
         match_arg += f" NOT ({exclude_arg})"
 
     where_clauses.append(AuctionLotIdx.product_name.op("MATCH")(match_arg))
