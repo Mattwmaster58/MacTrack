@@ -12,4 +12,8 @@ This webapp aims to achieve 2 goals:
  - SQLAlchemy for ORM
  - SQLite + FTS5 for DB
 ##### Frontend
- - undecided
+ - React + MUI
+
+## TODO
+ - User endpoints + auth + React Routing
+ - Async scraper + parallel (httpx does pooling nicely, could see a benefit there)
