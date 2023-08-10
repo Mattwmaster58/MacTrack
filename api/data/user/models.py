@@ -1,8 +1,8 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import Integer, String, Boolean, ForeignKey, DateTime, func
 from sqlalchemy import Enum as SQLAEnum
+from sqlalchemy import Integer, String, Boolean, ForeignKey, DateTime, func
 from sqlalchemy.orm import mapped_column, Mapped
 
 from api.data.base_model import Base
@@ -21,7 +21,7 @@ class User(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     email: Mapped[str] = mapped_column(String, unique=True)
     password: Mapped[str] = mapped_column(String)
-    
+    approved: Mapped[bool] = mapped_column(Boolean)
 
 
 class Filter(Base):

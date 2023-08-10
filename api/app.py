@@ -10,6 +10,7 @@ from litestar.contrib.sqlalchemy.plugins import SQLAlchemySerializationPlugin, S
 from litestar.datastructures import State
 from litestar.exceptions import ClientException
 from litestar.status_codes import HTTP_409_CONFLICT
+from litestar.types import Logger
 from sqlalchemy import ext
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
@@ -17,11 +18,6 @@ from litestar.logging import LoggingConfig
 
 from data import Base, create_fts_table_and_triggers, AuctionLot
 from routes.data.search import search
-
-
-async def provide_db(state: State) -> AsyncGenerator[ext.asyncio.engine, None]:
-    return state.engine
-
 
 session_maker = async_sessionmaker(expire_on_commit=False)
 
@@ -40,7 +36,7 @@ async def provide_transaction(state: State) -> AsyncGenerator[AsyncSession, None
 
 
 async def _init_db(_app: Litestar) -> None:
-    async with _app.state.db_engine.begin() as conn:
+    async with _app.lo.db_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
         fts_statements = create_fts_table_and_triggers(
             table=AuctionLot.__table__,
@@ -69,7 +65,7 @@ logging_config = LoggingConfig(
 )
 app = Litestar(
     route_handlers=[search],
-    dependencies={"tx": provide_transaction, "db": provide_db},
+    dependencies={"tx": provide_transaction},
     plugins=[SQLAlchemyPlugin(config=config), SQLAlchemySerializationPlugin()],
     cors_config=cors_config,
     compression_config=CompressionConfig(backend="brotli"),
