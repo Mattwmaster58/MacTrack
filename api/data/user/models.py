@@ -30,6 +30,7 @@ class Filter(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey(User.id))
     payload: Mapped[str] = mapped_column(String)
     active: Mapped[bool] = mapped_column(Boolean, default=False)
+    notification_type: Mapped[str] = mapped_column(String)
 
 
 class Notification(Base):
