@@ -1,4 +1,4 @@
-from macbidnotify.api.data.mac_bid.models import (
+from api.data.mac_bid.models import (
     Location,
     Building,
     AuctionLot,

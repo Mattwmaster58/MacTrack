@@ -5,8 +5,8 @@ from sqlalchemy import Integer, String, Boolean, ForeignKey, DateTime, func
 from sqlalchemy import Enum as SQLAEnum
 from sqlalchemy.orm import mapped_column, Mapped
 
-from macbidnotify.api.data.base_model import Base
-from macbidnotify.api.data.mac_bid import AuctionLot
+from api.data.base_model import Base
+from api.data.mac_bid import AuctionLot
 
 
 class NotificationStatus(enum.Enum):
@@ -21,6 +21,7 @@ class User(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     email: Mapped[str] = mapped_column(String, unique=True)
     password: Mapped[str] = mapped_column(String)
+    
 
 
 class Filter(Base):

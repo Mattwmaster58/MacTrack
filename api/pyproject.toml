@@ -12,10 +12,10 @@ litestar = "^2.0.0rc1"
 tqdm = "^4.66.0"
 requests = "^2.31.0"
 click = "^8.1.6"
+alembic = "^1.11.2"
 
 [tool.poetry.group.dev.dependencies]
 ipython = "^8.14.0"
-alembic = "^1.11.2"
 
 [tool.black]
 line-length = 120
