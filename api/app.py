@@ -70,5 +70,6 @@ app = Litestar(
     lifespan=[db_connection],
     plugins=[SQLAlchemySerializationPlugin()],
     cors_config=cors_config,
-    compression_config=CompressionConfig(backend="brotli")
+    compression_config=CompressionConfig(backend="brotli"),
+    debug=True
 )
