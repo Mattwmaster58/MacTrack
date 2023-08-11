@@ -15,6 +15,7 @@ from sqlalchemy import ext
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from litestar.logging import LoggingConfig
+from litestar.contrib.sqlalchemy.plugins.init.config.sync import autocommit_before_send_handler
 
 from data import Base, create_fts_table_and_triggers, AuctionLot
 from routes.auth.session import signup, login, session_auth
@@ -24,11 +25,10 @@ session_maker = async_sessionmaker(expire_on_commit=False)
 
 
 async def provide_transaction(state: State) -> AsyncGenerator[AsyncSession, None]:
-    async with session_maker(bind=state.engine) as session:
+    async with session_maker(bind=state.db_engine) as session:
         try:
             async with session.begin():
                 yield session
-
         except IntegrityError as exc:
             raise ClientException(
                 status_code=HTTP_409_CONFLICT,
@@ -36,8 +36,8 @@ async def provide_transaction(state: State) -> AsyncGenerator[AsyncSession, None
             ) from exc
 
 
-async def _init_db(_app: Litestar) -> None:
-    async with _app.state.db_engine.begin() as conn:
+async def _init_db(app: Litestar) -> None:
+    async with app.state.db_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
         fts_statements = create_fts_table_and_triggers(
             table=AuctionLot.__table__,
@@ -51,8 +51,11 @@ async def _init_db(_app: Litestar) -> None:
 
 
 db_path = Path(__file__).parent / "mac.bid.db"
-config = SQLAlchemyAsyncConfig(connection_string=f"sqlite+aiosqlite:///{db_path.as_posix()}")
-plugin = SQLAlchemyPlugin(config=config)
+async_db_config = SQLAlchemyAsyncConfig(
+    connection_string=f"sqlite+aiosqlite:///{db_path}",
+    before_send_handler=autocommit_before_send_handler,
+)
+db_plugin = SQLAlchemyPlugin(config=async_db_config)
 cors_config = CORSConfig(allow_origins=["http://localhost:3000"])
 # logging_config = StructLoggingConfig()
 
@@ -67,11 +70,11 @@ logging_config = LoggingConfig(
 app = Litestar(
     route_handlers=[search, login, signup],
     dependencies={"tx": provide_transaction},
-    plugins=[SQLAlchemyPlugin(config=config), SQLAlchemySerializationPlugin()],
+    plugins=[db_plugin],
     cors_config=cors_config,
     compression_config=CompressionConfig(backend="brotli"),
-    on_app_init=[session_auth.on_app_init],
     on_startup=[_init_db],
+    on_app_init=[session_auth.on_app_init],
     logging_config=logging_config,
-    # debug=True,  # required until this is fixed: https://github.com/litestar-org/litestar/issues/1804
+    debug=True,  # required until this is fixed: https://github.com/litestar-org/litestar/issues/1804
 )
