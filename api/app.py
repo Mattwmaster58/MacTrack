@@ -17,6 +17,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 from litestar.logging import LoggingConfig
 
 from data import Base, create_fts_table_and_triggers, AuctionLot
+from routes.auth.session import signup, login, session_auth
 from routes.data.search import search
 
 session_maker = async_sessionmaker(expire_on_commit=False)
@@ -36,7 +37,7 @@ async def provide_transaction(state: State) -> AsyncGenerator[AsyncSession, None
 
 
 async def _init_db(_app: Litestar) -> None:
-    async with _app.lo.db_engine.begin() as conn:
+    async with _app.state.db_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
         fts_statements = create_fts_table_and_triggers(
             table=AuctionLot.__table__,
@@ -64,11 +65,12 @@ logging_config = LoggingConfig(
     }
 )
 app = Litestar(
-    route_handlers=[search],
+    route_handlers=[search, login, signup],
     dependencies={"tx": provide_transaction},
     plugins=[SQLAlchemyPlugin(config=config), SQLAlchemySerializationPlugin()],
     cors_config=cors_config,
     compression_config=CompressionConfig(backend="brotli"),
+    on_app_init=[session_auth.on_app_init],
     on_startup=[_init_db],
     logging_config=logging_config,
     # debug=True,  # required until this is fixed: https://github.com/litestar-org/litestar/issues/1804
