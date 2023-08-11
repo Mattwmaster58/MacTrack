@@ -21,7 +21,7 @@ class User(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     email: Mapped[str] = mapped_column(String, unique=True)
     password: Mapped[str] = mapped_column(String)
-    approved: Mapped[bool] = mapped_column(Boolean)
+    approved: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
 class Filter(Base):
