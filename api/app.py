@@ -1,9 +1,10 @@
+import itertools
 import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import AsyncGenerator
 
-from litestar import Litestar
+from litestar import Litestar, Router
 from litestar.config.compression import CompressionConfig
 from litestar.config.cors import CORSConfig
 from litestar.contrib.sqlalchemy.plugins import SQLAlchemySerializationPlugin, SQLAlchemyPlugin, SQLAlchemyAsyncConfig
@@ -18,7 +19,7 @@ from litestar.logging import LoggingConfig
 from litestar.contrib.sqlalchemy.plugins.init.config.sync import autocommit_before_send_handler
 
 from data import Base, create_fts_table_and_triggers, AuctionLot
-from routes.auth.session import signup, login, session_auth
+from routes.auth.session import signup, login, create_session_auth
 from routes.data.search import search
 
 session_maker = async_sessionmaker(expire_on_commit=False)
@@ -59,22 +60,27 @@ db_plugin = SQLAlchemyPlugin(config=async_db_config)
 cors_config = CORSConfig(allow_origins=["http://localhost:3000"])
 # logging_config = StructLoggingConfig()
 
-logging_config = LoggingConfig(
-    loggers={
-        "MacFlashback": {
-            "level": "DEBUG",
-            "handlers": ["queue_listener"],
-        }
-    }
-)
+# logging_config = LoggingConfig(
+#     loggers={
+#         "MacFlashback": {
+#             "level": "DEBUG",
+#             "handlers": ["queue_listener"],
+#         }
+#     }
+# )
+API_ROOT = "/api"
+auth_excluded_routes = [API_ROOT + p for p in itertools.chain(search.paths, signup.paths, login.paths)]
+session_auth = create_session_auth(auth_excluded_routes)
+
+api_router = Router(path=API_ROOT, route_handlers=[search, login, signup])
 app = Litestar(
-    route_handlers=[search, login, signup],
+    route_handlers=[api_router],
     dependencies={"tx": provide_transaction},
     plugins=[db_plugin],
     cors_config=cors_config,
     compression_config=CompressionConfig(backend="brotli"),
     on_startup=[_init_db],
     on_app_init=[session_auth.on_app_init],
-    logging_config=logging_config,
+    # logging_config=logging_config,
     debug=True,  # required until this is fixed: https://github.com/litestar-org/litestar/issues/1804
 )

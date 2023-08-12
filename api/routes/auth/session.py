@@ -1,16 +1,15 @@
+import re
 from typing import Any, Literal
 
 import bcrypt
-from litestar import Request, get, post, Response
-from litestar.connection import ASGIConnection
+from litestar import Request, get, post
 from litestar.exceptions import NotAuthorizedException
 from litestar.middleware.session.server_side import (
     ServerSideSessionBackend,
     ServerSideSessionConfig,
 )
 from litestar.security.session_auth import SessionAuth
-from litestar.stores.memory import MemoryStore
-from pydantic import BaseModel, EmailStr, SecretStr
+from pydantic import BaseModel, EmailStr, field_validator
 from sqlalchemy import select
 
 from api.data.user import User
@@ -18,12 +17,26 @@ from api.typings import AsyncDbSession
 
 
 class UserAuthPayload(BaseModel):
-    email: str
+    username: str
     password: str
 
 
-MOCK_DB: dict[str, User] = {}
-memory_store = MemoryStore()
+class UserSignupPayload(UserAuthPayload):
+    email: EmailStr
+
+    @staticmethod
+    @field_validator("password")
+    def password_meets_bare_minimum(v: str) -> str:
+        if not (8 <= len(v) <= 64):
+            raise ValueError("password must be at least 8 chars and less than 64")
+        return v
+
+    @staticmethod
+    @field_validator("username")
+    def password_meets_bare_minimum(_, v: str) -> str:
+        if re.search(r"\S", v) is None:
+            raise ValueError("username must not be empty")
+        return v
 
 
 # The SessionAuth class requires a handler callable
@@ -43,24 +56,28 @@ async def retrieve_user_handler(tx: AsyncDbSession, session: dict[str, Any]) -> 
 
 @post("/login")
 async def login(request: Request, tx: AsyncDbSession, data: UserAuthPayload) -> User:
-    user: User | None = (await tx.execute(select(User).where(User.email == data.email))).one_or_none()
-    if user is None or not User.approved:
-        breakpoint()
+    user: User | None = (await tx.execute(select(User).where(User.username == data.username))).scalar_one_or_none()
+    if user is None:
+        raise NotAuthorizedException()
 
-    if bcrypt.checkpw(data.password.get_secret_value().encode("utf-8"), user.password):
-        breakpoint()
+    if not user.approved:
+        # todo: user not approved here
+        raise NotAuthorizedException("user not approved")
 
-    if not user.id:
-        breakpoint()
-        raise NotAuthorizedException
+    if not bcrypt.checkpw(data.password.encode("utf-8"), user.password):
+        raise NotAuthorizedException()
 
     request.set_session({"user_id": user.id})
     return user
 
 
 @post("/signup")
-async def signup(tx: AsyncDbSession, request: Request, data: UserAuthPayload) -> User:
-    new_user = User(name=data.name, email=data.email)
+async def signup(tx: AsyncDbSession, request: Request, data: UserSignupPayload) -> User:
+    new_user = User(
+        username=data.username,
+        email=data.email,
+        password=bcrypt.hashpw(data.password.encode("utf-8"), bcrypt.gensalt()),
+    )
     # todo: validate password?
     tx.add(new_user)
     request.set_session({"user_id": new_user.id})
@@ -76,8 +93,9 @@ async def get_user(request: Request[User, dict[Literal["user_id"], str], Any]) -
     return request.user
 
 
-session_auth = SessionAuth[User, ServerSideSessionBackend](
-    retrieve_user_handler=retrieve_user_handler,
-    session_backend_config=ServerSideSessionConfig(),
-    exclude=["/login", "/signup", "/search"],
-)
+def create_session_auth(exclude_paths=list[str]):
+    return SessionAuth[User, ServerSideSessionBackend](
+        retrieve_user_handler=retrieve_user_handler,
+        session_backend_config=ServerSideSessionConfig(),
+        exclude=exclude_paths,
+    )
