@@ -12,7 +12,7 @@ interface Props {
   onSubmit: (data: ItemFilterValues) => void;
 }
 
-const ItemFilter = ({ onSubmit }: Props) => {
+const ItemFilterForm = ({ onSubmit }: Props) => {
   const methods = useForm<ItemFilterValues>({
     mode: "all",
     defaultValues: {
@@ -47,4 +47,4 @@ const ItemFilter = ({ onSubmit }: Props) => {
   );
 };
 
-export { ItemFilter };
+export { ItemFilterForm };
