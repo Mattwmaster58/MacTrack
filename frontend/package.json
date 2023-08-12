@@ -36,11 +36,14 @@
     "extends": [
       "react-app",
       "react-app/jest"
+    ],
+    "plugins": [
+      "unused-imports"
     ]
   },
   "browserslist": {
     "production": [
-      ">0.2%",
+      ">5%",
       "not dead",
       "not op_mini all"
     ],
@@ -49,5 +52,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "eslint-plugin-unused-imports": "^3.0.0"
   }
 }
