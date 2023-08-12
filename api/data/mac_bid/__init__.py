@@ -1,4 +1,4 @@
-from api.data.mac_bid.models import (
+from data.mac_bid.models import (
     Location,
     Building,
     AuctionLot,

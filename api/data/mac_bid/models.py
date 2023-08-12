@@ -10,8 +10,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
-from api.data.mac_bid.alias_utils import create_ftx_idx_alias
-from api.data.base_model import Base
+from data.mac_bid.alias_utils import create_ftx_idx_alias
+from data.base_model import Base
 
 
 # class TransferPair(Base):

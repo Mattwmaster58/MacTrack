@@ -3,12 +3,12 @@ from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from api.data.mac_bid.fts5 import create_fts_table_and_triggers
-from api.data.mac_bid import AuctionLot
-from api.data.base_model import Base
+from data.mac_bid.fts5 import create_fts_table_and_triggers
+from data.mac_bid import AuctionLot
+from data.base_model import Base
 # strictly to execute code so those tables get attached to the base and tables get created
 # probably won't be necessary if we import this elsewhere
-from api.data.user import User as __
+from data.user import User as __
 
 __all__ = ["create_and_connect"]
 def create_and_connect(db_path: Path = Path(__file__).parent / "mac.bid.db"):

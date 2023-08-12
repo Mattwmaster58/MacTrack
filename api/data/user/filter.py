@@ -12,7 +12,7 @@ import operator
 from abc import ABC, abstractmethod
 from typing import Literal
 
-from api.data.mac_bid import AuctionLot
+from data.mac_bid import AuctionLot
 
 
 class Filter(ABC):

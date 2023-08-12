@@ -5,8 +5,8 @@ from sqlalchemy import Enum as SQLAEnum
 from sqlalchemy import Integer, String, Boolean, ForeignKey, DateTime, func
 from sqlalchemy.orm import mapped_column, Mapped
 
-from api.data.base_model import Base
-from api.data.mac_bid import AuctionLot
+from data.base_model import Base
+from data.mac_bid import AuctionLot
 
 
 class NotificationStatus(enum.Enum):

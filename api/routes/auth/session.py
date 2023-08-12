@@ -12,8 +12,8 @@ from litestar.security.session_auth import SessionAuth
 from pydantic import BaseModel, EmailStr, field_validator
 from sqlalchemy import select
 
-from api.data.user import User
-from api.typings import AsyncDbSession
+from data.user import User
+from typings import AsyncDbSession
 
 
 class UserAuthPayload(BaseModel):
