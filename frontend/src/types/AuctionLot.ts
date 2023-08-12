@@ -34,5 +34,4 @@ interface AuctionLot {
   image_url: string;
 }
 
-export type {AuctionLot};
-
+export type { AuctionLot };

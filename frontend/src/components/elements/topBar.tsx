@@ -2,14 +2,13 @@ import { Login } from "@mui/icons-material";
 import { IconButton, TextField } from "@mui/material";
 import { Stack } from "@mui/system";
 import React from "react";
-import {Link, useLocation, useNavigate} from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const TopBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   return (
     <Stack
-      useFlexGap
       alignItems={"center"}
       justifyContent={"center"}
       spacing={2}
@@ -22,9 +21,9 @@ const TopBar = () => {
       <TextField label={"search"} />
       <IconButton onClick={() => navigate("/login")}>
         <Login />
-        <Link to="/login" state={{ previousLocation: location }}>
-          Login
-        </Link>
+        {/*<Link to="/login" state={{ previousLocation: location }}>*/}
+        {/*  Login*/}
+        {/*</Link>*/}
       </IconButton>
     </Stack>
   );

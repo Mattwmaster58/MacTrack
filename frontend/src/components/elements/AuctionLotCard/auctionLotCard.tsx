@@ -8,7 +8,7 @@ import {
   IconButton,
   Typography,
 } from "@mui/material";
-import { Stack, styled } from "@mui/system";
+import { Stack } from "@mui/system";
 import { AuctionLot } from "../../../types/AuctionLot";
 
 interface Props {
@@ -45,7 +45,9 @@ const AuctionLotCard = ({ auctionInfo }: Props) => {
             overflow: "hidden",
             lineClamp: 2,
             textOverflow: "ellipsis",
-            height: `${(theme.typography.subtitle1.lineHeight as number) * 2}em`,
+            height: `${
+              (theme.typography.subtitle1.lineHeight as number) * 2
+            }em`,
           })}
           textAlign={"left"}
           gutterBottom

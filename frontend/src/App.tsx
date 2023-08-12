@@ -1,34 +1,38 @@
+import { ThemeProvider } from "@mui/system";
 import { QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
-import {createBrowserRouter, createRoutesFromElements, Route, RouterProvider} from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
 import { queryClient } from "./common/queryClient";
 import { TopBar } from "./components/elements/topBar";
-import { SignInModal } from "./pages/SignInModal";
-
-const root = <QueryClientProvider client={queryClient}><TopBar/><SignInModal open handleClose={() => {}}/></QueryClientProvider>;
-
-const router = createBrowserRouter(
-  createRoutesFromElements(
-    <Route path="/" element={root}>
-      <Route path="login" element={<SignInModal open handleClose={() => {}}/>} action={() => {console.log("he"); return false}}/>
-      <Route
-        path="logout"
-        action={() => {
-          console.log("logout");
-          return true;
-        }}
-      />
-      <Route path="search" element={<div />} />
-      <Route path="dashboard" element={<div />} />
-    </Route>
-  )
-);
+import { SignIn } from "./pages/signIn";
+import { theme } from "./theme";
 
 function App() {
+  let routes = (
+    <Routes>
+      <Route path="/login" element={<SignIn />} />
+      <Route path="/" element={<TopBar />}>
+        <Route
+          path="logout"
+          action={() => {
+            console.log("logout");
+            return true;
+          }}
+        />
+        <Route path="search" element={<div />} />
+        <Route path="dashboard" element={<div />} />
+      </Route>
+    </Routes>
+  );
+
   return (
     <React.StrictMode>
-      <RouterProvider router={router} />
+      <QueryClientProvider client={queryClient}>
+        {/*<ThemeProvider theme={theme}>*/}
+          <BrowserRouter>{routes}</BrowserRouter>
+        {/*</ThemeProvider>*/}
+      </QueryClientProvider>
     </React.StrictMode>
   );
 

@@ -10,9 +10,9 @@ export function TermsInput<TFieldArrayValues>(
   control: Control<ItemFilterValues, any>
 ) {
   return (
-    <Stack flexDirection="column" useFlexGap spacing={2}>
-      <Stack flexDirection="column" useFlexGap spacing={2}>
-        <Stack flexDirection="row" alignItems="center" useFlexGap spacing={2}>
+    <Stack flexDirection="column" spacing={2}>
+      <Stack flexDirection="column" spacing={2}>
+        <Stack flexDirection="row" alignItems="center" spacing={2}>
           <Typography alignItems={"center"}>Include items where</Typography>
           <Controller
             control={control}
@@ -34,7 +34,7 @@ export function TermsInput<TFieldArrayValues>(
           )}
         />
       </Stack>
-      <Stack flexDirection="row" alignItems="center" useFlexGap spacing={2}>
+      <Stack flexDirection="row" alignItems="center" spacing={2}>
         <Typography alignItems={"center"}>
           and exclude those that contain any of the following
         </Typography>

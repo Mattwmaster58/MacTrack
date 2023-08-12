@@ -1,7 +1,7 @@
 import Skeleton from "@mui/material/Skeleton";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { useSearchQuery } from "../../hooks/useSearchQuery";
-import { ItemFilterValues } from "../forms/ItemFilter/types/itemFilterValues";
+import { ItemFilterValues } from "../forms/itemFilter/types/itemFilterValues";
 import { AuctionLotCard } from "./AuctionLotCard/auctionLotCard";
 
 interface Props {
