@@ -1,42 +1,18 @@
-import re
 from typing import Any, Literal
 
 import bcrypt
-from litestar import Request, get, post
+from litestar import Request, get, post, Response
 from litestar.exceptions import NotAuthorizedException
 from litestar.middleware.session.server_side import (
     ServerSideSessionBackend,
     ServerSideSessionConfig,
 )
 from litestar.security.session_auth import SessionAuth
-from pydantic import BaseModel, EmailStr, field_validator
 from sqlalchemy import select
 
+from data.http_models.session import UserAuthPayload, UserRegisterPayload, UserRegisterResponse
 from data.user import User
 from typings import AsyncDbSession
-
-
-class UserAuthPayload(BaseModel):
-    username: str
-    password: str
-
-
-class UserSignupPayload(UserAuthPayload):
-    email: EmailStr
-
-    @staticmethod
-    @field_validator("password")
-    def password_meets_bare_minimum(v: str) -> str:
-        if not (8 <= len(v) <= 64):
-            raise ValueError("password must be at least 8 chars and less than 64")
-        return v
-
-    @staticmethod
-    @field_validator("username")
-    def password_meets_bare_minimum(_, v: str) -> str:
-        if re.search(r"\S", v) is None:
-            raise ValueError("username must not be empty")
-        return v
 
 
 # The SessionAuth class requires a handler callable
@@ -54,7 +30,7 @@ async def retrieve_user_handler(tx: AsyncDbSession, session: dict[str, Any]) -> 
     return None
 
 
-@post("/login")
+@post("/sign-in")
 async def login(request: Request, tx: AsyncDbSession, data: UserAuthPayload) -> User:
     user: User | None = (await tx.execute(select(User).where(User.username == data.username))).scalar_one_or_none()
     if user is None:
@@ -64,25 +40,44 @@ async def login(request: Request, tx: AsyncDbSession, data: UserAuthPayload) -> 
         # todo: user not approved here
         raise NotAuthorizedException("user not approved")
 
-    if not bcrypt.checkpw(data.password.encode("utf-8"), user.password):
+    if not check_password(data.password, user.password):
         raise NotAuthorizedException()
 
     request.set_session({"user_id": user.id})
     return user
 
 
-@post("/signup")
-async def signup(tx: AsyncDbSession, request: Request, data: UserSignupPayload) -> User:
+@post("/register")
+async def signup(tx: AsyncDbSession, request: Request, data: UserRegisterPayload) -> Response[UserRegisterResponse]:
+    existing_user_email: User | None = (
+        await tx.execute(select(User.email).where((User.username == data.username) | (User.email == data.email)))
+    ).scalar_one_or_none()
+    
+    if existing_user_email is not None:
+        duplicate_field = "email" if existing_user_email == data.email else "username"
+        return Response(
+            UserRegisterResponse(success=False, message=f"This {duplicate_field} has already been used"),
+            status_code=400,
+        )
+
     new_user = User(
         username=data.username,
         email=data.email,
-        password=bcrypt.hashpw(data.password.encode("utf-8"), bcrypt.gensalt()),
+        password=hash_password(data.password),
     )
     # todo: validate password?
     tx.add(new_user)
     request.set_session({"user_id": new_user.id})
 
-    return new_user
+    return Response(UserRegisterResponse(success=True), status_code=201)
+
+
+def hash_password(password: str):
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+
+
+def check_password(password: str, hashed_password: str):
+    bcrypt.checkpw(password.encode("utf-8"), hashed_password.encode("utf-8"))
 
 
 @get("/current-user")

@@ -1,16 +1,16 @@
-import { createTheme } from "@mui/system";
+import { createTheme } from "@mui/material";
 
 export const theme = createTheme({
   components: {
-    MuiStackBase: {
+    MuiStack: {
       defaultProps: {
         useFlexGap: true,
       },
     },
-    MuiGridBase: {
+    MuiTextField: {
       defaultProps: {
-        useFlexGap: true,
-      },
-    },
+        size: "small"
+      }
+    }
   },
 });

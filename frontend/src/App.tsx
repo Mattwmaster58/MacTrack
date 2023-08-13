@@ -1,17 +1,21 @@
-import { ThemeProvider } from "@mui/system";
+import { ThemeProvider } from "@mui/material";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { SnackbarProvider } from "notistack";
 import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
 import { queryClient } from "./common/queryClient";
 import { TopBar } from "./components/elements/topBar";
+import { Register } from "./pages/register";
 import { SignIn } from "./pages/signIn";
 import { theme } from "./theme";
 
 function App() {
   let routes = (
     <Routes>
-      <Route path="/login" element={<SignIn />} />
+      <Route path="/sign-in" element={<SignIn />} />
+      <Route path="/register" element={<Register />} />
       <Route path="/" element={<TopBar />}>
         <Route
           path="logout"
@@ -27,23 +31,17 @@ function App() {
   );
 
   return (
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        {/*<ThemeProvider theme={theme}>*/}
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={theme}>
+        <SnackbarProvider
+          anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+        >
           <BrowserRouter>{routes}</BrowserRouter>
-        {/*</ThemeProvider>*/}
-      </QueryClientProvider>
-    </React.StrictMode>
+        </SnackbarProvider>
+      </ThemeProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
-
-  // return (
-  //   <QueryClientProvider client={queryClient}>
-  //     <div className="App">
-  //       <ItemFilter onSubmit={setFilterValues} />
-  //       {filterValues && <SearchQueryContainer params={filterValues} />}
-  //     </div>
-  //   </QueryClientProvider>
-  // );
 }
 
-export default App;
+export default App

@@ -19,11 +19,8 @@ const TopBar = () => {
       }}
     >
       <TextField label={"search"} />
-      <IconButton onClick={() => navigate("/login")}>
-        <Login />
-        {/*<Link to="/login" state={{ previousLocation: location }}>*/}
-        {/*  Login*/}
-        {/*</Link>*/}
+      <IconButton onClick={() => navigate("/sign-in")}>
+        <Login /> Sign in
       </IconButton>
     </Stack>
   );

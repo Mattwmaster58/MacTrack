@@ -1,14 +1,14 @@
-import {Button, TextField, Typography} from "@mui/material";
+import { Button, TextField, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import { useForm } from "react-hook-form";
 
-interface LoginRegisterValues {
+interface SignInValues {
   username: string;
   password: string;
 }
 
 const SignInForm = () => {
-  const methods = useForm<LoginRegisterValues>({
+  const methods = useForm<SignInValues>({
     mode: "all",
     defaultValues: {
       username: "",
@@ -20,12 +20,21 @@ const SignInForm = () => {
     handleSubmit,
     formState: { errors },
   } = methods;
+
   return (
-    <Stack maxHeight={"25rem"} maxWidth={"20rem"} alignItems={"center"} spacing={1}>
+    <Stack
+      maxHeight={"25rem"}
+      maxWidth={"25rem"}
+      alignItems={"center"}
+      spacing={1}
+      sx={{}}
+    >
       <Typography variant="h2">MacTrack</Typography>
-      <TextField label="Username" />
-      <TextField label="Password" type={"password"} />
-      <Button sx={{width: "100%"}}>Sign in</Button>
+      <TextField fullWidth label="Username" />
+      <TextField fullWidth label="Password" type={"password"} />
+      <Button fullWidth variant="contained">
+        Sign in
+      </Button>
     </Stack>
   );
 };
