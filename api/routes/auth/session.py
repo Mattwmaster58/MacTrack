@@ -34,10 +34,10 @@ async def login(request: Request, tx: AsyncDbSession, data: UserAuthPayload) -> 
     user: User | None = (await tx.execute(select(User).where(User.username == data.username))).scalar_one_or_none()
     if user is None:
         resp = Response(UserResponse(success=False, message="That user doesn't exist"), status_code=404)
-    elif not user.approved:
-        resp = Response(UserResponse(success=False, message="Account is pending admin approval"), status_code=402)
     elif not check_password(data.password, user.password):
         resp = Response(UserResponse(success=False, message="Incorrect username or password"), status_code=401)
+    elif not user.approved:
+        resp = Response(UserResponse(success=False, message="Account is pending admin approval"), status_code=402)
     else:
         resp = Response(UserResponse(success=True), status_code=200)
         request.set_session({"user_id": user.id})
@@ -75,7 +75,7 @@ def hash_password(password: str):
 
 
 def check_password(password: str, hashed_password: str):
-    bcrypt.checkpw(password.encode("utf-8"), hashed_password.encode("utf-8"))
+    bcrypt.checkpw(password.encode("utf-8"), hashed_password)
 
 
 @get("/current-user")
