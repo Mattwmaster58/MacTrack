@@ -8,6 +8,7 @@ This webapp aims to achieve 2 goals:
 
 #### Features (WIP)
  - [ ] Automatically updated database of [mac.bid](https://mac.bid) items
+   - [x] Manual scraping ability 
  - [x] Full text search via [SQLite's FTS5](https://www.sqlite.org/fts5.html) on over 8 million mac.bid items
  - [ ] 2 levels deep boolean logic expressions (eg `(term1 AND term2) OR (term3 AND term4)`)
  - [ ] Notification on search results via Email, SMS, and more planned in the future
