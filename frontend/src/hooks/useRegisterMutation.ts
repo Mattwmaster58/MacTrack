@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
+import { ApiEndpoints } from '../common/apiEndpoints'
 import { RegisterValues } from "../components/forms/registerForm";
-import { Endpoints } from "./constants";
 
 export interface RegisterResponse {
   success: boolean;
@@ -11,11 +11,11 @@ export interface RegisterResponse {
 // todo: type this correctly
 const useRegisterMutation = () => {
   return useMutation<RegisterResponse, any, any, any>(
-    [Endpoints.register],
+    [ApiEndpoints.register],
     {
       mutationFn: async (registerValues: RegisterValues) => {
         const { data } = await axios.post(
-          Endpoints.register,
+          ApiEndpoints.register,
           registerValues
         );
         return data;
