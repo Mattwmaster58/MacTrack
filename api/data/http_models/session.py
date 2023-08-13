@@ -28,5 +28,5 @@ class UserRegisterPayload(UserAuthPayload):
         return v
 
 
-class UserRegisterResponse(BaseResponse):
+class UserResponse(BaseResponse):
     pass

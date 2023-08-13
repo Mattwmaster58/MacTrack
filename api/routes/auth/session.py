@@ -2,7 +2,6 @@ from typing import Any, Literal
 
 import bcrypt
 from litestar import Request, get, post, Response
-from litestar.exceptions import NotAuthorizedException
 from litestar.middleware.session.server_side import (
     ServerSideSessionBackend,
     ServerSideSessionConfig,
@@ -10,7 +9,7 @@ from litestar.middleware.session.server_side import (
 from litestar.security.session_auth import SessionAuth
 from sqlalchemy import select
 
-from data.http_models.session import UserAuthPayload, UserRegisterPayload, UserRegisterResponse
+from data.http_models.session import UserAuthPayload, UserRegisterPayload, UserResponse
 from data.user import User
 from typings import AsyncDbSession
 
@@ -31,32 +30,31 @@ async def retrieve_user_handler(tx: AsyncDbSession, session: dict[str, Any]) -> 
 
 
 @post("/sign-in")
-async def login(request: Request, tx: AsyncDbSession, data: UserAuthPayload) -> User:
+async def login(request: Request, tx: AsyncDbSession, data: UserAuthPayload) -> Response[UserResponse]:
     user: User | None = (await tx.execute(select(User).where(User.username == data.username))).scalar_one_or_none()
     if user is None:
-        raise NotAuthorizedException()
+        resp = Response(UserResponse(success=False, message="That user doesn't exist"), status_code=404)
+    elif not user.approved:
+        resp = Response(UserResponse(success=False, message="Account is pending admin approval"), status_code=402)
+    elif not check_password(data.password, user.password):
+        resp = Response(UserResponse(success=False, message="Incorrect username or password"), status_code=401)
+    else:
+        resp = Response(UserResponse(success=True), status_code=200)
+        request.set_session({"user_id": user.id})
 
-    if not user.approved:
-        # todo: user not approved here
-        raise NotAuthorizedException("user not approved")
-
-    if not check_password(data.password, user.password):
-        raise NotAuthorizedException()
-
-    request.set_session({"user_id": user.id})
-    return user
+    return resp
 
 
 @post("/register")
-async def signup(tx: AsyncDbSession, request: Request, data: UserRegisterPayload) -> Response[UserRegisterResponse]:
+async def signup(tx: AsyncDbSession, request: Request, data: UserRegisterPayload) -> Response[UserResponse]:
     existing_user_email: User | None = (
         await tx.execute(select(User.email).where((User.username == data.username) | (User.email == data.email)))
     ).scalar_one_or_none()
-    
+
     if existing_user_email is not None:
         duplicate_field = "email" if existing_user_email == data.email else "username"
         return Response(
-            UserRegisterResponse(success=False, message=f"This {duplicate_field} has already been used"),
+            UserResponse(success=False, message=f"This {duplicate_field} has already been used"),
             status_code=400,
         )
 
@@ -69,7 +67,7 @@ async def signup(tx: AsyncDbSession, request: Request, data: UserRegisterPayload
     tx.add(new_user)
     request.set_session({"user_id": new_user.id})
 
-    return Response(UserRegisterResponse(success=True), status_code=201)
+    return Response(UserResponse(success=True), status_code=201)
 
 
 def hash_password(password: str):

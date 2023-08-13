@@ -2,7 +2,7 @@ const API_SUFFIX = "/api"
 
 const Endpoints = {
     search: `${API_SUFFIX}/search`,
-    signin: `${API_SUFFIX}/signin`,
+    signIn: `${API_SUFFIX}/sign-in`,
     register: `${API_SUFFIX}/register`
 }
 

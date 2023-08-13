@@ -11,7 +11,7 @@ interface Props {
 const SignIn = () => {
   return (
     <Stack
-      spacing={0}
+      spacing={1}
       alignItems={"center"}
       justifyContent={"center"}
       sx={{
