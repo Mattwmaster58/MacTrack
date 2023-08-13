@@ -40,6 +40,7 @@ const SignInForm = () => {
   const onSubmit = async (vals: SignInValues) => {
     try {
       await mutateAsync(vals);
+      navigate("/dashboard");
     } catch (e) {}
   };
   const errorText = error?.response?.data.message ?? error?.message;

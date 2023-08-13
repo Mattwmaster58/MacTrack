@@ -7,6 +7,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
 import { queryClient } from "./common/queryClient";
 import { TopBar } from "./components/elements/topBar";
+import { Dashboard } from './pages/dashboard'
 import { Register } from "./pages/register";
 import { SignIn } from "./pages/signIn";
 import { theme } from "./theme";
@@ -17,15 +18,8 @@ function App() {
       <Route path="/sign-in" element={<SignIn />} />
       <Route path="/register" element={<Register />} />
       <Route path="/" element={<TopBar />}>
-        <Route
-          path="logout"
-          action={() => {
-            console.log("logout");
-            return true;
-          }}
-        />
-        <Route path="search" element={<div />} />
-        <Route path="dashboard" element={<div />} />
+        <Route path="advanced-search" element={<div />} />
+        <Route path="dashboard" element={<Dashboard />} />
       </Route>
     </Routes>
   );
