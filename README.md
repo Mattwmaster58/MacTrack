@@ -1,6 +1,6 @@
 ### MacTrack
 
-After spending too much time scrolling through [mac.bid](https://mac.bid), I decided to more effectively use my time to write a tool to more effectively use mac.bid.
+After spending too much time scrolling through [mac.bid](https://mac.bid), I decided it would be a more effective use of my time to write a tool to more effectively use mac.bid.
 
 This webapp aims to achieve 2 goals:
  - notify you when searches matching your criteria are met
@@ -10,7 +10,9 @@ This webapp aims to achieve 2 goals:
  - [ ] Automatically updated database of [mac.bid](https://mac.bid) items
    - [x] Manual scraping ability 
  - [x] Full text search via [SQLite's FTS5](https://www.sqlite.org/fts5.html) on over 8 million mac.bid items
- - [ ] 2 levels deep boolean logic expressions (eg `(term1 AND term2) OR (term3 AND term4)`)
+ - [ ] Advanced search ability
+   - [ ] 2 levels deep boolean logic expressions (eg `(term1 AND term2) OR (term3 AND term4)`)
+   - [x] variety of field filters available
  - [ ] Notification on search results via Email, SMS, and more planned in the future
 
 
