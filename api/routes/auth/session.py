@@ -1,3 +1,4 @@
+import asyncio
 from typing import Any, Literal
 
 import bcrypt
@@ -7,7 +8,7 @@ from litestar.middleware.session.server_side import (
     ServerSideSessionConfig,
 )
 from litestar.security.session_auth import SessionAuth
-from sqlalchemy import select
+from sqlalchemy import select, literal
 
 from data.http_models.session import UserAuthPayload, UserRegisterPayload, UserResponse
 from data.user import User
@@ -47,7 +48,8 @@ async def login(request: Request, tx: AsyncDbSession, data: UserAuthPayload) -> 
 
 @post("/register")
 async def signup(tx: AsyncDbSession, request: Request, data: UserRegisterPayload) -> Response[UserResponse]:
-    existing_user_email: User | None = (
+    any_user = (await tx.execute(select(User.id).limit(1))).scalar_one_or_none()
+    existing_user_email = (
         await tx.execute(select(User.email).where((User.username == data.username) | (User.email == data.email)))
     ).scalar_one_or_none()
 
@@ -58,10 +60,10 @@ async def signup(tx: AsyncDbSession, request: Request, data: UserRegisterPayload
             status_code=400,
         )
 
+    no_users_in_the_table = not any_user
+
     new_user = User(
-        username=data.username,
-        email=data.email,
-        password=hash_password(data.password),
+        username=data.username, email=data.email, password=hash_password(data.password), approved=no_users_in_the_table
     )
     # todo: validate password?
     tx.add(new_user)
@@ -71,7 +73,7 @@ async def signup(tx: AsyncDbSession, request: Request, data: UserRegisterPayload
 
 
 def hash_password(password: str):
-    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
 def check_password(password: str, hashed_password: str):
