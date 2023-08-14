@@ -1,4 +1,7 @@
 """
+Should match the type definitions in @frontend/src/components/forms/itemFilterForm/types/itemfilterValues.tsx
+currently maintained by hand :/
+
 Module to deserialize frontend filter components to SQLAlchemy clauses.
 A lot of this code instruments the creation of SQLite FTS5 queries
 
@@ -6,87 +9,56 @@ Useful documentation:
  - https://www.sqlite.org/fts5.html
  - https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.bindparam
 """
-
-import functools
-import operator
-from abc import ABC, abstractmethod
+from enum import Enum
 from typing import Literal
 
-from data.mac_bid import AuctionLot
+from pydantic import BaseModel
+from sqlalchemy import Dialect
+from sqlalchemy.types import TypeDecorator, String
 
 
-class Filter(ABC):
-    @abstractmethod
-    def __init__(self): ...
-
-    @property
-    @abstractmethod
-    def as_sqlalchemy_condition(self): ...
-
-Condition = Literal["LIKE NEW", "DAMAGED", "OPEN BOX"]
+class BooleanFunction(str, Enum):
+    AND = "AND"
+    OR = "OR"
 
 
-class RetailPriceFilter(Filter):
-
-    def __init__(self, min_: float, max_: float):
-        if not any((min_ is not None, max_ is not None)):
-            raise ValueError(f"at least one of min/max needs to be specified for this filter. "
-                             f"you specified {min_=} {max_=}")
-        self.min_ = min_
-        self.max_ = max_
-
-    @property
-    def as_sqlalchemy_condition(self):
-        conditions = []
-        column = AuctionLot.retail_price
-        if self.min_ is not None:
-            conditions.append(column >= self.min_)
-        if self.max_ is not None:
-            conditions.append(column <= self.max_)
-        return functools.reduce(operator.and_, conditions)
+Conditions = Literal["LIKE NEW", "DAMAGED", "OPEN BOX"]
 
 
-class ConditionFilter(Filter):
-    def __init__(self, conditions: list[Condition]):
-        self.conditions = conditions
+class SimpleFtsQuery(BaseModel):
+    """
+    FTS supports a grammar that is much too complex to fully support, at least for my skill level
+    This is a much less complex approximation that I suspect will serve the majority of use cases
+    """
 
-    @property
-    def as_sqlalchemy_condition(self):
-        # todo: don't think it actually works like this
-        return self.conditions in AuctionLot.condition_name
+    boolean_function: BooleanFunction
+    columns: list[str]
+    includes: list[str]
+    excludes: list[str] | None = None
 
-class FtsAllMatchFilter(Filter):
-    """Matches rows that contain at least one match per token in any column"""
-    def __init__(self, columns: list[str], terms: list[str], exclude: list[str]):
-        self.columns = columns
-        self.terms = terms
-        self.exclude = exclude
-
-    def _to_fts_query(self):
-        # todo: use variable binding or smth?
-        brace_o, brace_c = "{}"
-        query = f'{brace_o} {" ".join(self.columns)} {brace_c} : {" ".join(self.terms)}'
-        if self.exclude:
-            query += f" NOT ({' OR '.join(self.exclude)})"
-        return query
-
-    @property
-    def as_sqlalchemy_condition(self):
-        return ...
+    def serialize_match(self) -> str:
+        pass
 
 
-class FtsFilter(Filter):
-    def __init__(self, queries: list[str]):
-        self.queries = queries
+class FilterQuery(BaseModel):
+    fts_query: SimpleFtsQuery
+    min_retail_price: float | None = None
+    max_retail_price: float | None = None
+    conditions: list[Conditions]
 
-    @property
-    def as_sqlalchemy_condition(self):
-        return ...
 
-class OrFts5Filter(Filter):
-    def __init__(self, terms: list[str]):
-        self.terms = terms
+class FilterQueryDbType(TypeDecorator):
+    impl = String
+    cache_ok = True
 
-    @property
-    def as_sqlalchemy_condition(self):
-        return ...
+    def process_bind_param(self, value: FilterQuery, _: Dialect) -> str | None:
+        if value is None:
+            return None
+        if not isinstance(value, FilterQuery):
+            raise TypeError(f"expected argument of type FilterQuery, got {FilterQuery}")
+        return value.model_dump_json(exclude_none=True)
+
+    def process_result_value(self, value: str | None, _: Dialect) -> FilterQuery | None:
+        if value is None:
+            return None
+        return FilterQuery.model_validate_json(value)

@@ -4,9 +4,11 @@ from datetime import datetime
 from sqlalchemy import Enum as SQLAEnum
 from sqlalchemy import Integer, String, Boolean, ForeignKey, DateTime, func
 from sqlalchemy.orm import mapped_column, Mapped
+from sqlalchemy.types import TypeDecorator
 
 from data.base_model import Base
 from data.mac_bid import AuctionLot
+from data.user.filter import FilterQueryDbType
 
 
 class NotificationStatus(enum.Enum):
@@ -29,9 +31,8 @@ class Filter(Base):
     __tablename__ = "filter"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey(User.id))
-    payload: Mapped[str] = mapped_column(String)
     active: Mapped[bool] = mapped_column(Boolean, default=False)
-    notification_type: Mapped[str] = mapped_column(String)
+    payload: Mapped[str] = mapped_column(FilterQueryDbType, nullable=False)
 
 
 class Notification(Base):

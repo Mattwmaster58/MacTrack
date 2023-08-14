@@ -1,10 +1,11 @@
 import React from 'react'
+import {
+  ItemFilterForm
+} from '../components/forms/itemFilterForm/itemFilterForm'
 
 const Dashboard = () => {
   return (
-    <div>
-      "hello"
-    </div>
+    <ItemFilterForm onSubmit={(vals) => {console.log(vals)}}/>
   )
 }
 

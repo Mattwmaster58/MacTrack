@@ -1,4 +1,4 @@
 export enum FilterMatchType {
-  ANY = "or",
-  ALL = "and",
+  ANY = "OR",
+  ALL = "AND",
 }

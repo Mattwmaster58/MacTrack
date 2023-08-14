@@ -11,7 +11,7 @@ This webapp aims to achieve 2 goals:
    - [x] Manual scraping ability 
  - [x] Full text search via [SQLite's FTS5](https://www.sqlite.org/fts5.html) on over 8 million mac.bid items
  - [ ] Advanced search ability
-   - [ ] 2 levels deep boolean logic expressions (eg `(term1 AND term2) OR (term3 AND term4)`)
+   - [ ] 2 levels deep boolean logic expressions FTS (eg `(term1 AND term2) OR (term3 AND term4)`)
    - [x] variety of field filters available
  - [ ] Notification on search results via Email, SMS, and more planned in the future
 

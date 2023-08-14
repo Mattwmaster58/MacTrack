@@ -1,13 +1,16 @@
 import { MenuItem, Select, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import React from "react";
-import { Control, Controller } from "react-hook-form";
+import { Control, Controller, CriteriaMode } from 'react-hook-form'
 import { FilterMatchType } from "../../../types/FilterMatchType";
 import { TagInput } from "../../elements/tagInput";
-import { ItemFilterValues } from "./types/itemFilterValues";
+import {
+  ItemFilterInputValues,
+  ItemFilterOutputValues,
+} from './types/itemFilter'
 
 export function TermsInput<TFieldArrayValues>(
-  control: Control<ItemFilterValues, any>
+  control: Control<ItemFilterInputValues, any>
 ) {
   return (
     <Stack flexDirection="column" spacing={2}>
@@ -16,7 +19,7 @@ export function TermsInput<TFieldArrayValues>(
           <Typography alignItems={"center"}>Include items where</Typography>
           <Controller
             control={control}
-            name="boolean_function"
+            name="fts_query.boolean_function"
             render={({ field }) => (
               <Select {...field}>
                 <MenuItem value={FilterMatchType.ANY}>Any</MenuItem>
@@ -27,7 +30,7 @@ export function TermsInput<TFieldArrayValues>(
           of the following terms match
         </Stack>
         <Controller
-          name="terms"
+          name="fts_query.includes"
           control={control}
           render={({ field: { onChange, value } }) => (
             <TagInput onTagsChange={onChange} value={value} />
@@ -39,7 +42,7 @@ export function TermsInput<TFieldArrayValues>(
           and exclude those that contain any of the following
         </Typography>
         <Controller
-          name="exclude"
+          name="fts_query.excludes"
           control={control}
           render={({ field: { onChange, value } }) => (
             <TagInput onTagsChange={onChange} value={value} />

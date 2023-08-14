@@ -2,32 +2,37 @@ import { TextField, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import React from "react";
 import { Control, Controller } from "react-hook-form";
-import { ItemFilterValues } from "./types/itemFilterValues";
+import {
+  ItemFilterInputValues,
+  ItemFilterOutputValues,
+} from './types/itemFilter'
 
 export function RetailPriceInput<TFieldArrayValues>(
-  control: Control<ItemFilterValues, any>
+  control: Control<ItemFilterInputValues, any>
 ) {
   return (
     <Stack>
       <Typography>Retail price</Typography>
       <Stack flexDirection="row" spacing={2}>
         <Controller
-          name="max_retail_price"
+          defaultValue={""}
+          name="min_retail_price"
           control={control}
           render={({ field }) => (
             <TextField
-              label="Maximum"
+              label="Minimum"
               inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
               {...field}
             />
           )}
         />
         <Controller
-          name="min_retail_price"
+          defaultValue={""}
+          name="max_retail_price"
           control={control}
           render={({ field }) => (
             <TextField
-              label="Minimum"
+              label="Maximum"
               inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
               {...field}
             />
