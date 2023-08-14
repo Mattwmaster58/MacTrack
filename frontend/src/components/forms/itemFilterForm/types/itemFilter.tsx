@@ -27,8 +27,6 @@ const ItemFilterSchema = z
   })
   .partial()
   .refine(
-      // todo: verify this works as expected
-      // see also: https://github.com/colinhacks/zod/issues/479
     ({ min_retail_price, max_retail_price }) => {
       console.log(min_retail_price, max_retail_price);
       const bounds = [min_retail_price, max_retail_price];
@@ -38,7 +36,7 @@ const ItemFilterSchema = z
       return min_retail_price! <= max_retail_price!;
     },
     {
-      message: "Maximum must be greater than minimum",
+      message: "Minimum must be less than maximum",
       path: ["min_retail_price"],
     }
   );
