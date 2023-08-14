@@ -54,6 +54,7 @@ const ItemFilterForm = ({ onSubmit }: Props) => {
     handleSubmit,
     formState: { errors },
   } = methods;
+  // todo: abstract these controller thingymabobs
   
   const toggleDescriptionColumn = (ev: React.ChangeEvent<HTMLInputElement>) => {
     const curCols = getValues("fts_query.columns");
