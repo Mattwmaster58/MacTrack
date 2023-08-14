@@ -14,14 +14,18 @@ import React from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { FilterMatchType } from "../../../types/FilterMatchType";
 import { TagInput } from "../../elements/tagInput";
-import { ItemFilterInputValues, ItemFilterSchema } from "./types/itemFilter";
+import {
+  ItemFilterInputValues,
+  ItemFilterOutputValues,
+  ItemFilterSchema,
+} from './types/itemFilter'
 
 interface Props {
-  onSubmit: (data: ItemFilterInputValues) => void;
+  onSubmit: (data: ItemFilterOutputValues) => void;
 }
 
 const ItemFilterForm = ({ onSubmit }: Props) => {
-  const methods = useForm<ItemFilterInputValues>({
+  const methods = useForm<ItemFilterInputValues, any, ItemFilterOutputValues>({
     mode: "all",
     defaultValues: {
       fts_query: {
@@ -33,15 +37,35 @@ const ItemFilterForm = ({ onSubmit }: Props) => {
       min_retail_price: undefined,
       max_retail_price: undefined,
     },
-    resolver: zodResolver(ItemFilterSchema),
+    resolver:  async (data, context, options) => {
+      // you can debug your validation schema here
+      console.log("formData", data)
+      console.log(
+        "validation result",
+        await zodResolver(ItemFilterSchema)(data, context, options)
+      )
+      return zodResolver(ItemFilterSchema)(data, context, options)
+    },
   });
   const {
+    getValues,
+    setValue,
     control,
     handleSubmit,
     formState: { errors },
   } = methods;
+  
+  const toggleDescriptionColumn = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    const curCols = getValues("fts_query.columns");
+    let newCols: [string, ...string[]] = (() => {
+      return ev.target.checked
+        ? ["description", "product_name", "title"]
+        : ["product_name", "title"];
+    })();
+    setValue("fts_query.columns", newCols);
+    console.log(ev.target.checked, newCols);
+  } 
 
-  // @ts-ignore
   return (
     <FormControl>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -77,6 +101,17 @@ const ItemFilterForm = ({ onSubmit }: Props) => {
                 render={({ field: { onChange, value } }) => <TagInput onTagsChange={onChange} value={value}/>}
               />
             </Stack>
+            <Controller
+              name="fts_query.columns"
+              control={control}
+              defaultValue={["product_name", "title"]}
+              render={({ field }) => (
+                <FormControlLabel
+                  control={<Switch {...field} onChange={toggleDescriptionColumn} />}
+                  label="Include description in search"
+                />
+              )}
+            />
           </Stack>
           <Stack>
             <Typography>Retail price</Typography>
@@ -107,16 +142,6 @@ const ItemFilterForm = ({ onSubmit }: Props) => {
               />
             </Stack>
           </Stack>
-          <Controller
-            name="fts_query.columns"
-            control={control}
-            render={({ field }) => (
-              <FormControlLabel
-                control={<Switch {...field} />}
-                label="Include description in search"
-              />
-            )}
-          />
         </FormProvider>
         <Button type="submit">Submit</Button>
       </form>
