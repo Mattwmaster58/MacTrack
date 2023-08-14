@@ -18,11 +18,11 @@ const ItemFilterSchema = z
     min_retail_price: z
       .string()
       .optional()
-      .transform((s) => parseFloat(s ?? "") || 0),
+      .transform((s) => parseFloat(s ?? "") || -1),
     max_retail_price: z
       .string()
       .optional()
-      .transform((s) => parseFloat(s ?? "") || 0),
+      .transform((s) => parseFloat(s ?? "") || -1),
     conditions: z.array(ConditionsEnum),
   })
   .partial()
@@ -31,10 +31,11 @@ const ItemFilterSchema = z
       // see also: https://github.com/colinhacks/zod/issues/479
     ({ min_retail_price, max_retail_price }) => {
       console.log(min_retail_price, max_retail_price);
-      if (min_retail_price === undefined || max_retail_price === undefined) {
+      const bounds = [min_retail_price, max_retail_price];
+      if (bounds.includes(undefined) || bounds.includes(-1)) {
         return true;
       }
-      return min_retail_price <= max_retail_price;
+      return min_retail_price! <= max_retail_price!;
     },
     {
       message: "Maximum must be greater than minimum",
