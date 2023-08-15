@@ -8,9 +8,9 @@ import {
 } from "@mui/material";
 import { Stack } from "@mui/system";
 import { useSnackbar } from "notistack";
-import React, { useState } from "react";
+import React from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useRegisterMutation } from "../../hooks/useRegisterMutation";
 

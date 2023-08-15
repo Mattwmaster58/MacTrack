@@ -1,4 +1,4 @@
-import {MutationCache, QueryClient} from "@tanstack/react-query";
+import { MutationCache, QueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import qs from "qs";
 
@@ -18,5 +18,4 @@ const queryClient = new QueryClient({
   }),
 });
 
-export {queryClient};
-
+export { queryClient };

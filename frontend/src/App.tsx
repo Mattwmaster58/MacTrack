@@ -7,7 +7,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
 import { queryClient } from "./common/queryClient";
 import { TopBar } from "./components/elements/topBar";
-import { Dashboard } from './pages/dashboard'
+import { Dashboard } from "./pages/dashboard";
 import { Register } from "./pages/register";
 import { SignIn } from "./pages/signIn";
 import { theme } from "./theme";
@@ -22,8 +22,8 @@ function App() {
         <Route path="advanced-search" element={<div />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="filters">
-            <Route path="new"/>
-            <Route path="{filter_id:int}/edit"/> 
+          <Route path="new" />
+          <Route path="{filter_id:int}/edit" />
         </Route>
       </Route>
     </Routes>
@@ -43,4 +43,4 @@ function App() {
   );
 }
 
-export default App
+export default App;

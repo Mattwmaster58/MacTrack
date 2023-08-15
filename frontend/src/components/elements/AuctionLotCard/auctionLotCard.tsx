@@ -19,7 +19,7 @@ const AuctionLotCard = ({ auctionInfo }: Props) => {
   let discountRate: number | string;
   if (auctionInfo.winning_bid_amount) {
     discountRate = Math.round(
-      (1 - auctionInfo.winning_bid_amount / auctionInfo.retail_price) * 100
+      (1 - auctionInfo.winning_bid_amount / auctionInfo.retail_price) * 100,
     );
   } else {
     discountRate = "?";

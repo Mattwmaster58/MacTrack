@@ -1,7 +1,7 @@
-import {Typography} from "@mui/material";
+import { Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import { useState } from "react";
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 import { RegisterForm, RegisterValues } from "../components/forms/registerForm";
 
 interface Props {
@@ -11,7 +11,7 @@ interface Props {
 
 const Register = () => {
   const [registerValues, setRegisterValues] = useState<RegisterValues | null>(
-    null
+    null,
   );
   console.log(registerValues);
   return (
@@ -23,7 +23,7 @@ const Register = () => {
         minHeight: "100vh",
       }}
     >
-      <RegisterForm/>
+      <RegisterForm />
       <Typography variant="subtitle2">
         Already have an account? <Link to={"/sign-in"}>Sign in</Link>
       </Typography>

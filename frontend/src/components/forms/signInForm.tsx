@@ -11,8 +11,7 @@ import React from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { useRegisterMutation } from "../../hooks/useRegisterMutation";
-import { useSignInMutation } from '../../hooks/useSignInMutation'
+import { useSignInMutation } from "../../hooks/useSignInMutation";
 
 const signInSchema = z.object({
   username: z.string().nonempty("Must be specified"),
@@ -33,8 +32,7 @@ const SignInForm = () => {
     handleSubmit,
     formState: { errors },
   } = methods;
-  const { mutateAsync, data, error, isError, isLoading } =
-    useSignInMutation();
+  const { mutateAsync, data, error, isError, isLoading } = useSignInMutation();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const onSubmit = async (vals: SignInValues) => {

@@ -9,8 +9,8 @@ export const theme = createTheme({
     },
     MuiTextField: {
       defaultProps: {
-        size: "small"
-      }
-    }
+        size: "small",
+      },
+    },
   },
 });
