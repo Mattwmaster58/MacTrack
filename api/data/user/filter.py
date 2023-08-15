@@ -34,7 +34,7 @@ class SimpleFtsQuery(BaseModel):
     boolean_function: BooleanFunction
     columns: list[str]
     includes: list[str]
-    excludes: list[str] | None = None
+    excludes: list[str] = []
 
     def serialize_match(self) -> str:
         pass
@@ -42,9 +42,11 @@ class SimpleFtsQuery(BaseModel):
 
 class FilterQuery(BaseModel):
     fts_query: SimpleFtsQuery
-    min_retail_price: float | None = None
-    max_retail_price: float | None = None
-    conditions: list[Conditions]
+    min_retail_price: float = -1
+    max_retail_price: float = -1
+    damaged: bool
+    new_: bool
+    open_box: bool
 
 
 class FilterQueryDbType(TypeDecorator):

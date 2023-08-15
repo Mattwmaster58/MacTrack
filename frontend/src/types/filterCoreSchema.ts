@@ -54,6 +54,6 @@ const FilterCoreSchema = z.intersection(
   ftsQueryRootKey,
 );
 
-export type CoreFilterOutputValues = z.output<typeof FilterCoreSchema>;
-export type CoreFilterInputValues = z.input<typeof FilterCoreSchema>;
+export type FilterCoreOutputValues = z.output<typeof FilterCoreSchema>;
+export type FilterCoreInputValues = z.input<typeof FilterCoreSchema>;
 export { FilterCoreSchema };

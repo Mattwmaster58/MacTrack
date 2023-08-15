@@ -18,8 +18,8 @@ import { Controller, FormProvider, useForm } from "react-hook-form";
 import { FilterMatchType } from "../../types/FilterMatchType";
 import { TagInput } from "../elements/tagInput";
 import {
-  CoreFilterInputValues,
-  CoreFilterOutputValues,
+  FilterCoreInputValues,
+  FilterCoreOutputValues,
   FilterCoreSchema,
 } from "../../types/filterCoreSchema";
 
@@ -38,8 +38,8 @@ const DEFAULT_ITEM_FILTER_VALUES = {
 };
 
 interface Props {
-  onSubmit: (data: CoreFilterOutputValues) => void;
-  initialValues?: CoreFilterOutputValues;
+  onSubmit: (data: FilterCoreOutputValues) => void;
+  initialValues?: FilterCoreOutputValues;
 }
 
 interface initialTransform<T> {
@@ -47,7 +47,7 @@ interface initialTransform<T> {
   initialTransform: (val: T) => T;
 }
 
-const processInitialValues = (initialValues?: CoreFilterOutputValues) => {
+const processInitialValues = (initialValues?: FilterCoreOutputValues) => {
   // this complexity arises from having to rectify 3 slightly different types:
   // database (pydantic), input form type, and output form type
   const minusOneToEmptyString = (val: string | number) =>
@@ -70,7 +70,7 @@ const processInitialValues = (initialValues?: CoreFilterOutputValues) => {
 };
 
 const ItemFilterCoreForm = ({ onSubmit, initialValues }: Props) => {
-  const methods = useForm<CoreFilterInputValues, any, CoreFilterOutputValues>({
+  const methods = useForm<FilterCoreInputValues, any, FilterCoreOutputValues>({
     mode: "all",
     defaultValues: processInitialValues(initialValues),
     resolver: async (data, context, options) => {
