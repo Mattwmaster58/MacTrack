@@ -32,10 +32,9 @@ const restOfItemFilterSchema = z
   })
   .refine(
     ({ min_retail_price, max_retail_price }) => {
-      console.log("running refined");
       return (
         [min_retail_price, max_retail_price].includes(-1) ||
-        min_retail_price <= max_retail_price
+        min_retail_price < max_retail_price
       );
     },
     {

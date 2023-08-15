@@ -24,9 +24,10 @@ import {
 
 interface Props {
   onSubmit: (data: ItemFilterOutputValues) => void;
+  initialValues?: ItemFilterOutputValues;
 }
 
-const ItemFilterForm = ({ onSubmit }: Props) => {
+const ItemFilterForm = ({ onSubmit, initialValues }: Props) => {
   const methods = useForm<ItemFilterInputValues, any, ItemFilterOutputValues>({
     mode: "all",
     defaultValues: {
@@ -36,8 +37,8 @@ const ItemFilterForm = ({ onSubmit }: Props) => {
         includes: [],
         excludes: [],
       },
-      min_retail_price: undefined,
-      max_retail_price: undefined,
+      min_retail_price: "",
+      max_retail_price: "",
       new_: true,
       open_box: true,
       damaged: false,
@@ -124,7 +125,6 @@ const ItemFilterForm = ({ onSubmit }: Props) => {
             <Controller
               name="fts_query.columns"
               control={control}
-              defaultValue={["product_name", "title"]}
               render={({ field }) => (
                 <FormControlLabel
                   control={
@@ -137,7 +137,6 @@ const ItemFilterForm = ({ onSubmit }: Props) => {
             <Typography>Retail price</Typography>
             <Stack flexDirection="row" spacing={2}>
               <Controller
-                defaultValue={""}
                 name="min_retail_price"
                 control={control}
                 render={({ field }) => (
@@ -151,7 +150,6 @@ const ItemFilterForm = ({ onSubmit }: Props) => {
                 )}
               />
               <Controller
-                defaultValue={""}
                 name="max_retail_price"
                 control={control}
                 render={({ field }) => (
@@ -171,7 +169,12 @@ const ItemFilterForm = ({ onSubmit }: Props) => {
                 control={control}
                 render={({ field }) => (
                   <FormControlLabel
-                    control={<Switch {...field} />}
+                    control={
+                      <Switch
+                        checked={field.value}
+                        onChange={(ev) => field.onChange(ev.target.checked)}
+                      />
+                    }
                     label="Open Box"
                   />
                 )}
@@ -181,7 +184,12 @@ const ItemFilterForm = ({ onSubmit }: Props) => {
                 control={control}
                 render={({ field }) => (
                   <FormControlLabel
-                    control={<Switch {...field} />}
+                    control={
+                      <Switch
+                        checked={field.value}
+                        onChange={(ev) => field.onChange(ev.target.checked)}
+                      />
+                    }
                     label="Damaged"
                   />
                 )}
@@ -191,7 +199,12 @@ const ItemFilterForm = ({ onSubmit }: Props) => {
                 control={control}
                 render={({ field }) => (
                   <FormControlLabel
-                    control={<Switch {...field} />}
+                    control={
+                      <Switch
+                        checked={field.value}
+                        onChange={(ev) => field.onChange(ev.target.checked)}
+                      />
+                    }
                     label="New"
                   />
                 )}
