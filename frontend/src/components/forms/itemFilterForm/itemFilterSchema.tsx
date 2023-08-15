@@ -10,8 +10,8 @@ const ftsQueryRootKey = z
     fts_query: z.object({
       boolean_function: BooleanFunctionEnum,
       columns: z.array(z.string().nonempty()).nonempty(),
-      includes: z.array(z.string().nonempty()).nonempty(),
-      excludes: z.array(z.string().nonempty()).optional(),
+      includes: z.array(z.string().nonempty()).nonempty("Enter some terms"),
+      excludes: z.array(z.string().nonempty()),
     }),
   })
   .required();
@@ -31,11 +31,8 @@ const restOfItemFilterSchema = z
     open_box: z.boolean(),
   })
   .refine(
-    ({ damaged, new_, open_box }) => [damaged, new_, open_box].includes(true),
-    { message: "Select at least one condition", path: ["new_"] },
-  )
-  .refine(
     ({ min_retail_price, max_retail_price }) => {
+      console.log("running refined");
       return (
         [min_retail_price, max_retail_price].includes(-1) ||
         min_retail_price <= max_retail_price
@@ -45,6 +42,10 @@ const restOfItemFilterSchema = z
       message: "Minimum must be less than maximum",
       path: ["min_retail_price"],
     },
+  )
+  .refine(
+    ({ damaged, new_, open_box }) => [damaged, new_, open_box].includes(true),
+    { message: "Select at least one condition", path: ["new_"] },
   );
 
 const ItemFilterSchema = z.intersection(

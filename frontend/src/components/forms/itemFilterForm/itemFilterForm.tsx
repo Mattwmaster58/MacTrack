@@ -38,6 +38,9 @@ const ItemFilterForm = ({ onSubmit }: Props) => {
       },
       min_retail_price: undefined,
       max_retail_price: undefined,
+      new_: true,
+      open_box: true,
+      damaged: false,
     },
     resolver: async (data, context, options) => {
       // you can debug your validation schema here
@@ -59,14 +62,14 @@ const ItemFilterForm = ({ onSubmit }: Props) => {
   // todo: abstract these controller thingymabobs
 
   const toggleDescriptionColumn = (ev: React.ChangeEvent<HTMLInputElement>) => {
-    let newCols: [string, ...string[]] = (() => {
-      return ev.target.checked
+    setValue(
+      "fts_query.columns",
+      ev.target.checked
         ? ["description", "product_name", "title"]
-        : ["product_name", "title"];
-    })();
-    setValue("fts_query.columns", newCols);
+        : ["product_name", "title"],
+    );
   };
-  console.log("new_:", errors, !!errors.new_?.message, errors.new_?.message);
+  console.log("errors prop:", errors);
 
   return (
     <FormControl>
@@ -94,7 +97,11 @@ const ItemFilterForm = ({ onSubmit }: Props) => {
                 name="fts_query.includes"
                 control={control}
                 render={({ field: { onChange, value } }) => (
-                  <TagInput onTagsChange={onChange} value={value} />
+                  <TagInput
+                    onTagsChange={onChange}
+                    value={value}
+                    externalErrorMessage={errors.fts_query?.includes?.message}
+                  />
                 )}
               />
             </Stack>
@@ -106,7 +113,11 @@ const ItemFilterForm = ({ onSubmit }: Props) => {
                 name="fts_query.excludes"
                 control={control}
                 render={({ field: { onChange, value } }) => (
-                  <TagInput onTagsChange={onChange} value={value} />
+                  <TagInput
+                    onTagsChange={onChange}
+                    value={value}
+                    externalErrorMessage={errors.fts_query?.excludes?.message}
+                  />
                 )}
               />
             </Stack>

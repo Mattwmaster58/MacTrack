@@ -7,7 +7,11 @@ const Tag = ({ data, handleDelete }: TagProps) => {
   return <Chip sx={{ marginRight: 1 }} label={data} onDelete={handleDelete} />;
 };
 
-const TagInput = ({ value, onTagsChange }: TagInputProps) => {
+const TagInput = ({
+  value,
+  onTagsChange,
+  externalErrorMessage,
+}: TagInputProps) => {
   const [tags, setTags] = useState<TagProps["data"][]>(value ?? []);
   const [errorText, setErrorText] = useState("");
   const tagRef = useRef<HTMLInputElement>();
@@ -21,7 +25,9 @@ const TagInput = ({ value, onTagsChange }: TagInputProps) => {
     onTagsChange && onTagsChange(newTagList);
   }
 
-  function updateTagsFromRef() {
+  const finalErrorMessage = externalErrorMessage || errorText;
+
+  function updateTagsFromInputRef() {
     if (tagRef.current) {
       let newTag = tagRef.current.value;
       if (newTag) {
@@ -40,7 +46,7 @@ const TagInput = ({ value, onTagsChange }: TagInputProps) => {
     resetErrorText();
     const inputVal = tagRef.current?.value;
     if (["Enter", "Comma"].includes(e.code)) {
-      updateTagsFromRef();
+      updateTagsFromInputRef();
       e.preventDefault();
     } else if (e.code === "Backspace" && !tagRef.current?.value) {
       updateTags(tags.slice(0, tags.length - 1));
@@ -59,12 +65,12 @@ const TagInput = ({ value, onTagsChange }: TagInputProps) => {
     <TextField
       multiline
       onKeyDown={handleKeypress}
-      onBlur={updateTagsFromRef}
+      onBlur={updateTagsFromInputRef}
       inputRef={tagRef}
       variant="outlined"
       size="medium"
-      error={errorText.length > 0}
-      helperText={errorText}
+      error={!!finalErrorMessage}
+      helperText={finalErrorMessage}
       placeholder={!tags.length ? "enter terms" : ""}
       InputProps={{
         startAdornment: (
