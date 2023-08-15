@@ -1,11 +1,11 @@
 import Skeleton from "@mui/material/Skeleton";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { useSearchQuery } from "../../hooks/useSearchQuery";
-import { ItemFilterOutputValues } from "../forms/itemFilterForm/itemFilterSchema";
-import { AuctionLotCard } from "./AuctionLotCard/auctionLotCard";
+import { CoreFilterOutputValues } from "../../types/filterCoreSchema";
+import { AuctionLotCard } from "./auctionLotCard";
 
 interface Props {
-  params: ItemFilterOutputValues;
+  params: CoreFilterOutputValues;
 }
 
 const SearchQueryContainer = ({ params }: Props) => {

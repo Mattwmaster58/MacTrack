@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { ApiEndpoints } from "../common/apiEndpoints";
-import { ItemFilterOutputValues } from "../components/forms/itemFilterForm/itemFilterSchema";
+import { CoreFilterOutputValues } from "../types/filterCoreSchema";
 import { AuctionLot } from "../types/AuctionLot";
 
-const useSearchQuery = (itemsFilterValues: ItemFilterOutputValues) => {
+const useSearchQuery = (itemsFilterValues: CoreFilterOutputValues) => {
   return useQuery([ApiEndpoints.search, itemsFilterValues], {
     queryFn: async () => {
       const { data } = await axios.get<AuctionLot[]>(ApiEndpoints.search, {

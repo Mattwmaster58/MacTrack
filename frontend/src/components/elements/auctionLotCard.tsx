@@ -9,7 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Stack } from "@mui/system";
-import { AuctionLot } from "../../../types/AuctionLot";
+import { AuctionLot } from "../../types/AuctionLot";
 
 interface Props {
   auctionInfo: AuctionLot;

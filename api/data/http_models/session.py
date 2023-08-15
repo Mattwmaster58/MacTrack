@@ -29,4 +29,4 @@ class UserRegisterPayload(UserAuthPayload):
 
 
 class UserResponse(BaseResponse):
-    pass
+    username: str | None = None

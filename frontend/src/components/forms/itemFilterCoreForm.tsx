@@ -15,13 +15,13 @@ import { Stack } from "@mui/system";
 import { deepmerge } from "deepmerge-ts";
 import React from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
-import { FilterMatchType } from "../../../types/FilterMatchType";
-import { TagInput } from "../../elements/tagInput";
+import { FilterMatchType } from "../../types/FilterMatchType";
+import { TagInput } from "../elements/tagInput";
 import {
-  ItemFilterInputValues,
-  ItemFilterOutputValues,
-  ItemFilterSchema,
-} from "./itemFilterSchema";
+  CoreFilterInputValues,
+  CoreFilterOutputValues,
+  FilterCoreSchema,
+} from "../../types/filterCoreSchema";
 
 const DEFAULT_ITEM_FILTER_VALUES = {
   fts_query: {
@@ -38,8 +38,8 @@ const DEFAULT_ITEM_FILTER_VALUES = {
 };
 
 interface Props {
-  onSubmit: (data: ItemFilterOutputValues) => void;
-  initialValues?: ItemFilterOutputValues;
+  onSubmit: (data: CoreFilterOutputValues) => void;
+  initialValues?: CoreFilterOutputValues;
 }
 
 interface initialTransform<T> {
@@ -47,7 +47,7 @@ interface initialTransform<T> {
   initialTransform: (val: T) => T;
 }
 
-const processInitialValues = (initialValues?: ItemFilterOutputValues) => {
+const processInitialValues = (initialValues?: CoreFilterOutputValues) => {
   // this complexity arises from having to rectify 3 slightly different types:
   // database (pydantic), input form type, and output form type
   const minusOneToEmptyString = (val: string | number) =>
@@ -69,13 +69,13 @@ const processInitialValues = (initialValues?: ItemFilterOutputValues) => {
   return mergedInitialValues;
 };
 
-const ItemFilterForm = ({ onSubmit, initialValues }: Props) => {
-  const methods = useForm<ItemFilterInputValues, any, ItemFilterOutputValues>({
+const ItemFilterCoreForm = ({ onSubmit, initialValues }: Props) => {
+  const methods = useForm<CoreFilterInputValues, any, CoreFilterOutputValues>({
     mode: "all",
     defaultValues: processInitialValues(initialValues),
     resolver: async (data, context, options) => {
       // purely for resolver debugging
-      const validationResult = await zodResolver(ItemFilterSchema)(
+      const validationResult = await zodResolver(FilterCoreSchema)(
         data,
         context,
         options,
@@ -250,4 +250,4 @@ const ItemFilterForm = ({ onSubmit, initialValues }: Props) => {
   );
 };
 
-export { ItemFilterForm };
+export { ItemFilterCoreForm };

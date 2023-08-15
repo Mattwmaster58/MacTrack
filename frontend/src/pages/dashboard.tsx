@@ -1,13 +1,16 @@
 import React from "react";
-import { ItemFilterForm } from "../components/forms/itemFilterForm/itemFilterForm";
+import { ItemFilterCoreForm } from "../components/forms/itemFilterCoreForm";
+import { Stack } from "@mui/system";
 
 const Dashboard = () => {
   return (
-    <ItemFilterForm
-      onSubmit={(vals) => {
-        console.log(vals);
-      }}
-    />
+    <Stack width={"100%"} alignItems={"center"}>
+      <ItemFilterCoreForm
+        onSubmit={(vals) => {
+          console.log(vals);
+        }}
+      />
+    </Stack>
   );
 };
 

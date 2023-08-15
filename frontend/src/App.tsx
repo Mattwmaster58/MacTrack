@@ -11,6 +11,7 @@ import { Dashboard } from "./pages/dashboard";
 import { Register } from "./pages/register";
 import { SignIn } from "./pages/signIn";
 import { theme } from "./theme";
+import { UnauthorizedCatcher } from "./pages/unauthorizedCatcher";
 
 // see: https://stackoverflow.com/a/71273212/3427299
 function App() {
@@ -18,7 +19,11 @@ function App() {
     <Routes>
       <Route path="/sign-in" element={<SignIn />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/" element={<TopBar />}>
+      <Route
+        path="/"
+        element={<TopBar />}
+        errorElement={<UnauthorizedCatcher />}
+      >
         <Route path="advanced-search" element={<div />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="filters">

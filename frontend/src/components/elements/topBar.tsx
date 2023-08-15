@@ -8,7 +8,7 @@ const TopBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   return (
-    <>
+    <Stack direction="column" width="100%">
       <Stack
         alignItems={"center"}
         justifyContent={"center"}
@@ -25,7 +25,7 @@ const TopBar = () => {
         </IconButton>
       </Stack>
       <Outlet />
-    </>
+    </Stack>
   );
 };
 
