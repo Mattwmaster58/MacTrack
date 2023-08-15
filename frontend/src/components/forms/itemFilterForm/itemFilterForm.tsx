@@ -12,6 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Stack } from "@mui/system";
+import { deepmerge } from "deepmerge-ts";
 import React from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { FilterMatchType } from "../../../types/FilterMatchType";
@@ -22,39 +23,68 @@ import {
   ItemFilterSchema,
 } from "./itemFilterSchema";
 
+const DEFAULT_ITEM_FILTER_VALUES = {
+  fts_query: {
+    boolean_function: FilterMatchType.ALL,
+    columns: ["product_name", "title"],
+    includes: [],
+    excludes: [],
+  },
+  min_retail_price: 10,
+  max_retail_price: -1,
+  new_: true,
+  open_box: true,
+  damaged: false,
+};
+
 interface Props {
   onSubmit: (data: ItemFilterOutputValues) => void;
   initialValues?: ItemFilterOutputValues;
 }
 
+interface initialTransform<T> {
+  path: string;
+  initialTransform: (val: T) => T;
+}
+
+const processInitialValues = (initialValues?: ItemFilterOutputValues) => {
+  // this complexity arises from having to rectify 3 slightly different types:
+  // database (pydantic), input form type, and output form type
+  const minusOneToEmptyString = (val: string | number) =>
+    val === -1 ? "" : val;
+  const initialValueTransform: initialTransform<any>[] = [
+    { path: "min_retail_price", initialTransform: minusOneToEmptyString },
+    { path: "max_retail_price", initialTransform: minusOneToEmptyString },
+  ];
+  const mergedInitialValues = deepmerge(
+    initialValues ?? {},
+    DEFAULT_ITEM_FILTER_VALUES,
+  );
+  for (const { path, initialTransform } of initialValueTransform) {
+    // todo: actually make these types work. it should be technically possible,
+    //  but is currently not emotionally possible for me
+    // @ts-ignore
+    mergedInitialValues[path] = initialTransform(mergedInitialValues[path]);
+  }
+  return mergedInitialValues;
+};
+
 const ItemFilterForm = ({ onSubmit, initialValues }: Props) => {
   const methods = useForm<ItemFilterInputValues, any, ItemFilterOutputValues>({
     mode: "all",
-    defaultValues: {
-      fts_query: {
-        boolean_function: FilterMatchType.ALL,
-        columns: ["product_name", "title"],
-        includes: [],
-        excludes: [],
-      },
-      min_retail_price: "",
-      max_retail_price: "",
-      new_: true,
-      open_box: true,
-      damaged: false,
-    },
+    defaultValues: processInitialValues(initialValues),
     resolver: async (data, context, options) => {
-      // you can debug your validation schema here
-      console.log("formData", data);
-      console.log(
-        "validation result",
-        await zodResolver(ItemFilterSchema)(data, context, options),
+      // purely for resolver debugging
+      const validationResult = await zodResolver(ItemFilterSchema)(
+        data,
+        context,
+        options,
       );
-      return zodResolver(ItemFilterSchema)(data, context, options);
+      console.log("formData:", data, "formValidation:", validationResult);
+      return new Promise((res) => res(validationResult));
     },
   });
   const {
-    getValues,
     setValue,
     control,
     handleSubmit,
@@ -70,7 +100,6 @@ const ItemFilterForm = ({ onSubmit, initialValues }: Props) => {
         : ["product_name", "title"],
     );
   };
-  console.log("errors prop:", errors);
 
   return (
     <FormControl>

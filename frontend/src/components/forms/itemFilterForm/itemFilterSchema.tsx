@@ -16,16 +16,18 @@ const ftsQueryRootKey = z
   })
   .required();
 
+// this gets complicated because we want to accomplish 2 things.
+//  - one is the ability to have this input empty, 2 is to transform that empty input into a
+//  type matching primitive sentinel value for storing in the database
+// basically, the input values of the schema needs to be a *subset* type of the output type
+const possiblyEmptyPriceInput = z
+  .union([z.string(), z.number()])
+  .transform((s) => parseFloat((s ?? "").toString()) || -1);
+
 const restOfItemFilterSchema = z
   .object({
-    min_retail_price: z
-      .string()
-      .optional()
-      .transform((s) => parseFloat(s ?? "") || -1),
-    max_retail_price: z
-      .string()
-      .optional()
-      .transform((s) => parseFloat(s ?? "") || -1),
+    min_retail_price: possiblyEmptyPriceInput,
+    max_retail_price: possiblyEmptyPriceInput,
     damaged: z.boolean(),
     new_: z.boolean(),
     open_box: z.boolean(),
