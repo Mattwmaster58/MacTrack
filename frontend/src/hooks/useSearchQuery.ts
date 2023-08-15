@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { ApiEndpoints } from '../common/apiEndpoints'
-import { ItemFilterOutputValues } from "../components/forms/itemFilterForm/types/itemFilter";
+import { ItemFilterOutputValues } from "../components/forms/itemFilterForm/itemFilterSchema";
 import { AuctionLot } from "../types/AuctionLot";
 
 const useSearchQuery = (itemsFilterValues: ItemFilterOutputValues) => {

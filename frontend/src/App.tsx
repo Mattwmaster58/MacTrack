@@ -22,8 +22,8 @@ function App() {
         <Route path="advanced-search" element={<div />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="filters">
-            <Route path="/new"/>
-            <Route path="/{filter_id:int}/edit"/> 
+            <Route path="new"/>
+            <Route path="{filter_id:int}/edit"/> 
         </Route>
       </Route>
     </Routes>
