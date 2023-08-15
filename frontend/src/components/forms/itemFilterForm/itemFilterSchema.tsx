@@ -1,4 +1,4 @@
-import { z } from "zod"; // should match the type definitions in @api/routes/data/filter.py
+import { z } from "zod";
 // should match the type definitions in @api/routes/data/filter.py
 // currently maintained by hand :/
 
