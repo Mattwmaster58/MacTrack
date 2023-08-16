@@ -25,6 +25,7 @@ class User(Base):
     username: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String, nullable=False)
     approved: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
 
 class Filter(Base):
