@@ -71,7 +71,7 @@ async def signup(tx: AsyncDbSession, request: Request, data: UserRegisterPayload
 
 
 @get("/current-user")
-async def get_user(request: Request[User, dict[Literal["user_id"], str], Any]) -> UserResponse:
+async def current_user(request: Request[User, dict[Literal["user_id"], str], Any]) -> UserResponse:
     return UserResponse(success=True, username=request.user.username, admin=request.user.admin)
 
 

@@ -1,25 +1,20 @@
 import itertools
-import logging
-from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import AsyncGenerator
 
 from litestar import Litestar, Router
 from litestar.config.compression import CompressionConfig
 from litestar.config.cors import CORSConfig
-from litestar.contrib.sqlalchemy.plugins import SQLAlchemySerializationPlugin, SQLAlchemyPlugin, SQLAlchemyAsyncConfig
+from litestar.contrib.sqlalchemy.plugins import SQLAlchemyPlugin, SQLAlchemyAsyncConfig
 from litestar.datastructures import State
 from litestar.exceptions import ClientException
 from litestar.status_codes import HTTP_409_CONFLICT
-from litestar.types import Logger
-from sqlalchemy import ext
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from litestar.logging import LoggingConfig
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from litestar.contrib.sqlalchemy.plugins.init.config.sync import autocommit_before_send_handler
 
 from data import Base, create_fts_table_and_triggers, AuctionLot
-from routes.auth.session import signup, login, create_session_auth
+from routes.auth import signup, login, create_session_auth, current_user
 from routes.data.search import search
 
 session_maker = async_sessionmaker(expire_on_commit=False)
@@ -69,10 +64,12 @@ cors_config = CORSConfig(allow_origins=["http://localhost:3000"])
 #     }
 # )
 API_ROOT = "/api"
-auth_excluded_routes = [API_ROOT + p for p in itertools.chain(search.paths, signup.paths, login.paths)]
+auth_excluded_routes = [search, login, signup]
+auth_excluded_paths = [API_ROOT + p for p in itertools.chain(x.paths for x in auth_excluded_routes)]
 session_auth = create_session_auth(auth_excluded_routes)
+api_routes = [*auth_excluded_paths, current_user]
+api_router = Router(path=API_ROOT, route_handlers=api_routes)
 
-api_router = Router(path=API_ROOT, route_handlers=[search, login, signup])
 app = Litestar(
     route_handlers=[api_router],
     dependencies={"tx": provide_transaction},
