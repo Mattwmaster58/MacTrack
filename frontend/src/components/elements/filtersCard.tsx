@@ -4,6 +4,7 @@ import { Card, Typography } from "@mui/material";
 interface Props {
   meta: FilterMeta;
 }
+
 const FilterCard = ({ meta }: Props) => {
   return (
     <Card>

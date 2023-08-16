@@ -1,13 +1,14 @@
 import { useFiltersQuery } from "../hooks/useFiltersQuery";
-import { Stack, width } from "@mui/system";
+import { Stack } from "@mui/system";
 import { FilterCard } from "../components/elements/filtersCard";
 import { CircularProgress } from "@mui/material";
+import { FilterMeta } from "../types/filterMetaSchema";
 
 const Filters = () => {
   const { data, isLoading, isError } = useFiltersQuery();
 
   const filterCards = (data ?? []).map((meta, idx) => (
-    <FilterCard key={idx} meta={meta} />
+    <FilterCard key={idx} meta={meta as unknown as FilterMeta} />
   ));
 
   return (

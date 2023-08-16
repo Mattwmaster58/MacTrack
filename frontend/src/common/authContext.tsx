@@ -1,7 +1,8 @@
-import React, { createContext, useState } from "react";
+import React, { useState } from "react";
 
 interface Auth {
-  user: string | null;
+  username: string | null;
+  admin: boolean;
 }
 
 interface IAuthContext {
@@ -10,7 +11,7 @@ interface IAuthContext {
 }
 
 export const AuthContext = React.createContext<IAuthContext>({
-  auth: { user: null },
+  auth: { username: null, admin: false },
   setAuth: (auth: Auth) => {},
 });
 
@@ -19,7 +20,7 @@ export const AuthContextProvider = (props: any) => {
     setAuthState({ ...authState, auth: auth });
   };
   const initState = {
-    auth: { user: null },
+    auth: { username: null, admin: false },
     setAuth,
   };
   const [authState, setAuthState] = useState<IAuthContext>(initState);

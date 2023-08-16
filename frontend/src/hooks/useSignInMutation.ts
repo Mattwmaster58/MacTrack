@@ -3,10 +3,11 @@ import axios from "axios";
 import { ApiEndpoints } from "../common/apiEndpoints";
 import { SignInValues } from "../components/forms/signInForm";
 
-export type RegisterResponse =
+export type UserResponse =
   | {
       success: true;
       username: string;
+      admin: boolean;
       message?: string;
     }
   | {
@@ -16,7 +17,7 @@ export type RegisterResponse =
 
 // todo: type this correctly
 const useSignInMutation = () => {
-  return useMutation<RegisterResponse, any, any, any>([ApiEndpoints.register], {
+  return useMutation<UserResponse, any, any, any>([ApiEndpoints.register], {
     mutationFn: async (signInValues: SignInValues) => {
       const { data } = await axios.post(ApiEndpoints.signIn, signInValues);
       return data;

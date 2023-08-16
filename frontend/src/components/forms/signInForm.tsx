@@ -12,7 +12,7 @@ import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useSignInMutation } from "../../hooks/useSignInMutation";
-import { AuthContext } from "../../common/usernameContext";
+import { AuthContext } from "../../common/authContext";
 
 const signInSchema = z.object({
   username: z.string().nonempty("Must be specified"),
@@ -22,6 +22,7 @@ const signInSchema = z.object({
 export type SignInValues = z.infer<typeof signInSchema>;
 const SignInForm = () => {
   const { auth, setAuth } = useContext(AuthContext);
+  // todo: if already authed, do something different?
   const methods = useForm<SignInValues>({
     mode: "all",
     defaultValues: {
@@ -41,7 +42,7 @@ const SignInForm = () => {
     try {
       const resp = await mutateAsync(vals);
       if (resp.success) {
-        setAuth({ user: resp.username });
+        setAuth({ username: resp.username, admin: resp.admin });
         navigate("/dashboard");
       } else {
         enqueueSnackbar(`Failed to sign in ${resp.message}`, {

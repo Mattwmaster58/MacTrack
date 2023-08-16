@@ -2,13 +2,13 @@ import { AccountCircle, Login } from "@mui/icons-material";
 import { IconButton, TextField } from "@mui/material";
 import { Stack } from "@mui/system";
 import React, { useContext } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { AuthContext } from "../../common/usernameContext";
+import { Outlet, useNavigate } from "react-router-dom";
+import { AuthContext } from "../../common/authContext";
 
 const TopBar = () => {
   const navigate = useNavigate();
   const {
-    auth: { user },
+    auth: { username },
   } = useContext(AuthContext);
   const notSignedIn = (
     <IconButton onClick={() => navigate("/sign-in")}>
@@ -17,7 +17,7 @@ const TopBar = () => {
   );
   const alreadySignedIn = (
     <IconButton onClick={() => navigate("/sign-out")}>
-      <AccountCircle /> {user}
+      <AccountCircle /> {username}
     </IconButton>
   );
   return (
@@ -33,7 +33,7 @@ const TopBar = () => {
         }}
       >
         <TextField label={"search"} />
-        {user ? alreadySignedIn : notSignedIn}
+        {username ? alreadySignedIn : notSignedIn}
       </Stack>
       <Outlet />
     </Stack>

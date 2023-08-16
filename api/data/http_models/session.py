@@ -30,3 +30,4 @@ class UserRegisterPayload(UserAuthPayload):
 
 class UserResponse(BaseResponse):
     username: str | None = None
+    admin: bool | None = None

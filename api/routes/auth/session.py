@@ -1,4 +1,3 @@
-import asyncio
 from typing import Any, Literal
 
 import bcrypt
@@ -8,22 +7,21 @@ from litestar.middleware.session.server_side import (
     ServerSideSessionConfig,
 )
 from litestar.security.session_auth import SessionAuth
-from sqlalchemy import select, literal
+from sqlalchemy import select
 
 from data.http_models.session import UserAuthPayload, UserRegisterPayload, UserResponse
 from data.user import User
 from typings import AsyncDbSession
 
 
-# The SessionAuth class requires a handler callable
-# that takes the session dictionary, and returns the
-# 'User' instance correlating to it.
-#
-# The session dictionary itself is a value the user decides
-# upon. So for example, it might be a simple dictionary
-# that holds a user id, for example: { "id": "abcd123" }
-#
-# Note: The callable can be either sync or async - both will work.
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+
+def check_password(password: str, hashed_password: str) -> bool:
+    return bcrypt.checkpw(password.encode("utf-8"), hashed_password.encode("utf-8"))
+
+
 async def retrieve_user_handler(tx: AsyncDbSession, session: dict[str, Any]) -> User | None:
     if user_claimed_id := session.get("user_id"):
         return (await tx.execute(select(User).where(User.id == user_claimed_id))).one_or_none()
@@ -72,20 +70,9 @@ async def signup(tx: AsyncDbSession, request: Request, data: UserRegisterPayload
     return Response(UserResponse(success=True), status_code=201)
 
 
-def hash_password(password: str) -> str:
-    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-
-
-def check_password(password: str, hashed_password: str) -> bool:
-    return bcrypt.checkpw(password.encode("utf-8"), hashed_password.encode("utf-8"))
-
-
 @get("/current-user")
-async def get_user(request: Request[User, dict[Literal["user_id"], str], Any]) -> User:
-    # because this route requires authentication, we can access
-    # `request.user`, which is the authenticated user returned
-    # by the 'retrieve_user_handler' function we passed to SessionAuth.
-    return request.user
+async def get_user(request: Request[User, dict[Literal["user_id"], str], Any]) -> UserResponse:
+    return UserResponse(success=True, username=request.user.username, admin=request.user.admin)
 
 
 def create_session_auth(exclude_paths=list[str]):
