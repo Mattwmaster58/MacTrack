@@ -7,11 +7,12 @@ import {
 } from "@mui/material";
 import { Stack } from "@mui/system";
 import { useSnackbar } from "notistack";
-import React from "react";
+import React, { useContext } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useSignInMutation } from "../../hooks/useSignInMutation";
+import { AuthContext } from "../../common/usernameContext";
 
 const signInSchema = z.object({
   username: z.string().nonempty("Must be specified"),
@@ -20,6 +21,7 @@ const signInSchema = z.object({
 
 export type SignInValues = z.infer<typeof signInSchema>;
 const SignInForm = () => {
+  const { auth, setAuth } = useContext(AuthContext);
   const methods = useForm<SignInValues>({
     mode: "all",
     defaultValues: {
@@ -37,8 +39,15 @@ const SignInForm = () => {
   const { enqueueSnackbar } = useSnackbar();
   const onSubmit = async (vals: SignInValues) => {
     try {
-      await mutateAsync(vals);
-      navigate("/dashboard");
+      const resp = await mutateAsync(vals);
+      if (resp.success) {
+        setAuth({ user: resp.username });
+        navigate("/dashboard");
+      } else {
+        enqueueSnackbar(`Failed to sign in ${resp.message}`, {
+          variant: "error",
+        });
+      }
     } catch (e) {}
   };
   const errorText = error?.response?.data.message ?? error?.message;

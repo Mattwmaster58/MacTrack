@@ -3,10 +3,16 @@ import axios from "axios";
 import { ApiEndpoints } from "../common/apiEndpoints";
 import { SignInValues } from "../components/forms/signInForm";
 
-export interface RegisterResponse {
-  success: boolean;
-  message?: string;
-}
+export type RegisterResponse =
+  | {
+      success: true;
+      username: string;
+      message?: string;
+    }
+  | {
+      success: false;
+      message: string;
+    };
 
 // todo: type this correctly
 const useSignInMutation = () => {

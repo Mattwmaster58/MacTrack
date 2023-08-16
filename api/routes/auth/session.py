@@ -40,7 +40,7 @@ async def login(request: Request, tx: AsyncDbSession, data: UserAuthPayload) -> 
     elif not user.approved:
         resp = Response(UserResponse(success=False, message="Account is pending admin approval"), status_code=402)
     else:
-        resp = Response(UserResponse(success=True), status_code=200)
+        resp = Response(UserResponse(success=True, username=user.username), status_code=200)
         request.set_session({"user_id": user.id})
 
     return resp

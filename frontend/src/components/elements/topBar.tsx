@@ -1,12 +1,25 @@
-import { Login } from "@mui/icons-material";
+import { AccountCircle, Login } from "@mui/icons-material";
 import { IconButton, TextField } from "@mui/material";
 import { Stack } from "@mui/system";
-import React from "react";
+import React, { useContext } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { AuthContext } from "../../common/usernameContext";
 
 const TopBar = () => {
   const navigate = useNavigate();
-  const location = useLocation();
+  const {
+    auth: { user },
+  } = useContext(AuthContext);
+  const notSignedIn = (
+    <IconButton onClick={() => navigate("/sign-in")}>
+      <Login /> Sign in
+    </IconButton>
+  );
+  const alreadySignedIn = (
+    <IconButton onClick={() => navigate("/sign-out")}>
+      <AccountCircle /> {user}
+    </IconButton>
+  );
   return (
     <Stack direction="column" width="100%">
       <Stack
@@ -20,9 +33,7 @@ const TopBar = () => {
         }}
       >
         <TextField label={"search"} />
-        <IconButton onClick={() => navigate("/sign-in")}>
-          <Login /> Sign in
-        </IconButton>
+        {user ? alreadySignedIn : notSignedIn}
       </Stack>
       <Outlet />
     </Stack>

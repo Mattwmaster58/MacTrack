@@ -6,7 +6,7 @@ import { CircularProgress } from "@mui/material";
 const Filters = () => {
   const { data, isLoading, isError } = useFiltersQuery();
 
-  const filterCards = data.map((meta, idx) => (
+  const filterCards = (data ?? []).map((meta, idx) => (
     <FilterCard key={idx} meta={meta} />
   ));
 
@@ -16,3 +16,5 @@ const Filters = () => {
     </Stack>
   );
 };
+
+export { Filters };
