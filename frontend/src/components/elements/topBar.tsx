@@ -1,8 +1,13 @@
-import { AccountCircle, Login } from "@mui/icons-material";
-import { IconButton, TextField } from "@mui/material";
-import { Stack } from "@mui/system";
+import { AccountCircle, Login, Search } from "@mui/icons-material";
+import {
+  IconButton,
+  InputAdornment,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { Box, Stack } from "@mui/system";
 import React, { useContext } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../common/authContext";
 
 const TopBar = () => {
@@ -12,7 +17,7 @@ const TopBar = () => {
   } = useContext(AuthContext);
   const notSignedIn = (
     <IconButton onClick={() => navigate("/sign-in")}>
-      <Login /> Sign in
+      <Login /> {"Sign in"}
     </IconButton>
   );
   const alreadySignedIn = (
@@ -21,18 +26,31 @@ const TopBar = () => {
     </IconButton>
   );
   return (
-    <Stack direction="column" width="100%">
+    <Stack direction={"column"} width={"100%"}>
       <Stack
         alignItems={"center"}
-        justifyContent={"center"}
+        justifyContent={""}
         spacing={2}
-        direction="row"
+        direction={"row"}
         sx={{
           height: "5rem",
           width: "100%",
         }}
       >
-        <TextField label={"search"} />
+        <Typography variant={"h4"}>{"MacTrack"}</Typography>
+        <Link to={"/filters"} style={{ textDecoration: "none" }}>
+          <Typography variant={"subtitle1"}>{"filters"}</Typography>
+        </Link>
+        <Box className={"spacer"} sx={{ flexGrow: 1 }} />
+        <TextField
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position={"start"}>
+                <Search />
+              </InputAdornment>
+            ),
+          }}
+        />
         {username ? alreadySignedIn : notSignedIn}
       </Stack>
       <Outlet />
