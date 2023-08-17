@@ -45,7 +45,10 @@
     ],
     "plugins": [
       "unused-imports"
-    ]
+    ],
+    "rules": {
+      "react/jsx-curly-brace-presence": [1, { "props": "always", "children": "always", "propElementValues": "always" }]
+    }
   },
   "browserslist": {
     "production": [
