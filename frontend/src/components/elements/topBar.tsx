@@ -35,6 +35,8 @@ const TopBar = () => {
         sx={{
           height: "5rem",
           width: "100%",
+          padding: 1,
+          boxShadow: "0 1px 0 #FFF",
         }}
       >
         <Typography variant={"h4"}>{"MacTrack"}</Typography>
