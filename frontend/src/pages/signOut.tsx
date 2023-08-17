@@ -8,7 +8,7 @@ const SignOut = () => {
   const navigate = useNavigate();
   setAuth({ username: null, admin: false });
   navigate("/dashboard");
-  return <CircularProgress></CircularProgress>;
+  return <></>;
 };
 
 export { SignOut };
