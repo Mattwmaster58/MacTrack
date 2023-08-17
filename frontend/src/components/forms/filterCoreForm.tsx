@@ -69,7 +69,7 @@ const processInitialValues = (initialValues?: FilterCoreOutputValues) => {
   return mergedInitialValues;
 };
 
-const ItemFilterCoreForm = ({ onSubmit, initialValues }: Props) => {
+const FilterCoreForm = ({ onSubmit, initialValues }: Props) => {
   const methods = useForm<FilterCoreInputValues, any, FilterCoreOutputValues>({
     mode: "all",
     defaultValues: processInitialValues(initialValues),
@@ -105,26 +105,26 @@ const ItemFilterCoreForm = ({ onSubmit, initialValues }: Props) => {
     <FormControl>
       <form onSubmit={handleSubmit(onSubmit)}>
         <FormProvider {...methods}>
-          <Stack flexDirection="column" spacing={2}>
-            <Stack flexDirection="column" spacing={2}>
-              <Stack flexDirection="row" alignItems="center" spacing={2}>
+          <Stack flexDirection={"column"} spacing={2}>
+            <Stack flexDirection={"column"} spacing={2}>
+              <Stack flexDirection={"row"} alignItems={"center"} spacing={2}>
                 <Typography alignItems={"center"}>
-                  Include items where
+                  {"Include items where"}
                 </Typography>
                 <Controller
                   control={control}
-                  name="fts_query.boolean_function"
+                  name={"fts_query.boolean_function"}
                   render={({ field }) => (
                     <Select {...field}>
-                      <MenuItem value={FilterMatchType.ANY}>Any</MenuItem>
-                      <MenuItem value={FilterMatchType.ALL}>All</MenuItem>
+                      <MenuItem value={FilterMatchType.ANY}>{"Any"}</MenuItem>
+                      <MenuItem value={FilterMatchType.ALL}>{"All"}</MenuItem>
                     </Select>
                   )}
                 />
-                of the following terms match
+                {"of the following terms match"}
               </Stack>
               <Controller
-                name="fts_query.includes"
+                name={"fts_query.includes"}
                 control={control}
                 render={({ field: { onChange, value } }) => (
                   <TagInput
@@ -135,12 +135,12 @@ const ItemFilterCoreForm = ({ onSubmit, initialValues }: Props) => {
                 )}
               />
             </Stack>
-            <Stack flexDirection="row" alignItems="center" spacing={2}>
+            <Stack flexDirection={"row"} alignItems={"center"} spacing={2}>
               <Typography alignItems={"center"}>
-                and exclude those that contain any of the following
+                {"and exclude those that contain any of the following"}
               </Typography>
               <Controller
-                name="fts_query.excludes"
+                name={"fts_query.excludes"}
                 control={control}
                 render={({ field: { onChange, value } }) => (
                   <TagInput
@@ -152,25 +152,25 @@ const ItemFilterCoreForm = ({ onSubmit, initialValues }: Props) => {
               />
             </Stack>
             <Controller
-              name="fts_query.columns"
+              name={"fts_query.columns"}
               control={control}
               render={({ field }) => (
                 <FormControlLabel
                   control={
                     <Switch {...field} onChange={toggleDescriptionColumn} />
                   }
-                  label="Include description in search"
+                  label={"Include description in search"}
                 />
               )}
             />
-            <Typography>Retail price</Typography>
-            <Stack flexDirection="row" spacing={2}>
+            <Typography>{"Retail price"}</Typography>
+            <Stack flexDirection={"row"} spacing={2}>
               <Controller
-                name="min_retail_price"
+                name={"min_retail_price"}
                 control={control}
                 render={({ field }) => (
                   <TextField
-                    label="Minimum"
+                    label={"Minimum"}
                     error={!!errors.min_retail_price?.message}
                     helperText={errors.min_retail_price?.message ?? "\u00a0"}
                     inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
@@ -179,11 +179,11 @@ const ItemFilterCoreForm = ({ onSubmit, initialValues }: Props) => {
                 )}
               />
               <Controller
-                name="max_retail_price"
+                name={"max_retail_price"}
                 control={control}
                 render={({ field }) => (
                   <TextField
-                    label="Maximum"
+                    label={"Maximum"}
                     error={!!errors.max_retail_price?.message}
                     helperText={errors.max_retail_price?.message ?? "\u00a0"}
                     inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
@@ -194,7 +194,7 @@ const ItemFilterCoreForm = ({ onSubmit, initialValues }: Props) => {
             </Stack>
             <FormGroup row>
               <Controller
-                name="open_box"
+                name={"open_box"}
                 control={control}
                 render={({ field }) => (
                   <FormControlLabel
@@ -204,12 +204,12 @@ const ItemFilterCoreForm = ({ onSubmit, initialValues }: Props) => {
                         onChange={(ev) => field.onChange(ev.target.checked)}
                       />
                     }
-                    label="Open Box"
+                    label={"Open Box"}
                   />
                 )}
               />
               <Controller
-                name="damaged"
+                name={"damaged"}
                 control={control}
                 render={({ field }) => (
                   <FormControlLabel
@@ -219,12 +219,12 @@ const ItemFilterCoreForm = ({ onSubmit, initialValues }: Props) => {
                         onChange={(ev) => field.onChange(ev.target.checked)}
                       />
                     }
-                    label="Damaged"
+                    label={"Damaged"}
                   />
                 )}
               />
               <Controller
-                name="new_"
+                name={"new_"}
                 control={control}
                 render={({ field }) => (
                   <FormControlLabel
@@ -234,7 +234,7 @@ const ItemFilterCoreForm = ({ onSubmit, initialValues }: Props) => {
                         onChange={(ev) => field.onChange(ev.target.checked)}
                       />
                     }
-                    label="New"
+                    label={"New"}
                   />
                 )}
               />
@@ -244,10 +244,10 @@ const ItemFilterCoreForm = ({ onSubmit, initialValues }: Props) => {
             </FormHelperText>
           </Stack>
         </FormProvider>
-        <Button type="submit">Submit</Button>
+        <Button type={"submit"}>{"Submit"}</Button>
       </form>
     </FormControl>
   );
 };
 
-export { ItemFilterCoreForm };
+export { FilterCoreForm };

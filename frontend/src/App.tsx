@@ -15,29 +15,33 @@ import { QueryClientProvider } from "./common/queryClient";
 import { CurrentUser } from "./pages/currentUser";
 import AuthenticateRoute from "./common/authenticatedRoute";
 import { SignOut } from "./pages/signOut";
+import { Filters } from "./pages/filters/filters";
+import { NewFilter } from "./pages/filters/new";
 
 // see: https://stackoverflow.com/a/71273212/3427299
 function App() {
   const routes = (
     <Routes>
-      <Route path="/current-user" element={<CurrentUser />} />
-      <Route path="/sign-in" element={<SignIn />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/sign-out" element={<SignOut />} />
+      <Route path={"/current-user"} element={<CurrentUser />} />
+      <Route path={"/sign-in"} element={<SignIn />} />
+      <Route path={"/register"} element={<Register />} />
+      <Route path={"/sign-out"} element={<SignOut />} />
       <Route
-        path="/"
+        path={"/"}
         element={<TopBar />}
         errorElement={<UnauthorizedCatcher />}
       >
-        <Route path="advanced-search" element={<div />} />
-        <Route path="dashboard" element={<Dashboard />} />
+        <Route path={"advanced-search"} element={<div />} />
+        <Route path={"dashboard"} element={<Dashboard />} />
         <Route
-          path="filters"
-          element={<AuthenticateRoute children={<Dashboard />} />}
-        >
-          <Route path="new" />
-          <Route path="{filter_id:int}/edit" />
-        </Route>
+          path={"filters"}
+          element={<AuthenticateRoute children={<Filters />} />}
+        />
+        <Route
+          path={"filters/new"}
+          element={<AuthenticateRoute children={<NewFilter />} />}
+        />
+        <Route path={"{filter_id:int}/edit"} />
       </Route>
     </Routes>
   );
