@@ -14,6 +14,7 @@ import { AuthContextProvider } from "./common/authContext";
 import { QueryClientProvider } from "./common/queryClient";
 import { CurrentUser } from "./pages/currentUser";
 import AuthenticateRoute from "./common/authenticatedRoute";
+import { SignOut } from "./pages/signOut";
 
 // see: https://stackoverflow.com/a/71273212/3427299
 function App() {
@@ -22,6 +23,7 @@ function App() {
       <Route path="/current-user" element={<CurrentUser />} />
       <Route path="/sign-in" element={<SignIn />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/sign-out" element={<SignOut />} />
       <Route
         path="/"
         element={<TopBar />}

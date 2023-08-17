@@ -11,6 +11,7 @@ axios.defaults.baseURL = "http://localhost:8000";
 // array format is chosen because this is what litestar uses
 axios.defaults.paramsSerializer = (params) =>
   qs.stringify(params, { arrayFormat: "repeat" });
+axios.defaults.withCredentials = true;
 
 type Props = {
   children: React.ReactNode;

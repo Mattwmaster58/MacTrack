@@ -1,6 +1,6 @@
-import { CircularProgress, Fade } from "@mui/material";
+import { CircularProgress, Fade, Grid, Typography, Zoom } from "@mui/material";
 import { Stack } from "@mui/system";
-import { useContext } from "react";
+import { ReactElement, useContext, useState } from "react";
 import { AuthContext } from "../common/authContext";
 import { useNavigate } from "react-router-dom";
 import { useCurrentUserQuery } from "../hooks/useCurrentUserQuery";
@@ -12,8 +12,9 @@ const CurrentUser = () => {
   } = useContext(AuthContext);
   const { data, isLoading, isError, refetch } = useCurrentUserQuery();
   const navigate = useNavigate();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   // @ts-ignore
+  // eslint-disable-next-line no-restricted-globals
   const returnUrl: string = (location?.state as any)?.referrer ?? "/";
 
   // username is set below, this *should* fetch username whenever we get it
@@ -31,7 +32,14 @@ const CurrentUser = () => {
 
   return (
     <Fade in unmountOnExit>
-      <Stack direction="column" alignContent="center" justifyContent="center">
+      <Stack
+        spacing={1}
+        alignItems={"center"}
+        justifyContent={"center"}
+        sx={{
+          minHeight: "100vh",
+        }}
+      >
         <CircularProgress size={250} />
       </Stack>
     </Fade>

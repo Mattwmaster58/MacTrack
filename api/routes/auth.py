@@ -2,6 +2,7 @@ from typing import Any, Literal
 
 import bcrypt
 from litestar import Request, get, post, Response
+from litestar.connection import ASGIConnection
 from litestar.middleware.session.server_side import (
     ServerSideSessionBackend,
     ServerSideSessionConfig,
@@ -11,6 +12,7 @@ from sqlalchemy import select
 
 from data.http_models.session import UserAuthPayload, UserRegisterPayload, UserResponse
 from data.user import User
+from dependancies.transaction import provide_transaction
 from typings import AsyncDbSession
 
 
@@ -22,7 +24,7 @@ def check_password(password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(password.encode("utf-8"), hashed_password.encode("utf-8"))
 
 
-async def retrieve_user_handler(tx: AsyncDbSession, session: dict[str, Any]) -> User | None:
+async def retrieve_user_handler(session: dict[str, Any], connection: ASGIConnection, tx: AsyncDbSession) -> User | None:
     if user_claimed_id := session.get("user_id"):
         return (await tx.execute(select(User).where(User.id == user_claimed_id))).one_or_none()
     return None
@@ -58,20 +60,23 @@ async def signup(tx: AsyncDbSession, request: Request, data: UserRegisterPayload
             status_code=400,
         )
 
-    no_users_in_the_table = not any_user
-
+    will_be_the_first_user = not any_user
     new_user = User(
-        username=data.username, email=data.email, password=hash_password(data.password), approved=no_users_in_the_table
+        username=data.username,
+        email=data.email,
+        password=hash_password(data.password),
+        approved=will_be_the_first_user,
+        admin=will_be_the_first_user,
     )
     # todo: validate password?
     tx.add(new_user)
     request.set_session({"user_id": new_user.id})
 
-    return Response(UserResponse(success=True), status_code=201)
+    return Response(UserResponse(success=True, admin=will_be_the_first_user), status_code=201)
 
 
 @get("/current-user")
-async def current_user(request: Request[User, dict[Literal["user_id"], str], Any]) -> UserResponse:
+async def current_user(request: Request[User, dict[Literal["user_id"], int], Any]) -> UserResponse:
     return UserResponse(success=True, username=request.user.username, admin=request.user.admin)
 
 
@@ -80,4 +85,5 @@ def create_session_auth(exclude_paths=list[str]):
         retrieve_user_handler=retrieve_user_handler,
         session_backend_config=ServerSideSessionConfig(),
         exclude=exclude_paths,
+        dependencies={"tx": provide_transaction}
     )
