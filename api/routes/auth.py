@@ -24,9 +24,10 @@ def check_password(password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(password.encode("utf-8"), hashed_password.encode("utf-8"))
 
 
-async def retrieve_user_handler(session: dict[str, Any], connection: ASGIConnection, tx: AsyncDbSession) -> User | None:
+async def retrieve_user_handler(session: dict[str, Any], connection: ASGIConnection) -> User | None:
     if user_claimed_id := session.get("user_id"):
-        return (await tx.execute(select(User).where(User.id == user_claimed_id))).one_or_none()
+        async for tx in provide_transaction(connection.app.state):
+            return (await tx.execute(select(User).where(User.id == user_claimed_id))).scalar_one_or_none()
     return None
 
 
@@ -53,6 +54,7 @@ async def signup(tx: AsyncDbSession, request: Request, data: UserRegisterPayload
         await tx.execute(select(User.email).where((User.username == data.username) | (User.email == data.email)))
     ).scalar_one_or_none()
 
+    # todo: validate password?
     if existing_user_email is not None:
         duplicate_field = "email" if existing_user_email == data.email else "username"
         return Response(
@@ -68,9 +70,7 @@ async def signup(tx: AsyncDbSession, request: Request, data: UserRegisterPayload
         approved=will_be_the_first_user,
         admin=will_be_the_first_user,
     )
-    # todo: validate password?
     tx.add(new_user)
-    request.set_session({"user_id": new_user.id})
 
     return Response(UserResponse(success=True, admin=will_be_the_first_user), status_code=201)
 
@@ -85,5 +85,4 @@ def create_session_auth(exclude_paths=list[str]):
         retrieve_user_handler=retrieve_user_handler,
         session_backend_config=ServerSideSessionConfig(),
         exclude=exclude_paths,
-        dependencies={"tx": provide_transaction}
     )
