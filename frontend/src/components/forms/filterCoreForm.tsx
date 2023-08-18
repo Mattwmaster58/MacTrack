@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Button,
-  FormControl,
   FormControlLabel,
   FormGroup,
   FormHelperText,
@@ -14,7 +13,13 @@ import {
 import { Stack } from "@mui/system";
 import { deepmerge } from "deepmerge-ts";
 import React from "react";
-import { Controller, FormProvider, useForm } from "react-hook-form";
+import {
+  Controller,
+  FormProvider,
+  useForm,
+  useFormContext,
+  UseFormProps,
+} from "react-hook-form";
 import { FilterMatchType } from "../../types/FilterMatchType";
 import { TagInput } from "../elements/tagInput";
 import {
@@ -30,7 +35,7 @@ const DEFAULT_ITEM_FILTER_VALUES = {
     includes: [],
     excludes: [],
   },
-  min_retail_price: 10,
+  min_retail_price: -1,
   max_retail_price: -1,
   new_: true,
   open_box: true,
@@ -47,9 +52,18 @@ interface initialTransform<T> {
   initialTransform: (val: T) => T;
 }
 
-const processInitialValues = (initialValues?: FilterCoreOutputValues) => {
+interface FilterCoreFormAndSubmitHandler {
+  elem: FilterCoreForm;
+  handleSubmit: typeof useForm.handleSubmit;
+}
+
+const processInitialValues = (initialValues?: Props["initialValues"]) => {
   // this complexity arises from having to rectify 3 slightly different types:
-  // database (pydantic), input form type, and output form type
+  //  - database (pydantic)
+  //  - (user) input form type
+  //  - output form type
+  // output form type is saved in the database, and that database is fed back in as input
+  // what this means is that the input form type must be a "subset type" of the output
   const minusOneToEmptyString = (val: string | number) =>
     val === -1 ? "" : val;
   const initialValueTransform: initialTransform<any>[] = [
@@ -69,8 +83,10 @@ const processInitialValues = (initialValues?: FilterCoreOutputValues) => {
   return mergedInitialValues;
 };
 
-const FilterCoreForm = ({ onSubmit, initialValues }: Props) => {
-  const methods = useForm<FilterCoreInputValues, any, FilterCoreOutputValues>({
+const getFilterCoreAndHandleSubmit = () => {};
+
+const getFilterCoreProps = (initialValues?: Props["initialValues"]) => {
+  let useFormProps: UseFormProps = {
     mode: "all",
     defaultValues: processInitialValues(initialValues),
     resolver: async (data, context, options) => {
@@ -83,7 +99,18 @@ const FilterCoreForm = ({ onSubmit, initialValues }: Props) => {
       console.log("formData:", data, "formValidation:", validationResult);
       return new Promise((res) => res(validationResult));
     },
-  });
+  } as const;
+  return useFormProps;
+};
+
+const ProviderLackingFilterCoreForm = ({
+  onSubmit,
+}: Pick<Props, "onSubmit">) => {
+  const methods = useFormContext<
+    FilterCoreInputValues,
+    any,
+    FilterCoreOutputValues
+  >();
   const {
     setValue,
     control,
@@ -101,152 +128,157 @@ const FilterCoreForm = ({ onSubmit, initialValues }: Props) => {
     );
   };
 
-  return (
-    <FormControl>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <FormProvider {...methods}>
-          <Stack flexDirection={"column"} spacing={2}>
-            <Stack flexDirection={"column"} spacing={2}>
-              <Stack flexDirection={"row"} alignItems={"center"} spacing={2}>
-                <Typography alignItems={"center"}>
-                  {"Include items where"}
-                </Typography>
-                <Controller
-                  control={control}
-                  name={"fts_query.boolean_function"}
-                  render={({ field }) => (
-                    <Select {...field}>
-                      <MenuItem value={FilterMatchType.ANY}>{"Any"}</MenuItem>
-                      <MenuItem value={FilterMatchType.ALL}>{"All"}</MenuItem>
-                    </Select>
-                  )}
-                />
-                {"of the following terms match"}
-              </Stack>
-              <Controller
-                name={"fts_query.includes"}
-                control={control}
-                render={({ field: { onChange, value } }) => (
-                  <TagInput
-                    onTagsChange={onChange}
-                    value={value}
-                    externalErrorMessage={errors.fts_query?.includes?.message}
-                  />
-                )}
-              />
-            </Stack>
-            <Stack flexDirection={"row"} alignItems={"center"} spacing={2}>
-              <Typography alignItems={"center"}>
-                {"and exclude those that contain any of the following"}
-              </Typography>
-              <Controller
-                name={"fts_query.excludes"}
-                control={control}
-                render={({ field: { onChange, value } }) => (
-                  <TagInput
-                    onTagsChange={onChange}
-                    value={value}
-                    externalErrorMessage={errors.fts_query?.excludes?.message}
-                  />
-                )}
-              />
-            </Stack>
+  let formProvider = (
+    <FormProvider {...methods}>
+      <Stack flexDirection={"column"} spacing={2}>
+        <Stack flexDirection={"column"} spacing={2}>
+          <Stack flexDirection={"row"} alignItems={"center"} spacing={2}>
+            <Typography alignItems={"center"}>
+              {"Include items where"}
+            </Typography>
             <Controller
-              name={"fts_query.columns"}
               control={control}
+              name={"fts_query.boolean_function"}
               render={({ field }) => (
-                <FormControlLabel
-                  control={
-                    <Switch {...field} onChange={toggleDescriptionColumn} />
-                  }
-                  label={"Include description in search"}
-                />
+                <Select {...field}>
+                  <MenuItem value={FilterMatchType.ANY}>{"Any"}</MenuItem>
+                  <MenuItem value={FilterMatchType.ALL}>{"All"}</MenuItem>
+                </Select>
               )}
             />
-            <Typography>{"Retail price"}</Typography>
-            <Stack flexDirection={"row"} spacing={2}>
-              <Controller
-                name={"min_retail_price"}
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    label={"Minimum"}
-                    error={!!errors.min_retail_price?.message}
-                    helperText={errors.min_retail_price?.message ?? "\u00a0"}
-                    inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-                    {...field}
-                  />
-                )}
-              />
-              <Controller
-                name={"max_retail_price"}
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    label={"Maximum"}
-                    error={!!errors.max_retail_price?.message}
-                    helperText={errors.max_retail_price?.message ?? "\u00a0"}
-                    inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-                    {...field}
-                  />
-                )}
-              />
-            </Stack>
-            <FormGroup row>
-              <Controller
-                name={"open_box"}
-                control={control}
-                render={({ field }) => (
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={field.value}
-                        onChange={(ev) => field.onChange(ev.target.checked)}
-                      />
-                    }
-                    label={"Open Box"}
-                  />
-                )}
-              />
-              <Controller
-                name={"damaged"}
-                control={control}
-                render={({ field }) => (
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={field.value}
-                        onChange={(ev) => field.onChange(ev.target.checked)}
-                      />
-                    }
-                    label={"Damaged"}
-                  />
-                )}
-              />
-              <Controller
-                name={"new_"}
-                control={control}
-                render={({ field }) => (
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={field.value}
-                        onChange={(ev) => field.onChange(ev.target.checked)}
-                      />
-                    }
-                    label={"New"}
-                  />
-                )}
-              />
-            </FormGroup>
-            <FormHelperText error={!!errors.new_?.message}>
-              {errors.new_?.message}
-            </FormHelperText>
+            {"of the following terms match"}
           </Stack>
-        </FormProvider>
-        <Button type={"submit"}>{"Submit"}</Button>
-      </form>
-    </FormControl>
+          <Controller
+            name={"fts_query.includes"}
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <TagInput
+                onTagsChange={onChange}
+                value={value}
+                externalErrorMessage={errors.fts_query?.includes?.message}
+              />
+            )}
+          />
+        </Stack>
+        <Stack flexDirection={"row"} alignItems={"center"} spacing={2}>
+          <Typography alignItems={"center"}>
+            {"and exclude those that contain any of the following"}
+          </Typography>
+          <Controller
+            name={"fts_query.excludes"}
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <TagInput
+                onTagsChange={onChange}
+                value={value}
+                externalErrorMessage={errors.fts_query?.excludes?.message}
+              />
+            )}
+          />
+        </Stack>
+        <Controller
+          name={"fts_query.columns"}
+          control={control}
+          render={({ field }) => (
+            <FormControlLabel
+              control={<Switch {...field} onChange={toggleDescriptionColumn} />}
+              label={"Include description in search"}
+            />
+          )}
+        />
+        <Typography>{"Retail price"}</Typography>
+        <Stack flexDirection={"row"} spacing={2}>
+          <Controller
+            name={"min_retail_price"}
+            control={control}
+            render={({ field }) => (
+              <TextField
+                label={"Minimum"}
+                error={!!errors.min_retail_price?.message}
+                helperText={errors.min_retail_price?.message ?? "\u00a0"}
+                inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                {...field}
+              />
+            )}
+          />
+          <Controller
+            name={"max_retail_price"}
+            control={control}
+            render={({ field }) => (
+              <TextField
+                label={"Maximum"}
+                error={!!errors.max_retail_price?.message}
+                helperText={errors.max_retail_price?.message ?? "\u00a0"}
+                inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                {...field}
+              />
+            )}
+          />
+        </Stack>
+        <FormGroup row>
+          <Controller
+            name={"open_box"}
+            control={control}
+            render={({ field }) => (
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={field.value}
+                    onChange={(ev) => field.onChange(ev.target.checked)}
+                  />
+                }
+                label={"Open Box"}
+              />
+            )}
+          />
+          <Controller
+            name={"damaged"}
+            control={control}
+            render={({ field }) => (
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={field.value}
+                    onChange={(ev) => field.onChange(ev.target.checked)}
+                  />
+                }
+                label={"Damaged"}
+              />
+            )}
+          />
+          <Controller
+            name={"new_"}
+            control={control}
+            render={({ field }) => (
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={field.value}
+                    onChange={(ev) => field.onChange(ev.target.checked)}
+                  />
+                }
+                label={"New"}
+              />
+            )}
+          />
+        </FormGroup>
+        <FormHelperText error={!!errors.new_?.message}>
+          {errors.new_?.message}
+        </FormHelperText>
+      </Stack>
+    </FormProvider>
+  );
+
+  return <form onSubmit={handleSubmit(onSubmit)}>{formProvider}</form>;
+};
+
+const FilterCoreForm = ({ onSubmit, initialValues }: Props) => {
+  const methods = useForm(getFilterCoreProps(initialValues));
+
+  return (
+    <FormProvider {...methods}>
+      <ProviderLackingFilterCoreForm onSubmit={onSubmit} />
+    </FormProvider>
   );
 };
 
