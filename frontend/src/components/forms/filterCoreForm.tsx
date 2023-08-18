@@ -69,7 +69,7 @@ const processInitialValues = (initialValues?: FilterCoreOutputValues) => {
   return mergedInitialValues;
 };
 
-const FilterCoreForm = ({ onSubmit, initialValues }: Props) => {
+const useFilterCoreFormAndHandler = ({ onSubmit, initialValues }: Props) => {
   const methods = useForm<FilterCoreInputValues, any, FilterCoreOutputValues>({
     mode: "all",
     defaultValues: processInitialValues(initialValues),
@@ -101,7 +101,7 @@ const FilterCoreForm = ({ onSubmit, initialValues }: Props) => {
     );
   };
 
-  return (
+  const form = (
     <FormControl>
       <form onSubmit={handleSubmit(onSubmit)}>
         <FormProvider {...methods}>
@@ -248,6 +248,12 @@ const FilterCoreForm = ({ onSubmit, initialValues }: Props) => {
       </form>
     </FormControl>
   );
+  return { form, handleSubmit };
 };
 
-export { FilterCoreForm };
+const FilterCoreForm = ({ onSubmit, initialValues }: Props) => {
+  const { form } = useFilterCoreFormAndHandler({ onSubmit, initialValues });
+  return form;
+};
+
+export { FilterCoreForm, useFilterCoreFormAndHandler };
