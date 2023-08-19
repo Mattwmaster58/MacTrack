@@ -93,7 +93,7 @@ function getFormCoreElements(
   return (
     <Stack flexDirection={"column"} spacing={2}>
       <Stack flexDirection={"column"} spacing={2}>
-        <Stack flexDirection={"row"} alignItems={"center"} spacing={2}>
+        <Stack flexDirection={"row"} alignItems={"baseline"} spacing={1}>
           <Typography alignItems={"center"}>{"Include items where"}</Typography>
           <Controller
             control={control}
@@ -118,8 +118,6 @@ function getFormCoreElements(
             />
           )}
         />
-      </Stack>
-      <Stack flexDirection={"row"} alignItems={"center"} spacing={2}>
         <Typography alignItems={"center"}>
           {"and exclude those that contain any of the following"}
         </Typography>
@@ -141,7 +139,7 @@ function getFormCoreElements(
         render={({ field }) => (
           <FormControlLabel
             control={<Switch {...field} onChange={toggleDescriptionColumn} />}
-            label={"Include description in search"}
+            label={"Also search item description with these terms"}
           />
         )}
       />

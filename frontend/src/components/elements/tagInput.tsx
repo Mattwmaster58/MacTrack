@@ -67,14 +67,20 @@ const TagInput = ({
       onKeyDown={handleKeypress}
       onBlur={updateTagsFromInputRef}
       inputRef={tagRef}
-      variant="outlined"
-      size="medium"
+      variant={"outlined"}
+      size={"medium"}
       error={!!finalErrorMessage}
       helperText={finalErrorMessage}
-      placeholder={!tags.length ? "enter terms" : ""}
+      placeholder={!tags.length ? "Press the enter key to register a term" : ""}
       InputProps={{
         startAdornment: (
-          <Box sx={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "last baseline",
+            }}
+          >
             {tags.map((data, index) => {
               return (
                 <Tag

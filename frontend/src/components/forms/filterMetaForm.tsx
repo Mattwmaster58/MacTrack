@@ -50,7 +50,8 @@ function getFormMetaElements(
       control={control}
       render={({ field }) => (
         <TextField
-          label={"Name"}
+          sx={{ width: "100%" }}
+          label={"Filter Name"}
           error={!!errors.name?.message}
           helperText={errors.name?.message ?? "\u00a0"}
           {...field}
