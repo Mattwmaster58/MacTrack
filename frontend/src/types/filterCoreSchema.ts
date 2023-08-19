@@ -10,7 +10,9 @@ const ftsQueryRootKey = z
     fts_query: z.object({
       boolean_function: BooleanFunctionEnum,
       columns: z.array(z.string().nonempty()).nonempty(),
-      includes: z.array(z.string().nonempty()).nonempty("Enter some terms"),
+      includes: z
+        .array(z.string().nonempty())
+        .nonempty("At least one term must be specified"),
       excludes: z.array(z.string().nonempty()),
     }),
   })

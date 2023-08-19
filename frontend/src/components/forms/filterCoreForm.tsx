@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Button,
+  Checkbox,
   FormControl,
   FormControlLabel,
   FormGroup,
@@ -91,8 +92,9 @@ function getFormCoreElements(
   };
 
   return (
-    <Stack flexDirection={"column"} spacing={2}>
-      <Stack flexDirection={"column"} spacing={2}>
+    <Stack flexDirection={"column"} spacing={1}>
+      <Stack flexDirection={"column"} spacing={1}>
+        <Typography variant={"h5"}>{"Search terms"}</Typography>
         <Stack flexDirection={"row"} alignItems={"baseline"} spacing={1}>
           <Typography alignItems={"center"}>{"Include items where"}</Typography>
           <Controller
@@ -138,12 +140,12 @@ function getFormCoreElements(
         control={control}
         render={({ field }) => (
           <FormControlLabel
-            control={<Switch {...field} onChange={toggleDescriptionColumn} />}
+            control={<Checkbox {...field} onChange={toggleDescriptionColumn} />}
             label={"Also search item description with these terms"}
           />
         )}
       />
-      <Typography>{"Retail price"}</Typography>
+      <Typography variant={"h5"}>{"Retail price"}</Typography>
       <Stack flexDirection={"row"} spacing={2}>
         <Controller
           name={"min_retail_price"}
@@ -172,6 +174,7 @@ function getFormCoreElements(
           )}
         />
       </Stack>
+      <Typography variant={"h5"}>{"Item Condition"}</Typography>
       <FormGroup row>
         <Controller
           name={"open_box"}

@@ -91,7 +91,11 @@ const FilterForm = ({ initialValues, onSubmit }: Props) => {
               setValue as unknown as UseFormSetValue<FilterCoreInputValues>,
             )}
           </FormProvider>
-          <Button type={"submit"}>{"Save"}</Button>
+          <Stack direction={"row"} justifyContent={"flex-end"}>
+            <Button variant={"contained"} type={"submit"}>
+              {"Save"}
+            </Button>
+          </Stack>
         </form>
       </FormControl>
     </Stack>
