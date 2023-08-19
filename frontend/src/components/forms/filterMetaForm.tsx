@@ -32,7 +32,9 @@ import {
 import { FilterMeta } from "../../types/filterMetaSchema";
 
 const DEFAULT_FILTER_META_VALUES = {
-  name: "",
+  meta: {
+    name: "",
+  },
 };
 
 interface Props {
@@ -42,11 +44,13 @@ interface Props {
 
 function getFormMetaElements(
   control: Control<FilterMetaInputValues>,
-  errors: FieldErrors<FilterMetaInputValues>,
+  rootErrors: FieldErrors<FilterMetaInputValues>,
 ) {
+  const rootPath = "meta";
+  const errors = rootErrors[rootPath] ?? {};
   return (
     <Controller
-      name={"name"}
+      name={`${rootPath}.name`}
       control={control}
       render={({ field }) => (
         <TextField

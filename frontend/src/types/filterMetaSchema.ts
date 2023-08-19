@@ -1,10 +1,14 @@
 import { z } from "zod";
 
-const FilterMetaSchema = z.object({
+const FilterMetaSchemaBase = z.object({
   name: z
     .string()
     .nonempty("Name must be specified")
     .max(128, "Name is too long"),
+});
+
+const FilterMetaSchema = z.object({
+  meta: FilterMetaSchemaBase,
 });
 
 export type FilterMetaOutputValues = z.output<typeof FilterMetaSchema>;

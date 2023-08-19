@@ -51,10 +51,9 @@ const restOfItemFilterSchema = z
     { message: "Select at least one condition", path: ["new_"] },
   );
 
-const FilterCoreSchema = z.intersection(
-  restOfItemFilterSchema,
-  ftsQueryRootKey,
-);
+const FilterCoreSchema = z.object({
+  core: z.intersection(restOfItemFilterSchema, ftsQueryRootKey),
+});
 
 export type FilterCoreOutputValues = z.output<typeof FilterCoreSchema>;
 export type FilterCoreInputValues = z.input<typeof FilterCoreSchema>;

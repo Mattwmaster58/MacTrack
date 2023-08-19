@@ -30,19 +30,22 @@ import {
   FilterCoreOutputValues,
   FilterCoreSchema,
 } from "../../types/filterCoreSchema";
+import { FilterInputValues } from "./filterForm";
 
 const DEFAULT_FILTER_CORE_VALUES = {
-  fts_query: {
-    boolean_function: FilterMatchType.ALL,
-    columns: ["product_name", "title"],
-    includes: [],
-    excludes: [],
+  core: {
+    fts_query: {
+      boolean_function: FilterMatchType.ALL,
+      columns: ["product_name", "title"],
+      includes: [],
+      excludes: [],
+    },
+    min_retail_price: -1,
+    max_retail_price: -1,
+    new_: true,
+    open_box: true,
+    damaged: false,
   },
-  min_retail_price: -1,
-  max_retail_price: -1,
-  new_: true,
-  open_box: true,
-  damaged: false,
 };
 
 interface Props {
@@ -55,13 +58,20 @@ interface initialTransform<T> {
   initialTransform: (val: T) => T;
 }
 
-const processInitialValues = (initialValues?: FilterCoreOutputValues) => {
+const processInitialValues = (
+  initialValues?: FilterCoreOutputValues,
+): FilterCoreOutputValues => {
   // this complexity arises from having to rectify 3 slightly different types:
   // database (pydantic), input form type, and output form type
+  // dear future me: please don't have to do transforms on nested values
   const minusOneToEmptyString = (val: string | number) =>
     val === -1 ? "" : val;
-  const initialValueTransform: initialTransform<any>[] = [
+  const initialValueTransform: initialTransform<
+    keyof FilterCoreOutputValues["core"]
+  >[] = [
+    // @ts-ignore
     { path: "min_retail_price", initialTransform: minusOneToEmptyString },
+    // @ts-ignore
     { path: "max_retail_price", initialTransform: minusOneToEmptyString },
   ];
   const mergedInitialValues = deepmerge(
@@ -72,19 +82,24 @@ const processInitialValues = (initialValues?: FilterCoreOutputValues) => {
     // todo: actually make these types work. it should be technically possible,
     //  but is currently not emotionally possible for me
     // @ts-ignore
-    mergedInitialValues[path] = initialTransform(mergedInitialValues[path]);
+    mergedInitialValues.core[path] = initialTransform(
+      // @ts-ignore
+      mergedInitialValues.core[path],
+    );
   }
-  return mergedInitialValues;
+  return mergedInitialValues as unknown as FilterCoreOutputValues;
 };
 
 function getFormCoreElements(
   control: Control<FilterCoreInputValues>,
-  errors: FieldErrors<FilterCoreInputValues>,
+  rootErrors: FieldErrors<FilterCoreInputValues>,
   setValue: UseFormSetValue<FilterCoreInputValues>,
 ) {
+  const rootPath = "core";
+  const errors = rootErrors[rootPath] ?? {};
   const toggleDescriptionColumn = (ev: React.ChangeEvent<HTMLInputElement>) => {
     setValue(
-      "fts_query.columns",
+      `${rootPath}.fts_query.columns`,
       ev.target.checked
         ? ["description", "product_name", "title"]
         : ["product_name", "title"],
@@ -99,7 +114,7 @@ function getFormCoreElements(
           <Typography alignItems={"center"}>{"Include items where"}</Typography>
           <Controller
             control={control}
-            name={"fts_query.boolean_function"}
+            name={`${rootPath}.fts_query.boolean_function`}
             render={({ field }) => (
               <Select {...field}>
                 <MenuItem value={FilterMatchType.ANY}>{"Any"}</MenuItem>
@@ -110,7 +125,7 @@ function getFormCoreElements(
           {"of the following terms match"}
         </Stack>
         <Controller
-          name={"fts_query.includes"}
+          name={`${rootPath}.fts_query.includes`}
           control={control}
           render={({ field: { onChange, value } }) => (
             <TagInput
@@ -124,7 +139,7 @@ function getFormCoreElements(
           {"and exclude those that contain any of the following"}
         </Typography>
         <Controller
-          name={"fts_query.excludes"}
+          name={`${rootPath}.fts_query.excludes`}
           control={control}
           render={({ field: { onChange, value } }) => (
             <TagInput
@@ -136,7 +151,7 @@ function getFormCoreElements(
         />
       </Stack>
       <Controller
-        name={"fts_query.columns"}
+        name={`${rootPath}.fts_query.columns`}
         control={control}
         render={({ field }) => (
           <FormControlLabel
@@ -148,7 +163,7 @@ function getFormCoreElements(
       <Typography variant={"h5"}>{"Retail price"}</Typography>
       <Stack flexDirection={"row"} spacing={2}>
         <Controller
-          name={"min_retail_price"}
+          name={`${rootPath}.min_retail_price`}
           control={control}
           render={({ field }) => (
             <TextField
@@ -161,7 +176,7 @@ function getFormCoreElements(
           )}
         />
         <Controller
-          name={"max_retail_price"}
+          name={`${rootPath}.max_retail_price`}
           control={control}
           render={({ field }) => (
             <TextField
@@ -177,7 +192,22 @@ function getFormCoreElements(
       <Typography variant={"h5"}>{"Item Condition"}</Typography>
       <FormGroup row>
         <Controller
-          name={"open_box"}
+          name={`${rootPath}.new_`}
+          control={control}
+          render={({ field }) => (
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={field.value}
+                  onChange={(ev) => field.onChange(ev.target.checked)}
+                />
+              }
+              label={"New"}
+            />
+          )}
+        />
+        <Controller
+          name={`${rootPath}.open_box`}
           control={control}
           render={({ field }) => (
             <FormControlLabel
@@ -192,7 +222,7 @@ function getFormCoreElements(
           )}
         />
         <Controller
-          name={"damaged"}
+          name={`${rootPath}.damaged`}
           control={control}
           render={({ field }) => (
             <FormControlLabel
@@ -203,21 +233,6 @@ function getFormCoreElements(
                 />
               }
               label={"Damaged"}
-            />
-          )}
-        />
-        <Controller
-          name={"new_"}
-          control={control}
-          render={({ field }) => (
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={field.value}
-                  onChange={(ev) => field.onChange(ev.target.checked)}
-                />
-              }
-              label={"New"}
             />
           )}
         />

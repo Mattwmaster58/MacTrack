@@ -4,9 +4,9 @@ import { ApiEndpoints } from "../common/apiEndpoints";
 import axios from "axios/index";
 
 const useFiltersQuery = () => {
-  return useQuery([ApiEndpoints.filters], {
+  return useQuery([ApiEndpoints.filter.list], {
     queryFn: async (): Promise<FilterCoreOutputValues[]> => {
-      const { data } = await axios.get(ApiEndpoints.filters);
+      const { data } = await axios.get(ApiEndpoints.filter.list);
       return data;
     },
   });

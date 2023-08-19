@@ -1,20 +1,18 @@
-import React, { useState } from "react";
+import React from "react";
 import {
-  FilterCoreForm,
   getFormCoreElements,
   processInitialValues as processInitialCoreValues,
 } from "./filterCoreForm";
 import { Stack } from "@mui/system";
 import {
   Control,
-  Controller,
   FormProvider,
   useForm,
   UseFormSetValue,
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Button, FormControl, TextField } from "@mui/material";
+import { FormControl } from "@mui/material";
 import {
   FilterCoreInputValues,
   FilterCoreOutputValues,
@@ -22,23 +20,20 @@ import {
 } from "../../types/filterCoreSchema";
 import {
   FilterMetaInputValues,
-  FilterMetaOutputValues,
   FilterMetaSchema,
 } from "../../types/filterMetaSchema";
 import {
   getFormMetaElements,
   processInitialValues as processInitialMetaValues,
 } from "./filterMetaForm";
+import { LoadingButton } from "@mui/lab";
 
 const FilterSchema = FilterCoreSchema.and(FilterMetaSchema);
 export type FilterOutputValues = z.output<typeof FilterSchema>;
 export type FilterInputValues = z.input<typeof FilterSchema>;
 export type Filter = z.infer<typeof FilterSchema>;
 
-type FilterInitialValues = {
-  core: FilterOutputValues;
-  meta: FilterMetaOutputValues;
-};
+type FilterInitialValues = FilterCoreOutputValues & FilterMetaInputValues;
 
 type Props = {
   onSubmit: (values: FilterOutputValues) => void;
@@ -46,9 +41,10 @@ type Props = {
 };
 
 const processInitialValues = (initialValues?: FilterInitialValues) => {
-  const processedCoreValues = processInitialCoreValues(initialValues?.core);
-  const processedMetaValues = processInitialMetaValues(initialValues?.meta);
-  return { ...processedCoreValues, ...processedMetaValues };
+  return {
+    ...processInitialCoreValues(initialValues),
+    ...processInitialMetaValues(initialValues),
+  };
 };
 
 const FilterForm = ({ initialValues, onSubmit }: Props) => {
@@ -70,7 +66,7 @@ const FilterForm = ({ initialValues, onSubmit }: Props) => {
     setValue,
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = methods;
 
   return (
@@ -92,9 +88,13 @@ const FilterForm = ({ initialValues, onSubmit }: Props) => {
             )}
           </FormProvider>
           <Stack direction={"row"} justifyContent={"flex-end"}>
-            <Button variant={"contained"} type={"submit"}>
+            <LoadingButton
+              loading={isSubmitting}
+              variant={"contained"}
+              type={"submit"}
+            >
               {"Save"}
-            </Button>
+            </LoadingButton>
           </Stack>
         </form>
       </FormControl>

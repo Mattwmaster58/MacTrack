@@ -10,7 +10,7 @@ from litestar.middleware.session.server_side import (
 from litestar.security.session_auth import SessionAuth
 from sqlalchemy import select
 
-from data.http_models.session import UserAuthPayload, UserRegisterPayload, UserResponse
+from data.http_models.auth import UserAuthPayload, UserRegisterPayload, UserResponse
 from data.user import User
 from dependancies.transaction import provide_transaction
 from typings import AsyncDbSession

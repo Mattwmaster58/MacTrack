@@ -8,7 +8,7 @@ interface Props {
 const FilterCard = ({ meta }: Props) => {
   return (
     <Card>
-      <Typography variant="h1">{meta.name}</Typography>
+      <Typography variant={"h1"}>{meta.meta.name}</Typography>
     </Card>
   );
 };
