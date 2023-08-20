@@ -1,7 +1,4 @@
 """
-Should match the type definitions in @frontend/src/components/forms/itemFilterForm/types/itemfilterValues.tsx
-currently maintained by hand :/
-
 Module to deserialize frontend filter components to SQLAlchemy clauses.
 A lot of this code instruments the creation of SQLite FTS5 queries
 

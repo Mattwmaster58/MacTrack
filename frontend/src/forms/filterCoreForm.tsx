@@ -24,7 +24,7 @@ import {
   UseFormSetValue,
 } from "react-hook-form";
 import { FilterMatchType } from "../types/FilterMatchType";
-import { TagInput } from "../components/elements/tagInput";
+import { TagInput } from "../components/tagInput";
 import {
   FilterCoreInputValues,
   FilterCoreOutputValues,
@@ -106,6 +106,7 @@ function getFormCoreElements(
         : ["product_name", "title"],
     );
   };
+  console.log(control._defaultValues.core?.max_retail_price);
 
   return (
     <Stack flexDirection={"column"} spacing={1}>

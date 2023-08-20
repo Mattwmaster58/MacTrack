@@ -32,16 +32,34 @@ type Props = {
 };
 
 const processInitialValues = (initialValues?: FilterInitialValues) => {
-  return {
-    ...processInitialCoreValues(initialValues),
-    ...processInitialMetaValues(initialValues),
+  const processedCore = processInitialCoreValues(
+    initialValues ? { core: initialValues.core } : undefined,
+  );
+  const processedMeta = processInitialMetaValues(
+    initialValues ? { meta: initialValues.meta } : undefined,
+  );
+  let merged = {
+    ...processedCore,
+    ...processedMeta,
   };
+  console.log(
+    "processed core:",
+    processedCore.core,
+    "merged core: ",
+    merged.core,
+  );
+  return merged;
 };
 
 const FilterForm = ({ initialValues, onSubmit }: Props) => {
+  const processedInitialValues = processInitialValues(initialValues);
+  console.log(
+    "initial values (1):",
+    processedInitialValues.core.max_retail_price,
+  );
   const methods = useForm<FilterInputValues, any, FilterOutputValues>({
     mode: "all",
-    defaultValues: processInitialValues(initialValues),
+    defaultValues: processedInitialValues,
     resolver: async (data, context, options) => {
       // purely for resolver debugging
       const validationResult = await zodResolver(FilterSchema)(
@@ -59,6 +77,11 @@ const FilterForm = ({ initialValues, onSubmit }: Props) => {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = methods;
+  console.log(
+    "initial values (2):",
+    processedInitialValues.core.max_retail_price,
+  );
+  console.log("control value:", control._defaultValues.core?.max_retail_price);
 
   return (
     <Stack>

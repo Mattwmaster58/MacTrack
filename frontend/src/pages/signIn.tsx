@@ -1,7 +1,7 @@
 import { Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import { Link } from "react-router-dom";
-import { SignInForm } from "../components/forms/signInForm";
+import { SignInForm } from "../forms/signInForm";
 
 interface Props {
   open: boolean;
@@ -19,8 +19,9 @@ const SignIn = () => {
       }}
     >
       <SignInForm />
-      <Typography variant="subtitle2">
-        No account? <Link to={"/register"}>Register here</Link>
+      <Typography variant={"subtitle2"}>
+        {"No account? "}
+        <Link to={"/register"}>{"Register here"}</Link>
       </Typography>
     </Stack>
   );

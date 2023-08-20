@@ -4,7 +4,7 @@ import { SnackbarProvider } from "notistack";
 import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
-import { TopBar } from "./components/elements/topBar";
+import { TopBar } from "./components/topBar";
 import { Dashboard } from "./pages/dashboard";
 import { Register } from "./pages/register";
 import { SignIn } from "./pages/signIn";
@@ -17,6 +17,7 @@ import AuthenticateRoute from "./common/authenticatedRoute";
 import { SignOut } from "./pages/signOut";
 import { Filters } from "./pages/filters/filters";
 import { NewFilter } from "./pages/filters/new";
+import { UpdateFilter } from "./pages/filters/update";
 
 // see: https://stackoverflow.com/a/71273212/3427299
 function App() {
@@ -41,7 +42,10 @@ function App() {
           path={"filters/new"}
           element={<AuthenticateRoute children={<NewFilter />} />}
         />
-        <Route path={"{filter_id:int}/edit"} />
+        <Route
+          path={"filters/update/:filterId"}
+          element={<AuthenticateRoute children={<UpdateFilter />} />}
+        />
       </Route>
     </Routes>
   );

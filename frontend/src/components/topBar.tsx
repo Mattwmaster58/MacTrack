@@ -8,7 +8,7 @@ import {
 import { Box, Stack } from "@mui/system";
 import React, { useContext } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import { AuthContext } from "../../common/authContext";
+import { AuthContext } from "../common/authContext";
 
 const TopBar = () => {
   const navigate = useNavigate();

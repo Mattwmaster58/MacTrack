@@ -1,18 +1,24 @@
 import { useFiltersQuery } from "../../hooks/useFiltersQuery";
 import { Stack } from "@mui/system";
-import { FilterCard } from "../../components/elements/filtersCard";
-import { Button, CircularProgress, IconButton } from "@mui/material";
-import { FilterMeta } from "../../types/filterMetaSchema";
-import { TitledPage } from "../../components/elements/titledPage";
+import { FilterCard } from "../../components/filtersCard";
+import { Button, CircularProgress } from "@mui/material";
+import { TitledPage } from "../../components/titledPage";
 import { Add } from "@mui/icons-material";
-import { Link, NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
+import Grid2 from "@mui/material/Unstable_Grid2";
 
 const Filters = () => {
   const { data, isLoading, isError } = useFiltersQuery();
 
-  const filterCards = (data ?? []).map((meta, idx) => (
-    <FilterCard key={idx} filter={meta} />
-  ));
+  const filterCardsContainer = (
+    <Grid2 container>
+      {(data ?? []).map((filter, idx) => (
+        <Grid2>
+          <FilterCard key={idx} filter={filter} />
+        </Grid2>
+      ))}
+    </Grid2>
+  );
 
   let rightElement = (
     <Button variant={"contained"} startIcon={<Add />}>
@@ -28,7 +34,7 @@ const Filters = () => {
 
   return (
     <TitledPage title={"Filters"} rightElement={rightElement}>
-      {isLoading ? loadingElem : filterCards}
+      {isLoading ? loadingElem : filterCardsContainer}
     </TitledPage>
   );
 };

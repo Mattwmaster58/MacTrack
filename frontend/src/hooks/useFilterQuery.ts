@@ -4,13 +4,14 @@ import { ApiEndpoints } from "../common/apiEndpoints";
 import { FilterData } from "../types/filterSchema";
 import axios from "axios";
 
-const useFiltersQuery = () => {
-  return useQuery([ApiEndpoints.filter.list], {
-    queryFn: async (): Promise<FilterData[]> => {
-      const { data } = await axios.get(ApiEndpoints.filter.list);
+const useFilterQuery = (filterId: number) => {
+  const path = `${ApiEndpoints.filter.list}/${filterId}`;
+  return useQuery([path], {
+    queryFn: async (): Promise<FilterData> => {
+      const { data } = await axios.get(path);
       return data;
     },
   });
 };
 
-export { useFiltersQuery };
+export { useFilterQuery };

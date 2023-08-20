@@ -9,7 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Stack } from "@mui/system";
-import { AuctionLot } from "../../types/AuctionLot";
+import { AuctionLot } from "../types/AuctionLot";
 
 interface Props {
   auctionInfo: AuctionLot;
@@ -36,7 +36,7 @@ const AuctionLotCard = ({ auctionInfo }: Props) => {
           //   yes, we set background twice on purpose here
           background: `url("${auctionInfo.image_url}")`,
         }}
-        component="img"
+        component={"img"}
         image={auctionInfo.image_url}
       />
       <CardContent>
@@ -51,7 +51,7 @@ const AuctionLotCard = ({ auctionInfo }: Props) => {
           })}
           textAlign={"left"}
           gutterBottom
-          variant="subtitle1"
+          variant={"subtitle1"}
         >
           {auctionInfo.product_name}
         </Typography>
@@ -60,17 +60,27 @@ const AuctionLotCard = ({ auctionInfo }: Props) => {
       <Stack
         direction={"row"}
         justifyContent={"center"}
-        divider={<Divider orientation="vertical" flexItem />}
+        divider={<Divider orientation={"vertical"} flexItem />}
         spacing={2}
       >
         <Typography>
-          ${parseInt(Math.round(auctionInfo.retail_price).toString())}
+          {"$"}
+          {parseInt(Math.round(auctionInfo.retail_price).toString())}
         </Typography>
-        <Typography>${auctionInfo.winning_bid_amount ?? "?"}</Typography>
-        <Typography>{discountRate}%</Typography>
+        <Typography>
+          {"$"}
+          {auctionInfo.winning_bid_amount ?? "?"}
+        </Typography>
+        <Typography>
+          {discountRate}
+          {"%"}
+        </Typography>
       </Stack>
       <CardActions>
-        <IconButton href={`https://mac.bid/lot/${auctionInfo.id}`} size="small">
+        <IconButton
+          href={`https://mac.bid/lot/${auctionInfo.id}`}
+          size={"small"}
+        >
           <Launch />
         </IconButton>
       </CardActions>

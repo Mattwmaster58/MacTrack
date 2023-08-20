@@ -1,6 +1,6 @@
 import { CircularProgress, Fade, Grid, Typography, Zoom } from "@mui/material";
 import { Stack } from "@mui/system";
-import { ReactElement, useContext, useState } from "react";
+import { useContext } from "react";
 import { AuthContext } from "../common/authContext";
 import { useNavigate } from "react-router-dom";
 import { useCurrentUserQuery } from "../hooks/useCurrentUserQuery";
@@ -31,18 +31,15 @@ const CurrentUser = () => {
   }
 
   return (
-    <Fade in unmountOnExit>
-      <Stack
-        spacing={1}
-        alignItems={"center"}
-        justifyContent={"center"}
-        sx={{
-          minHeight: "100vh",
-        }}
-      >
-        <CircularProgress size={250} />
-      </Stack>
-    </Fade>
+    <Stack
+      alignItems={"center"}
+      justifyContent={"center"}
+      sx={{
+        minHeight: "100vh",
+      }}
+    >
+      <CircularProgress size={250} />
+    </Stack>
   );
 };
 

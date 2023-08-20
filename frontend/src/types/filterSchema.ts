@@ -8,3 +8,10 @@ export type FilterInputValues = z.input<typeof FilterSchema>;
 export type Filter = z.infer<typeof FilterSchema>;
 export type FilterInitialValues = FilterCoreOutputValues &
   FilterMetaInputValues;
+export type FilterData = FilterOutputValues & {
+  meta: {
+    id: number;
+    updated_at: string;
+    created_at: string;
+  };
+};

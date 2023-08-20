@@ -1,19 +1,37 @@
 from litestar import get, Router, Request, Response, post, put
+from litestar.exceptions import NotFoundException
 from sqlalchemy import select
 
 from data.http_models.common import BaseResponse
-from data.http_models.filter import FilterCore, FilterPayload, FilterMeta
-from data.user import User, Filter
+from data.http_models.filter import FilterPayload, FilterResponse, FilterMetaResponse
+from data.user import Filter
 from typings import AsyncDbSession
 
 
+def filter_response_from_filter_row(row: Filter) -> FilterResponse:
+    return FilterResponse(
+        core=row.payload,
+        meta=FilterMetaResponse(
+            name=row.name, active=row.active, updated_at=row.updated_at, created_at=row.created_at, id=row.id
+        ),
+    )
+
+
 @get("/list")
-async def list_filters(request: Request, tx: AsyncDbSession) -> list[FilterPayload]:
+async def list_filters(request: Request, tx: AsyncDbSession) -> list[FilterResponse]:
     # todo: PAGINATE THIS
     stmt = select(Filter).where(Filter.user_id == request.user.id).order_by(Filter.updated_at.desc()).limit(10)
     filters = (await tx.execute(stmt)).scalars().all()
-    serialized = [FilterPayload(core=f.payload, meta=FilterMeta(name=f.name, active=f.active)) for f in filters]
-    return serialized
+    return [filter_response_from_filter_row(f) for f in filters]
+
+
+@get("/list/{filter_id:int}")
+async def list_filter_by_id(request: Request, tx: AsyncDbSession, filter_id: int) -> FilterResponse:
+    stmt = select(Filter).where((Filter.user_id == request.user.id) & (Filter.id == filter_id))
+    filter = (await tx.execute(stmt)).scalar_one_or_none()
+    if filter is None:
+        raise NotFoundException
+    return filter_response_from_filter_row(filter)
 
 
 @post("/create")
@@ -24,8 +42,10 @@ async def create_filter(request: Request, tx: AsyncDbSession, data: FilterPayloa
 
 
 @put("/update/{filter_id:int}")
-async def update_filter(request: Request, tx: AsyncDbSession) -> Response:
+async def update_filter(request: Request, tx: AsyncDbSession, filter_id: int) -> Response:
     pass
 
 
-router = Router(path="/filters", route_handlers=[list_filters, create_filter, update_filter])
+router = Router(
+    path="/filters", route_handlers=[list_filters, create_filter, update_filter, list_filter_by_id, update_filter]
+)

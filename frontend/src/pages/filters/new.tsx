@@ -1,6 +1,6 @@
 import React from "react";
-import { TitledPage } from "../../components/elements/titledPage";
-import { FilterForm } from "../../components/forms/filterForm";
+import { TitledPage } from "../../components/titledPage";
+import { FilterForm } from "../../forms/filterForm";
 import { useNewFilterMutation } from "../../hooks/useNewFilterMutation";
 import { FilterOutputValues } from "../../types/filterSchema";
 

@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { ApiEndpoints } from "../common/apiEndpoints";
-import { RegisterValues } from "../components/forms/registerForm";
+import { RegisterValues } from "../forms/registerForm";
 import { ApiResponse } from "../types/api";
 
 // todo: type this correctly

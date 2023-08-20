@@ -1,7 +1,7 @@
 import Skeleton from "@mui/material/Skeleton";
 import Grid2 from "@mui/material/Unstable_Grid2";
-import { useSearchQuery } from "../../hooks/useSearchQuery";
-import { FilterCoreOutputValues } from "../../types/filterCoreSchema";
+import { useSearchQuery } from "../hooks/useSearchQuery";
+import { FilterCoreOutputValues } from "../types/filterCoreSchema";
 import { AuctionLotCard } from "./auctionLotCard";
 
 interface Props {
@@ -12,7 +12,10 @@ const SearchQueryContainer = ({ params }: Props) => {
   const { isLoading, data } = useSearchQuery(params);
   console.log(data);
   return isLoading ? (
-    <Skeleton>Testing {isLoading}</Skeleton>
+    <Skeleton>
+      {"Testing "}
+      {isLoading}
+    </Skeleton>
   ) : (
     <Grid2 container direction={"row"} spacing={3}>
       {(data ?? []).map((lot, idx) => (

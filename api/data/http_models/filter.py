@@ -1,3 +1,8 @@
+"""
+Should match the type definitions in @frontend/src/components/forms/itemFilterForm/types/itemfilterValues.tsx
+currently maintained by hand :/
+"""
+from datetime import datetime
 from enum import Enum
 from typing import Literal
 
@@ -41,6 +46,16 @@ class FilterMeta(BaseModel):
     active: bool
 
 
+class FilterMetaResponse(FilterMeta):
+    updated_at: datetime
+    created_at: datetime
+    id: int
+
+
 class FilterPayload(BaseModel):
     core: FilterCore
     meta: FilterMeta
+
+
+class FilterResponse(FilterPayload):
+    meta: FilterMetaResponse

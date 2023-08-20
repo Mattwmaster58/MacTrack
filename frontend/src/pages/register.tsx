@@ -2,7 +2,7 @@ import { Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { RegisterForm, RegisterValues } from "../components/forms/registerForm";
+import { RegisterForm, RegisterValues } from "../forms/registerForm";
 
 interface Props {
   open: boolean;
@@ -24,8 +24,9 @@ const Register = () => {
       }}
     >
       <RegisterForm />
-      <Typography variant="subtitle2">
-        Already have an account? <Link to={"/sign-in"}>Sign in</Link>
+      <Typography variant={"subtitle2"}>
+        {"Already have an account? "}
+        <Link to={"/sign-in"}>{"Sign in"}</Link>
       </Typography>
     </Stack>
   );

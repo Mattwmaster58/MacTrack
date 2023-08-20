@@ -1,7 +1,7 @@
 import { Chip, TextField } from "@mui/material";
 import { Box } from "@mui/system";
 import { useRef, useState } from "react";
-import { TagInputProps, TagProps } from "../../types/TagInput";
+import { TagInputProps, TagProps } from "../types/TagInput";
 
 const Tag = ({ data, handleDelete }: TagProps) => {
   return <Chip sx={{ marginRight: 1 }} label={data} onDelete={handleDelete} />;

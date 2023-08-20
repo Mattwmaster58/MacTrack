@@ -1,5 +1,5 @@
 import React from "react";
-import { FilterCoreForm } from "../components/forms/filterCoreForm";
+import { FilterCoreForm } from "../forms/filterCoreForm";
 import { Stack } from "@mui/system";
 
 const Dashboard = () => {

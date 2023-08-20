@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { ApiEndpoints } from "../common/apiEndpoints";
-import { SignInValues } from "../components/forms/signInForm";
+import { SignInValues } from "../forms/signInForm";
 
 export type UserResponse =
   | {

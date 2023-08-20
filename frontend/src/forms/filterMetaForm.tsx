@@ -52,7 +52,7 @@ function getFormMetaElements(
 }
 
 function processInitialValues(initialValues?: FilterMetaOutputValues) {
-  return deepmerge(initialValues ?? {}, DEFAULT_FILTER_META_VALUES);
+  return deepmerge(DEFAULT_FILTER_META_VALUES, initialValues ?? {});
 }
 
 const FilterMetaForm = ({ onSubmit, initialValues }: Props) => {
