@@ -11,29 +11,20 @@ import {
   UseFormSetValue,
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { FormControl } from "@mui/material";
-import {
-  FilterCoreInputValues,
-  FilterCoreOutputValues,
-  FilterCoreSchema,
-} from "../../types/filterCoreSchema";
-import {
-  FilterMetaInputValues,
-  FilterMetaSchema,
-} from "../../types/filterMetaSchema";
+import { FilterCoreInputValues } from "../../types/filterCoreSchema";
+import { FilterMetaInputValues } from "../../types/filterMetaSchema";
 import {
   getFormMetaElements,
   processInitialValues as processInitialMetaValues,
 } from "./filterMetaForm";
 import { LoadingButton } from "@mui/lab";
-
-const FilterSchema = FilterCoreSchema.and(FilterMetaSchema);
-export type FilterOutputValues = z.output<typeof FilterSchema>;
-export type FilterInputValues = z.input<typeof FilterSchema>;
-export type Filter = z.infer<typeof FilterSchema>;
-
-type FilterInitialValues = FilterCoreOutputValues & FilterMetaInputValues;
+import {
+  FilterInitialValues,
+  FilterInputValues,
+  FilterOutputValues,
+  FilterSchema,
+} from "../../types/filterSchema";
 
 type Props = {
   onSubmit: (values: FilterOutputValues) => void;
@@ -79,7 +70,7 @@ const FilterForm = ({ initialValues, onSubmit }: Props) => {
               errors,
             )}
             {getFormCoreElements(
-              //too lazy to fix this ...
+              // too lazy to fix this ...
               // in theory, this should be fine, we don't use control.reset so should be fine tm
               // control,
               control as unknown as Control<FilterCoreInputValues>,

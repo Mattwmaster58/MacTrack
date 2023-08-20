@@ -4,7 +4,7 @@ const ApiEndpoints = {
   currentUser: `${API_SUFFIX}/current-user`,
   register: `${API_SUFFIX}/register`,
   filter: {
-    list: `${API_SUFFIX}/filters`,
+    list: `${API_SUFFIX}/filters/list`,
     update: `${API_SUFFIX}/filters/update`,
     create: `${API_SUFFIX}/filters/create`,
   },

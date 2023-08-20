@@ -1,14 +1,14 @@
-import { FilterMeta } from "../../types/filterMetaSchema";
 import { Card, Typography } from "@mui/material";
+import { Filter } from "../../types/filterSchema";
 
 interface Props {
-  meta: FilterMeta;
+  filter: Filter;
 }
 
-const FilterCard = ({ meta }: Props) => {
+const FilterCard = ({ filter }: Props) => {
   return (
     <Card>
-      <Typography variant={"h1"}>{meta.meta.name}</Typography>
+      <Typography variant={"h1"}>{filter.meta.name}</Typography>
     </Card>
   );
 };

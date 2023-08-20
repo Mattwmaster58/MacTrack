@@ -1,17 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Button,
-  FormControl,
-  FormControlLabel,
-  FormGroup,
-  FormHelperText,
-  MenuItem,
-  Select,
-  Switch,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { Stack } from "@mui/system";
+import { Button, FormControl, TextField } from "@mui/material";
 import { deepmerge } from "deepmerge-ts";
 import React from "react";
 import {
@@ -19,11 +7,8 @@ import {
   Controller,
   FieldErrors,
   FormProvider,
-  UseFormSetValue,
   useForm,
 } from "react-hook-form";
-import { FilterMatchType } from "../../types/FilterMatchType";
-import { TagInput } from "../elements/tagInput";
 import {
   FilterMetaInputValues,
   FilterMetaOutputValues,
@@ -34,6 +19,7 @@ import { FilterMeta } from "../../types/filterMetaSchema";
 const DEFAULT_FILTER_META_VALUES = {
   meta: {
     name: "",
+    active: true,
   },
 };
 

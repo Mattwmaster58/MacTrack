@@ -1,14 +1,19 @@
 from litestar import get, Router, Request, Response, post, put
+from sqlalchemy import select
 
 from data.http_models.common import BaseResponse
-from data.http_models.filter import FilterCore, FilterPayload
+from data.http_models.filter import FilterCore, FilterPayload, FilterMeta
 from data.user import User, Filter
 from typings import AsyncDbSession
 
 
 @get("/list")
-async def list_filters(request: Request, tx: AsyncDbSession) -> Response:
-    pass
+async def list_filters(request: Request, tx: AsyncDbSession) -> list[FilterPayload]:
+    # todo: PAGINATE THIS
+    stmt = select(Filter).where(Filter.user_id == request.user.id).order_by(Filter.updated_at.desc()).limit(10)
+    filters = (await tx.execute(stmt)).scalars().all()
+    serialized = [FilterPayload(core=f.payload, meta=FilterMeta(name=f.name, active=f.active)) for f in filters]
+    return serialized
 
 
 @post("/create")

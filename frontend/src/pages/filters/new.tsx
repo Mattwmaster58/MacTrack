@@ -1,10 +1,8 @@
 import React from "react";
 import { TitledPage } from "../../components/elements/titledPage";
-import {
-  FilterForm,
-  FilterOutputValues,
-} from "../../components/forms/filterForm";
+import { FilterForm } from "../../components/forms/filterForm";
 import { useNewFilterMutation } from "../../hooks/useNewFilterMutation";
+import { FilterOutputValues } from "../../types/filterSchema";
 
 const NewFilter = () => {
   const { mutate, isError, error } = useNewFilterMutation();

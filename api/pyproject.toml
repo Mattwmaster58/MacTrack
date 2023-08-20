@@ -8,7 +8,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-litestar = { git = "https://github.com/litestar-org/litestar", "rev" = "d257d099993179f1133a96441bf816e1de435007" }
+litestar = "^2.0.0rc1"
 tqdm = "^4.66.0"
 requests = "^2.31.0"
 click = "^8.1.6"

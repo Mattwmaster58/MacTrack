@@ -1,11 +1,12 @@
 import { FilterCoreOutputValues } from "../types/filterCoreSchema";
 import { useQuery } from "@tanstack/react-query";
 import { ApiEndpoints } from "../common/apiEndpoints";
-import axios from "axios/index";
+import { FilterOutputValues } from "../types/filterSchema";
+import axios from "axios";
 
 const useFiltersQuery = () => {
   return useQuery([ApiEndpoints.filter.list], {
-    queryFn: async (): Promise<FilterCoreOutputValues[]> => {
+    queryFn: async (): Promise<FilterOutputValues[]> => {
       const { data } = await axios.get(ApiEndpoints.filter.list);
       return data;
     },

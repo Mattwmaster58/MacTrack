@@ -30,7 +30,8 @@ import {
   FilterCoreOutputValues,
   FilterCoreSchema,
 } from "../../types/filterCoreSchema";
-import { FilterInputValues } from "./filterForm";
+
+import { FilterInputValues } from "../../types/filterSchema";
 
 const DEFAULT_FILTER_CORE_VALUES = {
   core: {

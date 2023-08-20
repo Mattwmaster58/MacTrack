@@ -5,6 +5,7 @@ const FilterMetaSchemaBase = z.object({
     .string()
     .nonempty("Name must be specified")
     .max(128, "Name is too long"),
+  active: z.boolean(),
 });
 
 const FilterMetaSchema = z.object({

@@ -8,13 +8,10 @@ import { Add } from "@mui/icons-material";
 import { Link, NavLink } from "react-router-dom";
 
 const Filters = () => {
-  // const { data, isLoading, isError } = useFiltersQuery();
-
-  const data = null;
-  const isLoading = false;
+  const { data, isLoading, isError } = useFiltersQuery();
 
   const filterCards = (data ?? []).map((meta, idx) => (
-    <FilterCard key={idx} meta={meta as unknown as FilterMeta} />
+    <FilterCard key={idx} filter={meta} />
   ));
 
   let rightElement = (
@@ -23,11 +20,15 @@ const Filters = () => {
     </Button>
   );
 
+  const loadingElem = (
+    <Stack width={"100%"} alignItems={"center"}>
+      <CircularProgress />
+    </Stack>
+  );
+
   return (
     <TitledPage title={"Filters"} rightElement={rightElement}>
-      <Stack width={"100%"} alignItems={"center"}>
-        {isLoading ? <CircularProgress /> : filterCards}
-      </Stack>
+      {isLoading ? loadingElem : filterCards}
     </TitledPage>
   );
 };

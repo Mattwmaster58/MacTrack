@@ -1,9 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { ApiEndpoints } from "../common/apiEndpoints";
-import { RegisterValues } from "../components/forms/registerForm";
 import { ApiResponse } from "../types/api";
-import { FilterOutputValues } from "../components/forms/filterForm";
+
+import { FilterOutputValues } from "../types/filterSchema";
 
 // todo: type this correctly
 // todo: invalidate filters list query with an appropriate query key here.

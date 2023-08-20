@@ -41,6 +41,6 @@ class FilterMeta(BaseModel):
     active: bool
 
 
-class FilterPayload(FilterCore):
+class FilterPayload(BaseModel):
     core: FilterCore
     meta: FilterMeta

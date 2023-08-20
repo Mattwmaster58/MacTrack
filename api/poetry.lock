@@ -735,8 +735,10 @@ version = "2.0.0rc1"
 description = "Litestar - A production-ready, highly performant, extensible ASGI API Framework"
 optional = false
 python-versions = ">=3.8,<4.0"
-files = []
-develop = false
+files = [
+    {file = "litestar-2.0.0rc1-py3-none-any.whl", hash = "sha256:a3d9ac724326ce3836fd8295b6352e634df5a338bfb089a67b3812c79eb1498f"},
+    {file = "litestar-2.0.0rc1.tar.gz", hash = "sha256:927abab8e1f99adef4538d4721ecfcb7774e6579b7d33a1ef33b390b8200fe09"},
+]
 
 [package.dependencies]
 anyio = ">=3"
@@ -767,12 +769,6 @@ redis = ["redis[hiredis] (>=4.4.4,<4.5.0)"]
 sqlalchemy = ["alembic", "sqlalchemy (>=2.0.12)"]
 standard = ["click", "jinja2 (>=3.1.2)", "jsbeautifier", "rich (>=13.0.0)", "rich-click", "uvicorn[standard] (>=0.22.0)"]
 structlog = ["structlog"]
-
-[package.source]
-type = "git"
-url = "https://github.com/litestar-org/litestar"
-reference = "d257d099993179f1133a96441bf816e1de435007"
-resolved_reference = "d257d099993179f1133a96441bf816e1de435007"
 
 [[package]]
 name = "mako"
@@ -1711,4 +1707,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "0593b759adab27efb59d5a1cab3908f3901b1833f510acfb20a20e0daad6b862"
+content-hash = "fd54928db7129fba6b718484892d435e1c666f3b773b5b0bd1c648991c658ef7"
