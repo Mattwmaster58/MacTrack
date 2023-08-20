@@ -12,8 +12,8 @@ import {
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormControl } from "@mui/material";
-import { FilterCoreInputValues } from "../../types/filterCoreSchema";
-import { FilterMetaInputValues } from "../../types/filterMetaSchema";
+import { FilterCoreInputValues } from "../types/filterCoreSchema";
+import { FilterMetaInputValues } from "../types/filterMetaSchema";
 import {
   getFormMetaElements,
   processInitialValues as processInitialMetaValues,
@@ -24,7 +24,7 @@ import {
   FilterInputValues,
   FilterOutputValues,
   FilterSchema,
-} from "../../types/filterSchema";
+} from "../types/filterSchema";
 
 type Props = {
   onSubmit: (values: FilterOutputValues) => void;

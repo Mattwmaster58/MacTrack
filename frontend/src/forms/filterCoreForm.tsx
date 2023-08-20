@@ -23,15 +23,15 @@ import {
   useForm,
   UseFormSetValue,
 } from "react-hook-form";
-import { FilterMatchType } from "../../types/FilterMatchType";
-import { TagInput } from "../elements/tagInput";
+import { FilterMatchType } from "../types/FilterMatchType";
+import { TagInput } from "../components/elements/tagInput";
 import {
   FilterCoreInputValues,
   FilterCoreOutputValues,
   FilterCoreSchema,
-} from "../../types/filterCoreSchema";
+} from "../types/filterCoreSchema";
 
-import { FilterInputValues } from "../../types/filterSchema";
+import { FilterInputValues } from "../types/filterSchema";
 
 const DEFAULT_FILTER_CORE_VALUES = {
   core: {

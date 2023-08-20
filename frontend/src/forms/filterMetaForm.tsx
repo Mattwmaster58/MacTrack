@@ -13,8 +13,8 @@ import {
   FilterMetaInputValues,
   FilterMetaOutputValues,
   FilterMetaSchema,
-} from "../../types/filterMetaSchema";
-import { FilterMeta } from "../../types/filterMetaSchema";
+} from "../types/filterMetaSchema";
+import { FilterMeta } from "../types/filterMetaSchema";
 
 const DEFAULT_FILTER_META_VALUES = {
   meta: {

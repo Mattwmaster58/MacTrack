@@ -1,4 +1,3 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Button,
   FormControl,
@@ -8,49 +7,48 @@ import {
 } from "@mui/material";
 import { Stack } from "@mui/system";
 import { useSnackbar } from "notistack";
-import React from "react";
+import React, { useContext } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { useRegisterMutation } from "../../hooks/useRegisterMutation";
+import { useSignInMutation } from "../hooks/useSignInMutation";
+import { AuthContext } from "../common/authContext";
 
-const registerSchema = z.object({
-  email: z.string().nonempty("Must be specified").email("Invalid email"),
-  username: z
-    .string()
-    .nonempty("Must be specified")
-    .min(4, "Must be more than 4 characters"),
-  password: z
-    .string()
-    .nonempty("Must be specified")
-    .min(8, "Must be more than 8 characters"),
+const signInSchema = z.object({
+  username: z.string().nonempty("Must be specified"),
+  password: z.string().nonempty("Must be specified"),
 });
-export type RegisterValues = z.infer<typeof registerSchema>;
 
-const RegisterForm = () => {
-  const methods = useForm<RegisterValues>({
+export type SignInValues = z.infer<typeof signInSchema>;
+const SignInForm = () => {
+  const { auth, setAuth } = useContext(AuthContext);
+  // todo: if already authed, do something different?
+  const methods = useForm<SignInValues>({
     mode: "all",
     defaultValues: {
-      email: "",
       username: "",
       password: "",
     },
-    resolver: zodResolver(registerSchema),
   });
   const {
     control,
     handleSubmit,
     formState: { errors },
   } = methods;
-  const { mutateAsync, data, error, isError, isLoading } =
-    useRegisterMutation();
+  const { mutateAsync, data, error, isError, isLoading } = useSignInMutation();
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
-  const onSubmit = async (vals: RegisterValues) => {
+  const onSubmit = async (vals: SignInValues) => {
     try {
-      await mutateAsync(vals);
-      enqueueSnackbar("Account successfully created!", { variant: "success" });
-      navigate("/sign-in");
+      const resp = await mutateAsync(vals);
+      if (resp.success) {
+        setAuth({ username: resp.username, admin: resp.admin });
+        navigate("/dashboard");
+      } else {
+        enqueueSnackbar(`Failed to sign in ${resp.message}`, {
+          variant: "error",
+        });
+      }
     } catch (e) {}
   };
   const errorText = error?.response?.data.message ?? error?.message;
@@ -60,66 +58,50 @@ const RegisterForm = () => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack
           maxHeight={"25rem"}
-          maxWidth={"20rem"}
+          maxWidth={"25rem"}
           alignItems={"center"}
           spacing={1}
           sx={{}}
         >
-          <Typography variant="h2">MacTrack</Typography>
+          <Typography variant={"h2"}>{"MacTrack"}</Typography>
           <Controller
             control={control}
-            name="email"
+            name={"username"}
             rules={{ required: true }}
             render={({ field }) => (
               <TextField
                 {...field}
                 fullWidth
-                size="small"
-                error={!!errors.email}
-                helperText={errors.email?.message ?? "\u00a0"}
-                label="Email"
-                type={"email"}
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="username"
-            rules={{ required: true }}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                size="small"
+                size={"small"}
                 error={!!errors.username}
                 helperText={errors.username?.message ?? "\u00a0"}
-                label="Username"
+                label={"Username"}
               />
             )}
           />
           <Controller
             control={control}
-            name="password"
+            name={"password"}
             rules={{ required: true }}
             render={({ field }) => (
               <TextField
                 {...field}
                 fullWidth
-                size="small"
+                size={"small"}
                 error={!!errors.password}
                 helperText={errors.password?.message ?? "\u00a0"}
-                label="Password"
+                label={"Password"}
                 type={"password"}
               />
             )}
           />
           <Button
             fullWidth
-            variant="contained"
+            variant={"contained"}
             type={"submit"}
             disabled={isLoading}
           >
-            Register
+            {"Sign In"}
           </Button>
           <FormHelperText error={!!errorText}>{errorText}</FormHelperText>
         </Stack>
@@ -128,4 +110,4 @@ const RegisterForm = () => {
   );
 };
 
-export { RegisterForm };
+export { SignInForm };
