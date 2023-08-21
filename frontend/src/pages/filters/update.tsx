@@ -22,7 +22,7 @@ const UpdateFilter = () => {
   const { filterId: filterIdStr } = useParams<{ filterId: string }>();
   const filterId = parseInt(filterIdStr!);
   const {
-    mutate,
+    mutateAsync,
     isError: isMutateError,
     isSuccess: isMutateSuccess,
     error: mutateError,
@@ -31,8 +31,8 @@ const UpdateFilter = () => {
   const navigate = useNavigate();
   const { data, error, isLoading, isError, isSuccess } =
     useFilterQuery(filterId);
-  const onSubmit = (vals: FilterOutputValues) => {
-    mutate(vals);
+  const onSubmit = async (vals: FilterOutputValues) => {
+    await mutateAsync(vals).catch();
   };
 
   if (isMutateError) {

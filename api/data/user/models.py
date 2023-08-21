@@ -1,14 +1,31 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import Enum as SQLAEnum
+from sqlalchemy import Enum as SQLAEnum, Dialect
 from sqlalchemy import Integer, String, Boolean, ForeignKey, DateTime, func
 from sqlalchemy.orm import mapped_column, Mapped
 from sqlalchemy.types import TypeDecorator
 
 from data.base_model import Base
+from data.http_models.filter import FilterCore
 from data.mac_bid import AuctionLot
-from data.user.filter import FilterQueryDbType
+
+
+class FilterQueryDbType(TypeDecorator):
+    impl = String
+    cache_ok = True
+
+    def process_bind_param(self, value: FilterCore, _: Dialect) -> str | None:
+        if value is None:
+            return None
+        if not isinstance(value, FilterCore):
+            raise TypeError(f"expected argument of type FilterQuery, got {FilterCore}")
+        return value.model_dump_json(exclude_none=True)
+
+    def process_result_value(self, value: str | None, _: Dialect) -> FilterCore | None:
+        if value is None:
+            return None
+        return FilterCore.model_validate_json(value)
 
 
 class NotificationStatus(enum.Enum):

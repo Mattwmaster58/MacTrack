@@ -8,12 +8,6 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-
-class BooleanFunction(str, Enum):
-    AND = "AND"
-    OR = "OR"
-
-
 Conditions = Literal["LIKE NEW", "DAMAGED", "OPEN BOX"]
 
 
@@ -59,3 +53,8 @@ class FilterPayload(BaseModel):
 
 class FilterResponse(FilterPayload):
     meta: FilterMetaResponse
+
+
+class BooleanFunction(Enum):
+    AND = "and"
+    OR = "or"

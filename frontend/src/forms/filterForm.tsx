@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   getFormCoreElements,
   processInitialValues as processInitialCoreValues,
@@ -11,7 +11,7 @@ import {
   UseFormSetValue,
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FormControl } from "@mui/material";
+import { ButtonGroup, FormControl } from "@mui/material";
 import { FilterCoreInputValues } from "../types/filterCoreSchema";
 import { FilterMetaInputValues } from "../types/filterMetaSchema";
 import {
@@ -25,6 +25,7 @@ import {
   FilterOutputValues,
   FilterSchema,
 } from "../types/filterSchema";
+import { AuthContext } from "../common/authContext";
 
 type Props = {
   onSubmit: (values: FilterOutputValues) => void;
@@ -44,6 +45,10 @@ const processInitialValues = (initialValues?: FilterInitialValues) => {
 };
 
 const FilterForm = ({ initialValues, onSubmit }: Props) => {
+  const {
+    auth: { admin },
+  } = useContext(AuthContext);
+
   const processedInitialValues = processInitialValues(initialValues);
   const methods = useForm<FilterInputValues, any, FilterOutputValues>({
     mode: "all",
@@ -65,6 +70,15 @@ const FilterForm = ({ initialValues, onSubmit }: Props) => {
     formState: { errors, isSubmitting },
   } = methods;
 
+  let adminComponents;
+  if (admin) {
+    adminComponents = (
+      <LoadingButton loading={isSubmitting}>{"force run now"}</LoadingButton>
+    );
+  } else {
+    adminComponents = null;
+  }
+
   return (
     <Stack>
       <FormControl>
@@ -82,14 +96,16 @@ const FilterForm = ({ initialValues, onSubmit }: Props) => {
               errors,
             )}
           </FormProvider>
-          <Stack direction={"row"} justifyContent={"flex-end"}>
-            <LoadingButton
-              loading={isSubmitting}
-              variant={"contained"}
-              type={"submit"}
-            >
-              {"Save"}
-            </LoadingButton>
+          <Stack justifyContent={"end"} direction={"row"}>
+            <ButtonGroup variant={"contained"}>
+              {adminComponents}
+              <LoadingButton loading={false}>
+                {"View historical results"}
+              </LoadingButton>
+              <LoadingButton loading={isSubmitting} type={"submit"}>
+                {"Save"}
+              </LoadingButton>
+            </ButtonGroup>
           </Stack>
         </form>
       </FormControl>

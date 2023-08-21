@@ -1,3 +1,4 @@
+import enum
 from datetime import datetime
 
 from sqlalchemy import (
@@ -7,6 +8,7 @@ from sqlalchemy import (
     ForeignKey,
     DateTime,
     Float,
+    Enum
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -19,6 +21,10 @@ from data.base_model import Base
 #     source: Mapped[int] = mapped_column(ForeignKey(Location.id), primary_key=True)
 #     destination: Mapped[int] = mapped_column(ForeignKey(Location.id), primary_key=True)
 
+class LotCondition(enum.Enum, str):
+    open_box = "OPEN BOX"
+    new_ = "LIKE NEW"
+    damaged = "DAMAGED"
 
 class Building(Base):
     __tablename__ = "building"
@@ -142,10 +148,9 @@ class AuctionLot(Base):
     shipping_weight: Mapped[int] = mapped_column(Integer, nullable=True)
     case_packed_qty: Mapped[int] = mapped_column(Integer, nullable=True)
     retail_price: Mapped[float] = mapped_column(Float, nullable=True)
-    condition_name: Mapped[str] = mapped_column(String, nullable=True)
+    condition_name: Mapped[LotCondition] = mapped_column(Enum(LotCondition), nullable=True)
     category: Mapped[str] = mapped_column(String, nullable=True)
     image_url: Mapped[str] = mapped_column(String, nullable=True)
-
 
 # typing is purely for dx - IDE will (correctly) suggest columns of AuctionLot to us now
 AuctionLotIdx: AuctionLot = create_ftx_idx_alias(AuctionLot, "id")

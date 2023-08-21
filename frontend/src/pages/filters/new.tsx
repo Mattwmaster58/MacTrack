@@ -7,11 +7,14 @@ import { enqueueSnackbar, useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
 
 const NewFilter = () => {
-  const { mutate, isSuccess, isError, error } = useNewFilterMutation();
+  const { mutateAsync, isSuccess, isError, error } = useNewFilterMutation();
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
-  const onSubmit = (vals: FilterOutputValues) => {
-    mutate(vals);
+  const onSubmit = async (vals: FilterOutputValues) => {
+    // this need to be async, so we can be informed of the forms isSubmitting
+    // mutate will usually catch and throw away this error for us, but async requires us
+    // to throw it away ourselves AIUI
+    await mutateAsync(vals).catch();
   };
 
   if (isError) {
