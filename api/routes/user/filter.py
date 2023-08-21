@@ -1,6 +1,6 @@
 from litestar import get, Router, Request, Response, post, put
-from litestar.exceptions import NotFoundException
-from sqlalchemy import select
+from litestar.exceptions import NotFoundException, ClientException
+from sqlalchemy import select, update
 
 from data.http_models.common import BaseResponse
 from data.http_models.filter import FilterPayload, FilterResponse, FilterMetaResponse
@@ -42,8 +42,20 @@ async def create_filter(request: Request, tx: AsyncDbSession, data: FilterPayloa
 
 
 @put("/update/{filter_id:int}")
-async def update_filter(request: Request, tx: AsyncDbSession, filter_id: int) -> Response:
-    pass
+async def update_filter(request: Request, tx: AsyncDbSession, filter_id: int, data: FilterPayload) -> BaseResponse:
+    stmt = (
+        update(Filter)
+        .where((Filter.user_id == request.user.id) & (Filter.id == filter_id))
+        .values(
+            name=data.meta.name,
+            active=data.meta.active,
+            payload=data.core,
+        )
+    )
+    n_rows_affected = (await tx.execute(stmt)).rowcount
+    if n_rows_affected == 0:
+        raise ClientException("No rows matched for update statement when one was expected")
+    return BaseResponse(success=True)
 
 
 router = Router(

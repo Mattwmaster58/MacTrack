@@ -34,7 +34,7 @@ class Filter(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey(User.id))
     name: Mapped[str] = mapped_column(String, nullable=False)
     active: Mapped[bool] = mapped_column(Boolean, default=False)
-    payload: Mapped[str] = mapped_column(FilterQueryDbType, nullable=False)
+    payload: Mapped[FilterQueryDbType] = mapped_column(FilterQueryDbType, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
 

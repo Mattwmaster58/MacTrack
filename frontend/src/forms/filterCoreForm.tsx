@@ -13,7 +13,6 @@ import {
   Typography,
 } from "@mui/material";
 import { Stack } from "@mui/system";
-import { deepmerge } from "deepmerge-ts";
 import React from "react";
 import {
   Control,
@@ -32,6 +31,7 @@ import {
 } from "../types/filterCoreSchema";
 
 import { FilterInputValues } from "../types/filterSchema";
+import { deepmerge } from "../common/deepmerge";
 
 const DEFAULT_FILTER_CORE_VALUES = {
   core: {
@@ -88,6 +88,10 @@ const processInitialValues = (
       mergedInitialValues.core[path],
     );
   }
+  console.log(
+    "column length:",
+    mergedInitialValues.core.fts_query.columns.length,
+  );
   return mergedInitialValues as unknown as FilterCoreOutputValues;
 };
 

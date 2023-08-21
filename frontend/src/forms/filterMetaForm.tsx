@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, FormControl, TextField } from "@mui/material";
-import { deepmerge } from "deepmerge-ts";
 import React from "react";
 import {
   Control,
@@ -15,6 +14,7 @@ import {
   FilterMetaSchema,
 } from "../types/filterMetaSchema";
 import { FilterMeta } from "../types/filterMetaSchema";
+import { deepmerge } from "../common/deepmerge";
 
 const DEFAULT_FILTER_META_VALUES = {
   meta: {
