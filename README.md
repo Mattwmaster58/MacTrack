@@ -18,18 +18,21 @@ Filters
  - manual running
  - queuing system (SAQ)?
  - node render process for notification emails
+   - see: https://github.com/markfinger/python-react
  - quick view - view results of your filter
 
 Auth
- - make it so that auth actually works 
-   - set current user if page reload
-   - direct to sign in page if logged out (when redirecting user, make sure we don't return them to /current-user)
+ - ~~make it so that auth actually works~~
+   - ~~set current user if page reload~~
+   - ~~direct to sign in page if logged out (when redirecting user, make sure we don't return them to /current-user)~~
 
 General
  - deploy backend on GCP
-   - get SSL certs
- - deploy frontend to netlify or others
+   - get SSL certs (caddy)
+   - see: https://github.com/dadatuputi/bitwarden_gcloud/tree/master/caddy
+ - deploy frontend to netlify (or others)
  - logging infrastructure
+ - PAGINATION
 
 
 #### Architecture
