@@ -13,8 +13,8 @@ const Filters = () => {
   const filterCardsContainer = (
     <Grid2 container>
       {(data ?? []).map((filter, idx) => (
-        <Grid2>
-          <FilterCard key={idx} filter={filter} />
+        <Grid2 key={idx}>
+          <FilterCard filter={filter} />
         </Grid2>
       ))}
     </Grid2>
