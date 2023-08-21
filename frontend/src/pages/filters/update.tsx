@@ -10,7 +10,8 @@ import { useUpdateFilterMutation } from "../../hooks/useUpdateFilterMutation";
 import { useFilterQuery } from "../../hooks/useFilterQuery";
 import { Centered } from "../../components/centered";
 import { CircularProgress } from "@mui/material";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { useSnackbar } from "notistack";
 
 type Props = {
   filterId: number;
@@ -23,12 +24,26 @@ const UpdateFilter = () => {
   const {
     mutate,
     isError: isMutateError,
+    isSuccess: isMutateSuccess,
     error: mutateError,
   } = useUpdateFilterMutation(filterId);
-  const { data, isLoading, isError } = useFilterQuery(filterId);
+  const { enqueueSnackbar } = useSnackbar();
+  const navigate = useNavigate();
+  const { data, error, isLoading, isError, isSuccess } =
+    useFilterQuery(filterId);
   const onSubmit = (vals: FilterOutputValues) => {
     mutate(vals);
   };
+
+  if (isMutateError) {
+    enqueueSnackbar(`Failed to save: ${JSON.stringify(error)}`, {
+      variant: "error",
+    });
+  } else if (isMutateSuccess) {
+    // todo: this shows twice (react strict mode rendering twice?)
+    enqueueSnackbar(`Filter updated`, { variant: "success", key: filterId });
+    navigate("/filters");
+  }
 
   const loadingElem = (
     <Centered>
