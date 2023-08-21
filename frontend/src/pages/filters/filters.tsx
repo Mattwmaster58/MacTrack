@@ -11,7 +11,7 @@ const Filters = () => {
   const { data, isLoading, isError } = useFiltersQuery();
 
   const filterCardsContainer = (
-    <Grid2 container>
+    <Grid2 container spacing={1}>
       {(data ?? []).map((filter, idx) => (
         <Grid2 key={idx}>
           <FilterCard filter={filter} />
