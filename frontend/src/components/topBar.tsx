@@ -34,8 +34,8 @@ const TopBar = () => {
         direction={"row"}
         sx={{
           height: "5rem",
-          width: "100%",
-          padding: 1,
+          paddingLeft: 2,
+          paddingRight: 2,
           boxShadow: "0 1px 0 #FFF",
         }}
       >
