@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const FilterMetaSchemaBase = z.object({
+export const FilterMetaSchemaBase = z.object({
   name: z
     .string()
     .nonempty("Name must be specified")

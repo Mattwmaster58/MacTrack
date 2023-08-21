@@ -1,7 +1,7 @@
 import { FilterCoreOutputValues } from "../types/filterCoreSchema";
 import { useQuery } from "@tanstack/react-query";
 import { ApiEndpoints } from "../common/apiEndpoints";
-import { FilterData } from "../types/filterSchema";
+import { FilterData, FilterDataSchema } from "../types/filterSchema";
 import axios from "axios";
 
 const useFilterQuery = (filterId: number) => {
@@ -9,7 +9,7 @@ const useFilterQuery = (filterId: number) => {
   return useQuery([path], {
     queryFn: async (): Promise<FilterData> => {
       const { data } = await axios.get(path);
-      return data;
+      return FilterDataSchema.parse(data);
     },
   });
 };

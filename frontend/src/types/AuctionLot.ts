@@ -1,37 +1,43 @@
-interface AuctionLot {
-  id: number;
-  auction_id: number;
-  closed_date: string;
-  expected_close_date: null;
-  inventory_id: number;
-  date_created: string; // deserialize to date string later :) "2019-06-19T15:45:00"
-  lot_number: number;
-  listing_url: string;
-  title: string;
-  is_open: boolean;
-  is_transferrable: boolean;
-  total_bids: number;
-  winning_customer_id: number;
-  winning_bid_id: string;
-  winning_bid_amount: number;
-  unique_bidders: number;
-  product_name: string;
-  upc: string;
-  description: string;
-  quantity: number;
-  is_pallet: boolean;
-  is_shippable: boolean;
-  current_location_id: number;
-  shipping_height: number;
-  shipping_width: number;
-  shipping_length: number;
-  warehouse_location: string;
-  shipping_weight: number;
-  case_packed_qty: number;
-  retail_price: number;
-  condition_name: "LIKE NEW" | "DAMAGED" | "OPEN BOX";
-  category: string;
-  image_url: string;
-}
+import { z } from "zod";
+import { pydanticDatetimeParsedOptional } from "./pydantic";
 
-export type { AuctionLot };
+const AuctionLotCondition = z.enum(["LIKE NEW", "OPEN BOX", "DAMAGED"]);
+
+const AuctionLotSchema = z.object({
+  id: z.number(),
+  auction_id: z.number().optional(),
+  closed_date: pydanticDatetimeParsedOptional,
+  expected_close_date: pydanticDatetimeParsedOptional,
+  inventory_id: z.number().optional(),
+  date_created: pydanticDatetimeParsedOptional,
+  lot_number: z.number().optional(),
+  listing_url: z.string().optional(),
+  title: z.string().optional(),
+  is_open: z.boolean().optional(),
+  is_transferrable: z.boolean().optional(),
+  total_bids: z.number().optional(),
+  winning_customer_id: z.number().optional(),
+  winning_bid_id: z.string().optional(),
+  winning_bid_amount: z.number().optional(),
+  unique_bidders: z.number().optional(),
+  product_name: z.string().optional(),
+  upc: z.string().optional(),
+  description: z.string().optional(),
+  quantity: z.number().optional(),
+  is_pallet: z.boolean().optional(),
+  is_shippable: z.boolean().optional(),
+  current_location_id: z.number().optional(),
+  shipping_height: z.number().optional(),
+  shipping_width: z.number().optional(),
+  shipping_length: z.number().optional(),
+  warehouse_location: z.string().optional(),
+  shipping_weight: z.number().optional(),
+  case_packed_qty: z.number().optional(),
+  retail_price: z.number().optional(),
+  condition_name: AuctionLotCondition,
+  category: z.string().optional(),
+  image_url: z.string().optional(),
+});
+
+export type AuctionLot = z.infer<typeof AuctionLotSchema>;
+export { AuctionLotSchema };

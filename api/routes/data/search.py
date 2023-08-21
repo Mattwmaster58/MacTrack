@@ -21,7 +21,7 @@ def query_statement_from_filter_core(filter_core: FilterCore) -> Select:
 
     where_clauses = []
 
-    # build fts query
+    # fts clause
     fts_serialized = ""
     if not fts_data.include_description:
         fts_serialized += f"-{AuctionLot.description}:"
@@ -31,12 +31,13 @@ def query_statement_from_filter_core(filter_core: FilterCore) -> Select:
         fts_serialized += f" NOT ({excludes_serialized})"
     where_clauses.append(column(AuctionLotIdx.__tablename__.op("MATCH")(fts_serialized)))
 
-    # all other clauses
+    # price clauses
     if filter_core.min_retail_price > -1:
         where_clauses.append(AuctionLotIdx.retail_price >= filter_core.min_retail_price)
     if filter_core.max_retail_price > -1:
         where_clauses.append(AuctionLotIdx.retail_price <= filter_core.min_retail_price)
 
+    # item condition clauses
     desired_item_conditions = []
     if filter_core.new_:
         desired_item_conditions.append(AuctionLotIdx.condition_name == LotCondition.new_)

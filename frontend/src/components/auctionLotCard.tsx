@@ -17,7 +17,7 @@ interface Props {
 
 const AuctionLotCard = ({ auctionInfo }: Props) => {
   let discountRate: number | string;
-  if (auctionInfo.winning_bid_amount) {
+  if (auctionInfo.winning_bid_amount && auctionInfo.retail_price) {
     discountRate = Math.round(
       (1 - auctionInfo.winning_bid_amount / auctionInfo.retail_price) * 100,
     );
@@ -65,7 +65,8 @@ const AuctionLotCard = ({ auctionInfo }: Props) => {
       >
         <Typography>
           {"$"}
-          {parseInt(Math.round(auctionInfo.retail_price).toString())}
+          {/*todo: shouldn't show if we don't know*/}
+          {parseInt(Math.round(auctionInfo.retail_price ?? 0).toString())}
         </Typography>
         <Typography>
           {"$"}

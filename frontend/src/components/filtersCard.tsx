@@ -16,7 +16,7 @@ interface Props {
 
 const FilterCard = ({ filter }: Props) => {
   const lastUpdatedUtc = formatDistanceToNow(
-    zonedTimeToUtc(parseISO(filter.meta.updated_at), "UTC"),
+    zonedTimeToUtc(filter.meta.updated_at, "UTC"),
   );
   return (
     <Card

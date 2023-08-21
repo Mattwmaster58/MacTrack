@@ -85,13 +85,13 @@ const FilterForm = ({ initialValues, onSubmit }: Props) => {
         <form onSubmit={handleSubmit(onSubmit)}>
           <FormProvider {...methods}>
             {getFormMetaElements(
+              // too lazy to fix this ...
+              // in theory, this should be fine, we don't use control.reset so should be fine tm
+              // control,
               control as unknown as Control<FilterMetaInputValues>,
               errors,
             )}
             {getFormCoreElements(
-              // too lazy to fix this ...
-              // in theory, this should be fine, we don't use control.reset so should be fine tm
-              // control,
               control as unknown as Control<FilterCoreInputValues>,
               errors,
             )}
