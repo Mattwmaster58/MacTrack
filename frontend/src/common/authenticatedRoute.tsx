@@ -1,5 +1,5 @@
 import React, { ReactNode, useContext } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "./authContext";
 
 type Props = {
@@ -15,7 +15,7 @@ const AuthenticateRoute = ({ adminOnly, children }: Props) => {
 
   if (!username) {
     return (
-      <Navigate to="/current-user" state={{ referrer: location.pathname }} />
+      <Navigate to={"/current-user"} state={{ referrer: location.pathname }} />
     );
   }
 
