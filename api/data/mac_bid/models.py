@@ -147,4 +147,5 @@ class AuctionLot(Base):
     image_url: Mapped[str] = mapped_column(String, nullable=True)
 
 
-AuctionLotIdx = create_ftx_idx_alias(AuctionLot, "id")
+# typing is purely for dx - IDE will (correctly) suggest columns of AuctionLot to us now
+AuctionLotIdx: AuctionLot = create_ftx_idx_alias(AuctionLot, "id")
