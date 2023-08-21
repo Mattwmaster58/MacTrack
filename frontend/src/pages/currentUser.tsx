@@ -10,7 +10,7 @@ const CurrentUser = () => {
     auth: { username },
     setAuth,
   } = useContext(AuthContext);
-  const { data, isLoading, isError, refetch } = useCurrentUserQuery();
+  const { error, data, isLoading, isError, refetch } = useCurrentUserQuery();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -19,7 +19,7 @@ const CurrentUser = () => {
 
   useEffect(() => {
     if (username) {
-      console.log(`logged in, navigating to other url: ${returnUrl}`);
+      console.log(`signed in, navigating to other url: ${returnUrl}`);
       navigate(returnUrl);
     } else {
       refetch();
@@ -30,8 +30,13 @@ const CurrentUser = () => {
     if (!isLoading && data?.success) {
       console.log("setting auth: ", data);
       setAuth({ username: data.username, admin: data.admin });
+    } else if (isError) {
+      // @ts-ignore
+      if (error?.response?.status === 401) {
+        navigate(`/sign-in?returnUrl=${returnUrl}`);
+      }
     }
-  }, [isLoading, data, setAuth]);
+  }, [isLoading, isError, data, setAuth]);
 
   return (
     <Fade in unmountOnExit>

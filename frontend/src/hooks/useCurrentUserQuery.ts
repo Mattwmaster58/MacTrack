@@ -11,6 +11,7 @@ const useCurrentUserQuery = () => {
       return data;
     },
     enabled: false,
+    meta: { ignore401: true },
   });
 };
 

@@ -9,7 +9,7 @@ import { Stack } from "@mui/system";
 import { useSnackbar } from "notistack";
 import React, { useContext } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { useSignInMutation } from "../hooks/useSignInMutation";
 import { AuthContext } from "../common/authContext";
@@ -37,13 +37,15 @@ const SignInForm = () => {
   } = methods;
   const { mutateAsync, data, error, isError, isLoading } = useSignInMutation();
   const navigate = useNavigate();
+  const [params, _] = useSearchParams();
   const { enqueueSnackbar } = useSnackbar();
+
   const onSubmit = async (vals: SignInValues) => {
     try {
       const resp = await mutateAsync(vals);
       if (resp.success) {
         setAuth({ username: resp.username, admin: resp.admin });
-        navigate("/dashboard");
+        navigate(params.get("returnUrl") ?? "/dashboard");
       } else {
         enqueueSnackbar(`Failed to sign in ${resp.message}`, {
           variant: "error",

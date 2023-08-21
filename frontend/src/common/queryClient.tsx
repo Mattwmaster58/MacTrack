@@ -39,7 +39,7 @@ const queryClient = new QueryClient({
     queries: {
       // staleTime: 10000,
       retry: (failureCount, error) => {
-        if (hasStatusCode(error, 404)) {
+        if (hasStatusCode(error, 404) || hasStatusCode(error, 401)) {
           return false;
         }
         return failureCount < 2;
@@ -49,12 +49,14 @@ const queryClient = new QueryClient({
 
   queryCache: new QueryCache({
     onError: (_error, _query) => {
-      if (hasStatusCode(_error, 401)) {
-        console.log("logging out due to 401:", _error);
+      if (hasStatusCode(_error, 401) && !_query.meta?.ignore401) {
+        // todo: is this even necessary with AuthRoute element?
+        console.log("logging out due to 401");
         // todo: implement this (shouldn't it be sign-in?)
         // todo: check perms (what it's an admin page?)
-        const signOutPath = "sign-out";
+        const signOutPath = "sign-in";
         // todo: this logic fails when we're at /current-user
+        // todo: implement this
         window.location.href = `${window.location.origin}/${signOutPath}?returnUrl=${window.location.pathname}`;
       } else if (hasStatusCode(_error, 404)) {
         console.log("redirecting due to 404:", _error);

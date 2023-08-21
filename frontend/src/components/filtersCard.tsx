@@ -5,9 +5,8 @@ import {
   CardContent,
   Typography,
 } from "@mui/material";
-import parseISO from "date-fns/parseISO";
 import { FilterData } from "../types/filterSchema";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, parseISO } from "date-fns";
 import { zonedTimeToUtc } from "date-fns-tz";
 import { useAccessibleOnClick } from "../common/useAccessibleOnClick";
 
