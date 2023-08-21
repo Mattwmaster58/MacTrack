@@ -14,8 +14,8 @@ from routes.data.search import search
 from routes.user.filter import router as filter_router
 
 
-async def _init_db(app: Litestar) -> None:
-    async with app.state.db_engine.begin() as conn:
+async def _init_db(_app: Litestar) -> None:
+    async with _app.state.db_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
         fts_statements = create_fts_table_and_triggers(
             table=AuctionLot.__table__,
