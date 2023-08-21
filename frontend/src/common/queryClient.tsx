@@ -51,8 +51,10 @@ const queryClient = new QueryClient({
     onError: (_error, _query) => {
       if (hasStatusCode(_error, 401)) {
         console.log("logging out due to 401:", _error);
-        // todo: implement this
-        const signOutPath = "/sign-out";
+        // todo: implement this (shouldn't it be sign-in?)
+        // todo: check perms (what it's an admin page?)
+        const signOutPath = "sign-out";
+        // todo: this logic fails when we're at /current-user
         window.location.href = `${window.location.origin}/${signOutPath}?returnUrl=${window.location.pathname}`;
       } else if (hasStatusCode(_error, 404)) {
         console.log("redirecting due to 404:", _error);
