@@ -32,30 +32,26 @@ type Props = {
 };
 
 const processInitialValues = (initialValues?: FilterInitialValues) => {
-  const processedCore = processInitialCoreValues(
-    initialValues ? { core: initialValues.core } : undefined,
-  );
-  const processedMeta = processInitialMetaValues(
-    initialValues ? { meta: initialValues.meta } : undefined,
-  );
+  const processedCore = processInitialCoreValues(initialValues);
+  const processedMeta = processInitialMetaValues(initialValues);
   let merged = {
     ...processedCore,
     ...processedMeta,
   };
-  console.log(
-    "processed core:",
-    processedCore.core,
-    "merged core: ",
-    merged.core,
-  );
   return merged;
 };
 
 const FilterForm = ({ initialValues, onSubmit }: Props) => {
+  console.log(
+    "initial values (0):",
+    initialValues!.core.max_retail_price,
+    initialValues!.core.min_retail_price,
+  );
   const processedInitialValues = processInitialValues(initialValues);
   console.log(
     "initial values (1):",
     processedInitialValues.core.max_retail_price,
+    processedInitialValues.core.min_retail_price,
   );
   const methods = useForm<FilterInputValues, any, FilterOutputValues>({
     mode: "all",
@@ -80,8 +76,9 @@ const FilterForm = ({ initialValues, onSubmit }: Props) => {
   console.log(
     "initial values (2):",
     processedInitialValues.core.max_retail_price,
+    processedInitialValues.core.min_retail_price,
   );
-  console.log("control value:", control._defaultValues.core?.max_retail_price);
+  console.log("control value:", control._defaultValues);
 
   return (
     <Stack>
