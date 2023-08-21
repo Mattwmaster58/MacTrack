@@ -24,7 +24,7 @@ class SimpleFtsQuery(BaseModel):
     """
 
     boolean_function: BooleanFunction
-    columns: list[str]
+    include_description: bool
     includes: list[str]
     excludes: list[str] = []
 

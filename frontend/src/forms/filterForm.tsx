@@ -60,7 +60,6 @@ const FilterForm = ({ initialValues, onSubmit }: Props) => {
     },
   });
   const {
-    setValue,
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
@@ -81,7 +80,6 @@ const FilterForm = ({ initialValues, onSubmit }: Props) => {
               // control,
               control as unknown as Control<FilterCoreInputValues>,
               errors,
-              setValue as unknown as UseFormSetValue<FilterCoreInputValues>,
             )}
           </FormProvider>
           <Stack direction={"row"} justifyContent={"flex-end"}>

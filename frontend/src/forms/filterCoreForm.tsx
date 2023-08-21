@@ -30,14 +30,13 @@ import {
   FilterCoreSchema,
 } from "../types/filterCoreSchema";
 
-import { FilterInputValues } from "../types/filterSchema";
 import { deepmerge } from "../common/deepmerge";
 
 const DEFAULT_FILTER_CORE_VALUES = {
   core: {
     fts_query: {
       boolean_function: FilterMatchType.ALL,
-      columns: ["product_name", "title"],
+      include_description: false,
       includes: [],
       excludes: [],
     },
@@ -88,28 +87,15 @@ const processInitialValues = (
       mergedInitialValues.core[path],
     );
   }
-  console.log(
-    "column length:",
-    mergedInitialValues.core.fts_query.columns.length,
-  );
   return mergedInitialValues as unknown as FilterCoreOutputValues;
 };
 
 function getFormCoreElements(
   control: Control<FilterCoreInputValues>,
   rootErrors: FieldErrors<FilterCoreInputValues>,
-  setValue: UseFormSetValue<FilterCoreInputValues>,
 ) {
   const rootPath = "core";
   const errors = rootErrors[rootPath] ?? {};
-  const toggleDescriptionColumn = (ev: React.ChangeEvent<HTMLInputElement>) => {
-    setValue(
-      `${rootPath}.fts_query.columns`,
-      ev.target.checked
-        ? ["description", "product_name", "title"]
-        : ["product_name", "title"],
-    );
-  };
 
   return (
     <Stack flexDirection={"column"} spacing={1}>
@@ -156,11 +142,16 @@ function getFormCoreElements(
         />
       </Stack>
       <Controller
-        name={`${rootPath}.fts_query.columns`}
+        name={`${rootPath}.fts_query.include_description`}
         control={control}
         render={({ field }) => (
           <FormControlLabel
-            control={<Checkbox {...field} onChange={toggleDescriptionColumn} />}
+            control={
+              <Checkbox
+                checked={field.value}
+                onChange={(ev) => field.onChange(ev.target.checked)}
+              />
+            }
             label={"Also search item description with these terms"}
           />
         )}
@@ -265,7 +256,6 @@ const FilterCoreForm = ({ onSubmit, initialValues }: Props) => {
     },
   });
   const {
-    setValue,
     control,
     handleSubmit,
     formState: { errors },
@@ -276,7 +266,7 @@ const FilterCoreForm = ({ onSubmit, initialValues }: Props) => {
     <FormControl>
       <form onSubmit={handleSubmit(onSubmit)}>
         <FormProvider {...methods}>
-          {getFormCoreElements(control, errors, setValue)}
+          {getFormCoreElements(control, errors)}
         </FormProvider>
         <Button type={"submit"}>{"Submit"}</Button>
       </form>
