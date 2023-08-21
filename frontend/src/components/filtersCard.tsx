@@ -16,7 +16,6 @@ interface Props {
 }
 
 const FilterCard = ({ filter }: Props) => {
-  console.log(filter);
   const lastUpdatedUtc = formatDistanceToNow(
     zonedTimeToUtc(parseISO(filter.meta.updated_at), "UTC"),
   );

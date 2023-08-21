@@ -34,25 +34,17 @@ type Props = {
 const processInitialValues = (initialValues?: FilterInitialValues) => {
   const processedCore = processInitialCoreValues(initialValues);
   const processedMeta = processInitialMetaValues(initialValues);
-  let merged = {
-    ...processedCore,
-    ...processedMeta,
+  // in theory, a plain unpacking here would be fine,
+  // but we use an explicit prop here to ensure meta/core do not bleed into eachothers values
+  // maybe it would be better to explicitly fail here than do this just in case. w/e
+  return {
+    meta: processedMeta.meta,
+    core: processedCore.core,
   };
-  return merged;
 };
 
 const FilterForm = ({ initialValues, onSubmit }: Props) => {
-  console.log(
-    "initial values (0):",
-    initialValues!.core.max_retail_price,
-    initialValues!.core.min_retail_price,
-  );
   const processedInitialValues = processInitialValues(initialValues);
-  console.log(
-    "initial values (1):",
-    processedInitialValues.core.max_retail_price,
-    processedInitialValues.core.min_retail_price,
-  );
   const methods = useForm<FilterInputValues, any, FilterOutputValues>({
     mode: "all",
     defaultValues: processedInitialValues,
@@ -73,12 +65,6 @@ const FilterForm = ({ initialValues, onSubmit }: Props) => {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = methods;
-  console.log(
-    "initial values (2):",
-    processedInitialValues.core.max_retail_price,
-    processedInitialValues.core.min_retail_price,
-  );
-  console.log("control value:", control._defaultValues);
 
   return (
     <Stack>

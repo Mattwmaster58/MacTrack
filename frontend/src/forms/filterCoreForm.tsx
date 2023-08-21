@@ -76,8 +76,8 @@ const processInitialValues = (
     { path: "max_retail_price", initialTransform: minusOneToEmptyString },
   ];
   const mergedInitialValues = deepmerge(
-    initialValues ?? {},
     DEFAULT_FILTER_CORE_VALUES,
+    initialValues ?? {},
   );
   for (const { path, initialTransform } of initialValueTransform) {
     // todo: actually make these types work. it should be technically possible,
@@ -106,7 +106,6 @@ function getFormCoreElements(
         : ["product_name", "title"],
     );
   };
-  console.log(control._defaultValues.core?.max_retail_price);
 
   return (
     <Stack flexDirection={"column"} spacing={1}>
