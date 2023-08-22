@@ -3,7 +3,7 @@ from pathlib import Path
 import click
 
 from data import create_and_connect
-from updater import MacBidUpdater
+from scraper.updater import MacBidUpdater
 
 
 @click.command()

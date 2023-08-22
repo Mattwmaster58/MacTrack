@@ -2,9 +2,9 @@ import functools
 import operator
 from typing import cast
 
+from litestar import post
 from sqlalchemy import select, column, Select
 from sqlalchemy.ext.asyncio import AsyncSession
-from litestar import post
 
 from data import AuctionLot
 from data.http_models.filter import FilterCore, BooleanFunction

@@ -1,11 +1,11 @@
-from data import create_and_connect
 from pathlib import Path
-from data.mac_bid import *
-from sqlalchemy import *
-from sqlalchemy.orm import Session, Query
 
-from data.user import Filter
 from pydantic import BaseModel
+from sqlalchemy import *
+from sqlalchemy.orm import Session
+
+from data import create_and_connect
+from data.user import Filter
 
 db_path = Path("/home/mattm/Documents/projects/mac-track/api/mac.bid.db")
 eng = create_and_connect(db_path)

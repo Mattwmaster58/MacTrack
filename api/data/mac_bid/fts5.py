@@ -1,6 +1,5 @@
 from sqlalchemy import DDLElement, String, Column
 from sqlalchemy.ext.compiler import compiles
-from sqlalchemy.orm import aliased
 
 
 # hugely useful: https://stackoverflow.com/a/49917886/3427299
@@ -84,8 +83,10 @@ def __compiles_fts_table_and_triggers(element: CreateFtsIfNoneExistsWithTriggers
     """
     return text
 
+
 def create_aliased_table():
     # iterate over columns
     table_args = []
+
 
 create_fts_table_and_triggers = CreateFtsIfNoneExistsWithTriggers

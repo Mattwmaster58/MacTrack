@@ -3,7 +3,7 @@ from functools import partial
 import requests
 
 from data.mac_bid import AuctionLot, AuctionGroup
-from utils import convert_str_kwargs_to_datetime_in_place, filter_raw_kwargs_in_place
+from scraper.utils import convert_str_kwargs_to_datetime_in_place, filter_raw_kwargs_in_place
 
 
 def create_prefixed_session(prefix=None):

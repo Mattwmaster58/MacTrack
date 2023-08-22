@@ -1,6 +1,6 @@
 from typing import Type
 
-from sqlalchemy import Table, Column, Integer, String
+from sqlalchemy import Table, Column
 from sqlalchemy.orm import aliased, DeclarativeBase, InstrumentedAttribute
 
 

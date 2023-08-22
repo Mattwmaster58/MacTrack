@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session, Query
 from tqdm import tqdm
 
 from data.mac_bid import Building, Location, AuctionGroup, AuctionLot
-from client import Client
+from scraper.api_client import Client
 from utils import filter_raw_kwargs_in_place
 
 
