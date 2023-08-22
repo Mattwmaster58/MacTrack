@@ -15,7 +15,8 @@ async def session_from_db_path(db_path: Path):
 
 
 async def _update(db_path: Path, skip_correction: bool):
-    mbc = MacBidUpdater(await session_from_db_path(db_path))
+    session = await session_from_db_path(db_path)
+    mbc = MacBidUpdater(session)
     if not skip_correction:
         await mbc.correct_auction_groups()
     await mbc.update_locations()
@@ -23,6 +24,7 @@ async def _update(db_path: Path, skip_correction: bool):
     await mbc.update_auction_groups()
     await mbc.update_final_auction_lots()
     await mbc.update_live_auction_lots()
+    await session.close_all()
 
 
 @click.command()
