@@ -11,6 +11,11 @@ from pydantic import BaseModel
 Conditions = Literal["LIKE NEW", "DAMAGED", "OPEN BOX"]
 
 
+class BooleanFunction(Enum):
+    AND = "and"
+    OR = "or"
+
+
 class SimpleFtsQuery(BaseModel):
     """
     FTS supports a grammar that is much too complex to fully support, at least for my skill level
@@ -53,8 +58,3 @@ class FilterPayload(BaseModel):
 
 class FilterResponse(FilterPayload):
     meta: FilterMetaResponse
-
-
-class BooleanFunction(Enum):
-    AND = "and"
-    OR = "or"

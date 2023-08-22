@@ -12,8 +12,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
-from data.mac_bid.alias_utils import create_ftx_idx_alias
 from data.base_model import Base
+from data.mac_bid.alias_utils import create_ftx_idx_alias
 
 
 # class TransferPair(Base):
@@ -21,10 +21,11 @@ from data.base_model import Base
 #     source: Mapped[int] = mapped_column(ForeignKey(Location.id), primary_key=True)
 #     destination: Mapped[int] = mapped_column(ForeignKey(Location.id), primary_key=True)
 
-class LotCondition(enum.Enum, str):
+class LotCondition(str, enum.Enum):
     open_box = "OPEN BOX"
     new_ = "LIKE NEW"
     damaged = "DAMAGED"
+
 
 class Building(Base):
     __tablename__ = "building"
@@ -151,6 +152,7 @@ class AuctionLot(Base):
     condition_name: Mapped[LotCondition] = mapped_column(Enum(LotCondition), nullable=True)
     category: Mapped[str] = mapped_column(String, nullable=True)
     image_url: Mapped[str] = mapped_column(String, nullable=True)
+
 
 # typing is purely for dx - IDE will (correctly) suggest columns of AuctionLot to us now
 AuctionLotIdx: AuctionLot = create_ftx_idx_alias(AuctionLot, "id")
