@@ -11,8 +11,10 @@ This webapp aims to achieve 2 goals:
 This is subject to change, I don't even have a working E2E prototype
 
 Scraper
+ - sanity checks: how many lots were open before/after scrape
  - CLI integration + async rewrite
  - queuing system (SAQ)?
+   - see [here](https://github.com/litestar-org/litestar-pg-redis-docker/blob/0c3622f6c483117ed6638e49e82c3545e111573e/app/main.py#L46)
 
 Filters
  - manual running
