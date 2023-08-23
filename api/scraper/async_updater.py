@@ -3,6 +3,7 @@ import time
 from datetime import datetime, timedelta
 
 from sqlalchemy import false, update, select, join, func, insert, Select
+from sqlalchemy.orm import selectinload
 from tqdm import tqdm
 
 from data.mac_bid import Building, Location, AuctionGroup, AuctionLot
@@ -43,9 +44,12 @@ class MacBidUpdater:
         prevent future updates from correctly finding the data left in between the auction and where the error
         occurred
         """
-        stmt = select(AuctionGroup.id).where(AuctionGroup.is_open == false()) \
-            .order_by(AuctionGroup.closing_date.desc()) \
+        stmt = (
+            select(AuctionGroup.id)
+            .where(AuctionGroup.is_open == false())
+            .order_by(AuctionGroup.closing_date.desc())
             .limit(1)
+        )
 
         last_scraped_group_id = (await self.session.execute(stmt)).scalar_one_or_none()
         await self.update_final_auction_groups(last_scraped_group_id)
@@ -79,13 +83,10 @@ class MacBidUpdater:
         # I am not sure if it's possible to both batch and have this specific replacement logic
         # this is definitely fast enough for now
         rows = 0
-        for batch in batched([filter_raw_kwargs_in_place(AuctionGroup, row) for row in objs],
-                             n=self.BULK_INSERT_CHUNK_SIZE):
-            res = await self.session.execute(
-                insert(AuctionGroup)
-                .values(batch)
-                .prefix_with("OR IGNORE")
-            )
+        for batch in batched(
+            [filter_raw_kwargs_in_place(AuctionGroup, row) for row in objs], n=self.BULK_INSERT_CHUNK_SIZE
+        ):
+            res = await self.session.execute(insert(AuctionGroup).values(batch).prefix_with("OR IGNORE"))
             rows += res.rowcount
         print(f"inserted <={rows} new auction groups")
 
@@ -95,11 +96,7 @@ class MacBidUpdater:
         live_groups = await self.client.get_live_auction_groups(pg=1, ppg=1000)
         transformed_live_groups = [filter_raw_kwargs_in_place(AuctionGroup, row) for row in live_groups]
         for batch in batched(transformed_live_groups, n=self.BULK_INSERT_CHUNK_SIZE):
-            res = await self.session.execute(
-                insert(AuctionGroup)
-                .values(batch)
-                .prefix_with("OR IGNORE")
-            )
+            res = await self.session.execute(insert(AuctionGroup).values(batch).prefix_with("OR IGNORE"))
             total_groups += res.rowcount
         await self.session.commit()
 
@@ -131,21 +128,17 @@ class MacBidUpdater:
 
     async def _update_lots_of_groups(self, query: Select["tuple[AuctionGroup]"]) -> None:
         total_lots = 0
-        groups_res = await self.session.execute(query)
+        groups_res = (await self.session.execute(query)).scalars()
         # noinspection PyTypeChecker
         groups_count = await self.session.execute(select(func.count()).select_from(query))
         for group in tqdm(groups_res, total=groups_count.scalar()):
             try:
-                lots = await self.client.get_auction_lots(group.id)
+                lots = await self.client.get_auction_lots(await group.awaitable_attrs.id)
             except Exception as e:
                 print(f"exception occurred: {e}. ignoring for {group=}")
             else:
                 for batch in batched(lots, n=self.BULK_INSERT_CHUNK_SIZE):
-                    await self.session.execute(
-                        insert(AuctionLot)
-                        .values(batch)
-                        .prefix_with("OR REPLACE")
-                    )
+                    await self.session.execute(insert(AuctionLot).values(batch).prefix_with("OR REPLACE"))
                 group.date_scraped = datetime.now()
                 await self.session.commit()
                 total_lots += len(lots)
@@ -161,29 +154,37 @@ class MacBidUpdater:
             - Close any groups that have abandon in the past
         """
         now = datetime.now()
-        close_lots_where_closed_date_is_passed = update(AuctionLot).where(
-            AuctionLot.is_open & (now > AuctionLot.closed_date)
-        ).values(is_open=False)
+        close_lots_where_closed_date_is_passed = (
+            update(AuctionLot).where(AuctionLot.is_open & (now > AuctionLot.closed_date)).values(is_open=False)
+        )
 
-        close_groups_where_all_lots_are_closed = update(AuctionGroup).where(
-            AuctionGroup.id == select(AuctionGroup.id).select_from(
-                join(AuctionGroup, AuctionLot, AuctionGroup.id == AuctionLot.auction_id)
-            ).where(
-                AuctionGroup.is_open
-            ).group_by(AuctionGroup.id).having(
-                func.count(1).filter(AuctionLot.is_open) == 0
-            ).scalar_subquery()
-        ).values(is_open=False)
+        close_groups_where_all_lots_are_closed = (
+            update(AuctionGroup)
+            .where(
+                AuctionGroup.id
+                == select(AuctionGroup.id)
+                .select_from(join(AuctionGroup, AuctionLot, AuctionGroup.id == AuctionLot.auction_id))
+                .where(AuctionGroup.is_open)
+                .group_by(AuctionGroup.id)
+                .having(func.count(1).filter(AuctionLot.is_open) == 0)
+                .scalar_subquery()
+            )
+            .values(is_open=False)
+        )
 
-        close_groups_if_date_completed_or_abandoned_past = update(AuctionGroup).where(
-            AuctionGroup.is_open & ((now > AuctionGroup.closing_date) | (now > AuctionGroup.abandon_date))
-        ).values(is_open=False)
+        close_groups_if_date_completed_or_abandoned_past = (
+            update(AuctionGroup)
+            .where(AuctionGroup.is_open & ((now > AuctionGroup.closing_date) | (now > AuctionGroup.abandon_date)))
+            .values(is_open=False)
+        )
 
         step_explantions = [
             (close_lots_where_closed_date_is_passed, "closing lots where closed_date is passed"),
             (close_groups_where_all_lots_are_closed, "closing groups where all lots within are closed"),
-            (close_groups_if_date_completed_or_abandoned_past,
-             "closing groups where date completed/abandoned is in the past")
+            (
+                close_groups_if_date_completed_or_abandoned_past,
+                "closing groups where date completed/abandoned is in the past",
+            ),
         ]
         for stmt, explanation in step_explantions:
             start = time.perf_counter()
