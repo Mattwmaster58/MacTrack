@@ -133,6 +133,8 @@ class MacBidUpdater:
         groups_count = await self.session.execute(select(func.count()).select_from(query))
         for group in tqdm(groups_res, total=groups_count.scalar()):
             try:
+                # since we're lazy loading here, we need to ensure asyncio happens in async context
+                # no idea what exactly that means but that's what SQLA told me
                 lots = await self.client.get_auction_lots(await group.awaitable_attrs.id)
             except Exception as e:
                 print(f"exception occurred: {e}. ignoring for {group=}")
