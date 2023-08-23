@@ -1,30 +1,34 @@
 from datetime import datetime
 from itertools import islice
+from typing import Type
 
-from sqlalchemy import DateTime
-
-
-def filter_raw_kwargs_in_place(table: type, kwargs):
-    table = table.__table__
-    column_names = table.columns.keys()
-    return {k: v for k, v in kwargs.items() if k in column_names}
+from sqlalchemy import DateTime, Table
+from sqlalchemy.orm import DeclarativeBase
 
 
-def create_from_datetime_json(klass, kwargs):
-    convert_str_kwargs_to_datetime_in_place(klass, kwargs)
-    return klass(**kwargs)
+def filter_list_of_raw_kwargs(table: Type[DeclarativeBase], vals: list[dict[str, str]]):
+    return [filter_raw_kwargs(table, x) for x in vals]
 
 
-def convert_str_kwargs_to_datetime_in_place(klass, kwargs):
-    col_to_type = {}
-    for col in klass.__table__.columns:
-        col_to_type[col.name] = col
-    for col, v in kwargs.items():
-        if isinstance(col_to_type[col].type, DateTime) and v is not None:
+def filter_raw_kwargs(table: Type[DeclarativeBase], kwargs) -> dict:
+    new_kwargs = {}
+    table_obj = table.__table__
+    col_names = table_obj.columns.keys()
+    # noinspection PyTypeChecker
+    col_to_type = {col.name: col for col in table_obj.columns}
+
+    for key, v in kwargs.items():
+        if key not in col_names:
+            continue
+        # special datetime handling case
+        if isinstance(col_to_type[key].type, DateTime) and v is not None:
             try:
-                kwargs[col] = datetime.strptime(v, "%Y-%m-%dT%H:%M:%S.%fZ")
+                new_kwargs[key] = datetime.strptime(v, "%Y-%m-%dT%H:%M:%S.%fZ")
             except ValueError as e:
-                raise ValueError(f"{col} on class {klass.__name__} failed: {e}")
+                raise TypeError(f"{key} on class {table.__name__} failed: {type(e)}: {e}")
+        else:
+            new_kwargs[key] = v
+    return new_kwargs
 
 
 def batched(iterable, *, n):
