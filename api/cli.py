@@ -4,14 +4,23 @@ from pathlib import Path
 import click
 
 from database import init_db_from_engine, create_async_db_config
-from scraper.async_updater import MacBidUpdater
-
+from scraper.updater import MacBidUpdater
+import atexit
 
 async def session_from_db_path(db_path: Path):
     config = create_async_db_config(db_path)
     engine = config.create_engine_callable(config.connection_string)
     await init_db_from_engine(engine)
-    return config.create_session_maker()()
+    session = config.create_session_maker()()
+    def _closer():
+        async def _acloser():
+            await session.close()
+            await engine.dispose()
+        return asyncio.new_event_loop().run_until_complete(_acloser())
+
+    atexit.register(_closer)
+    return session
+
 
 
 async def _update(db_path: Path, skip_correction: bool):
@@ -24,7 +33,6 @@ async def _update(db_path: Path, skip_correction: bool):
     await mbc.update_auction_groups()
     await mbc.update_final_auction_lots()
     await mbc.update_live_auction_lots()
-    await session.close_all()
 
 
 @click.command()
