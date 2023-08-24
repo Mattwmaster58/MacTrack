@@ -4,7 +4,7 @@ export interface TagProps {
 }
 
 export interface TagInputProps {
-  value?: TagProps["data"][];
+  initialTags?: TagProps["data"][];
   onTagsChange?: (tag: TagProps["data"][]) => void;
   externalErrorMessage?: string;
 }

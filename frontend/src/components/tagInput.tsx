@@ -8,22 +8,23 @@ const Tag = ({ data, handleDelete }: TagProps) => {
 };
 
 const TagInput = ({
-  value,
+  initialTags,
   onTagsChange,
   externalErrorMessage,
 }: TagInputProps) => {
-  const [tags, setTags] = useState<TagProps["data"][]>(value ?? []);
+  const [tags, setTags] = useState<TagProps["data"][]>(initialTags ?? []);
   const [errorText, setErrorText] = useState("");
   const tagRef = useRef<HTMLInputElement>();
 
-  const handleDelete = (value: TagProps["data"]) =>
-    setTags(tags.filter((val) => val !== value));
+  const handleDelete = (value: TagProps["data"]) => {
+    updateTags(tags.filter((val) => val !== value));
+  };
   const resetErrorText = () => setErrorText("");
 
-  function updateTags(newTagList: TagProps["data"][]) {
+  const updateTags = (newTagList: TagProps["data"][]) => {
     setTags(newTagList);
     onTagsChange && onTagsChange(newTagList);
-  }
+  };
 
   const finalErrorMessage = externalErrorMessage || errorText;
 

@@ -121,7 +121,7 @@ function getFormCoreElements(
           render={({ field: { onChange, value } }) => (
             <TagInput
               onTagsChange={onChange}
-              value={value}
+              initialTags={value}
               externalErrorMessage={errors.fts_query?.includes?.message}
             />
           )}
@@ -135,7 +135,7 @@ function getFormCoreElements(
           render={({ field: { onChange, value } }) => (
             <TagInput
               onTagsChange={onChange}
-              value={value}
+              initialTags={value}
               externalErrorMessage={errors.fts_query?.excludes?.message}
             />
           )}

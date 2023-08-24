@@ -6,7 +6,7 @@ import axios from "axios";
 
 const useFilterQuery = (filterId: number) => {
   const path = `${ApiEndpoints.filter.list}/${filterId}`;
-  return useQuery([path], {
+  return useQuery([ApiEndpoints.filter.list, filterId], {
     queryFn: async (): Promise<FilterData> => {
       const { data } = await axios.get(path);
       return FilterDataSchema.parse(data);
