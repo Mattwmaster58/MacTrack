@@ -67,7 +67,8 @@ class MacBidUpdater:
             cur_page_groups = await self.client.get_final_auction_groups(pg, ppg)
             found_auction = check_for_auction_group(cur_page_groups, last_scraped_group_id)
             print(
-                f"queued {len(all_groups)}+{len(cur_page_groups)}={len(all_groups) + len(cur_page_groups)} auction groups")
+                f"queued {len(all_groups)}+{len(cur_page_groups)}={len(all_groups) + len(cur_page_groups)} auction groups"
+            )
             all_groups.extend(cur_page_groups)
             print(f"going back further to find {last_scraped_group_id=} {pg=}")
             pg += 1
@@ -121,15 +122,15 @@ class MacBidUpdater:
         groups_res = await self.session.execute(query)
         # noinspection PyTypeChecker
         groups_count = await self.session.execute(select(func.count()).select_from(query))
-
+        pbar = tqdm(total=groups_count.scalar())
         tasks = set()
         task_to_group = {}
-        for group in tqdm(groups_res.scalars(), total=groups_count.scalar()):
+        for group in groups_res.scalars():
             if len(tasks) >= self.CONCURRENT_LOT_SCRAPE_LIMIT:
                 # wait until at least one task completes before adding a new one
                 # note the reassigning of the tasks variable here
                 finished_tasks, tasks = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
-                await self._unwrap_lot_tasks(finished_tasks, task_to_group)
+                total_lots += await self._unwrap_lot_tasks(finished_tasks, task_to_group)
                 # todo: progress bar update here
             # since we're lazy loading here, we need to ensure asyncio happens in async context
             # that's what awaitable_attrs is for. no idea what exactly that means but that's what SQLA told me
@@ -137,29 +138,33 @@ class MacBidUpdater:
             additional_task = asyncio.create_task(self.client.get_auction_lots(group_id))
             task_to_group[additional_task] = group
             tasks.add(additional_task)
-        # processing remaining tasks
-        # (there will be no pending tasks, _ are pending)
+
         if len(tasks) > 0:
+            # processing remaining tasks
+            # (there will be no pending tasks, _ are pending)
             finished_tasks, __pending = await asyncio.wait(tasks)
-            await self._unwrap_lot_tasks(finished_tasks, task_to_group)
+            total_lots += await self._unwrap_lot_tasks(finished_tasks, task_to_group)
         # todo: progress bar update here
         print(f"updated {total_lots} lots")
 
-    async def _unwrap_lot_tasks(self, tasks: Iterable[asyncio.Future], task_to_group_mapping: dict) -> None:
+    async def _unwrap_lot_tasks(self, tasks: Iterable[asyncio.Future], task_to_group_mapping: dict) -> int:
+        total_lots_inserted = 0
         for t in tasks:
             group = task_to_group_mapping[t]
             if t.done():
                 try:
                     lots = t.result()
                     await self._insert_lots(group, lots)
+                    total_lots_inserted += len(lots)
                 except Exception as e:
                     print(f"exception occurred: {type(e)}: {e}. {group} failed")
             else:
                 raise ValueError("You should only be passing done futures to this internal function :(")
         await self.session.commit()
+        return total_lots_inserted
 
     async def _insert_lots(self, group, lots) -> None:
         for batch in batched(lots, n=self.BULK_INSERT_CHUNK_SIZE):
             await self.session.execute(insert(AuctionLot).values(batch).prefix_with("OR REPLACE"))
         # todo: hopefully this isn't problematic
-        group.date_scraped = datetime.now()
+        group.date_scraped = datetime.utcnow()

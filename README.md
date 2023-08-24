@@ -11,6 +11,7 @@ This webapp aims to achieve 2 goals:
 This is subject to change, I don't even have a working E2E prototype
 
 Scraper
+ - ALL datetime in UTC
  - sanity checks: how many lots were open before/after scrape
  - ~~CLI integration + async rewrite~~
  - queuing system (SAQ)?
