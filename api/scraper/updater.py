@@ -54,15 +54,22 @@ class MacBidUpdater:
         def check_for_auction_group(auction_groups_: list, group_id: int):
             if group_id is None:
                 return False
-            for group in auction_groups_:
-                if group["id"] == group_id:
-                    return True
-            return False
+            return group_id in map(lambda x: x["id"], auction_groups_)
 
         print(f"looking for {last_scraped_group_id=}")
         cur_page_groups = await self.client.get_final_auction_groups(pg, ppg)
         all_groups = [*cur_page_groups]  # copy into list
         found_auction = check_for_auction_group(cur_page_groups, last_scraped_group_id)
+        if (
+            not found_auction
+            and last_scraped_group_id is not None
+            and (max_group_id := max(map(lambda x: x["id"], cur_page_groups))) < last_scraped_group_id
+        ):
+            raise ValueError(
+                f"{last_scraped_group_id=} is greater than the max "
+                f"of the first auction summary page {max_group_id=}"
+            )
+
         while len(cur_page_groups) == ppg and not found_auction:
             cur_page_groups = await self.client.get_final_auction_groups(pg, ppg)
             found_auction = check_for_auction_group(cur_page_groups, last_scraped_group_id)
@@ -72,7 +79,7 @@ class MacBidUpdater:
             all_groups.extend(cur_page_groups)
             print(f"going back further to find {last_scraped_group_id=} {pg=}")
             pg += 1
-        print("inserting past auction groups")
+        print(f"inserting past auction groups {found_auction=}")
         # todo: do proper batched insertions here
         # I am not sure if it's possible to both batch and have this specific replacement logic
         # this is definitely fast enough for now
