@@ -33,8 +33,8 @@ class SimpleFtsQuery(BaseModel):
 
 class FilterCore(BaseModel):
     fts_query: SimpleFtsQuery
-    min_retail_price: float = -1
-    max_retail_price: float = -1
+    min_retail_price: float
+    max_retail_price: float
     damaged: bool
     new_: bool
     open_box: bool

@@ -24,18 +24,18 @@ def query_statement_from_filter_core(filter_core: FilterCore) -> Select:
     # fts clause
     fts_serialized = ""
     if not fts_data.include_description:
-        fts_serialized += f"-{AuctionLot.description}:"
+        fts_serialized += f"-{AuctionLot.description.name}:"
     includes_serialized = fts_data.boolean_function.value.join([f'"{term}"' for term in fts_data.includes])
     fts_serialized += f"({includes_serialized})"
     if excludes_serialized := BooleanFunction.OR.value.upper().join([f'"{term}"' for term in fts_data.excludes]):
         fts_serialized += f" NOT ({excludes_serialized})"
-    where_clauses.append(column(AuctionLotIdx.__tablename__.op("MATCH")(fts_serialized)))
+    where_clauses.append(column(AuctionLotIdx.__tablename__).op("MATCH")(fts_serialized))
 
     # price clauses
     if filter_core.min_retail_price > -1:
         where_clauses.append(AuctionLotIdx.retail_price >= filter_core.min_retail_price)
     if filter_core.max_retail_price > -1:
-        where_clauses.append(AuctionLotIdx.retail_price <= filter_core.min_retail_price)
+        where_clauses.append(AuctionLotIdx.retail_price <= filter_core.max_retail_price)
 
     # item condition clauses
     desired_item_conditions = []
@@ -47,7 +47,8 @@ def query_statement_from_filter_core(filter_core: FilterCore) -> Select:
         desired_item_conditions.append(AuctionLotIdx.condition_name == LotCondition.damaged)
     where_clauses.append(functools.reduce(operator.or_, desired_item_conditions))
 
-    return select(AuctionLotIdx).where(*where_clauses)
+    stmt = select(AuctionLotIdx).where(*where_clauses)
+    return stmt
 
 
 async def items_from_filter_core(tx: AsyncSession, data: FilterCore) -> list[AuctionLot]:
@@ -56,14 +57,13 @@ async def items_from_filter_core(tx: AsyncSession, data: FilterCore) -> list[Auc
         rows = await tx.execute(stmt.limit(100))
     except Exception:
         raise
-    # todo: select 0th element more automatically? answer: scalars
     return cast("list[AuctionLot]", rows.scalars().all())
 
 
 @post("/search")
 async def search(
-        tx: AsyncSession,
-        data: FilterCore,
+    tx: AsyncSession,
+    data: FilterCore,
 ) -> list[AuctionLot]:
     # todo: PAGINATE THIS
     items = await items_from_filter_core(tx, data)
