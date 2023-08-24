@@ -1,8 +1,10 @@
 import itertools
+from pathlib import Path
 
 from litestar import Litestar, Router
 from litestar.config.compression import CompressionConfig
 from litestar.config.cors import CORSConfig
+from litestar.stores.file import FileStore
 
 from database import init_db_from_app, db_plugins
 from dependancies.transaction import provide_transaction
@@ -30,13 +32,14 @@ api_routes = [*auth_excluded_routes, *other_routes]
 api_router = Router(path=API_ROOT, route_handlers=api_routes)
 
 app = Litestar(
-    route_handlers=[api_router],
-    dependencies={"tx": provide_transaction},
-    plugins=[*db_plugins],
-    cors_config=cors_config,
-    compression_config=CompressionConfig(backend="brotli"),
-    on_startup=[init_db_from_app],
-    on_app_init=[session_auth.on_app_init],
     # logging_config=logging_config,
-    debug=True,  # required until this is fixed: https://github.com/litestar-org/litestar/issues/1804
+    compression_config=CompressionConfig(backend="brotli"),
+    cors_config=cors_config,
+    debug=True,
+    dependencies={"tx": provide_transaction},
+    on_app_init=[session_auth.on_app_init],
+    on_startup=[init_db_from_app],
+    plugins=[*db_plugins],
+    route_handlers=[api_router],
+    stores={"sessions": FileStore(path=Path(__file__).parent / "session_data")},
 )
