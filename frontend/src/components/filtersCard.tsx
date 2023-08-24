@@ -6,7 +6,7 @@ import {
   Typography,
 } from "@mui/material";
 import { FilterData } from "../types/filterSchema";
-import { formatDistanceToNow, parseISO } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import { zonedTimeToUtc } from "date-fns-tz";
 import { useAccessibleOnClick } from "../common/useAccessibleOnClick";
 
