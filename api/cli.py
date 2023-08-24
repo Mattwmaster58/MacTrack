@@ -5,7 +5,7 @@ from pathlib import Path
 import click
 
 from database import init_db_from_engine, create_async_db_config
-from scraper.cleanup import cleanup
+from scraper.db_cleanup import db_cleanup
 from scraper.updater import MacBidUpdater
 
 
@@ -30,7 +30,7 @@ async def _update(db_path: Path, skip_cleanup: bool):
     session = await session_from_db_path(db_path)
     mbc = MacBidUpdater(session)
     if not skip_cleanup:
-        await cleanup(mbc.session)
+        await db_cleanup(mbc.session)
     await mbc.update_locations()
     await mbc.update_buildings()
     # todo: sanity checks: how many lots were open before/after scrape

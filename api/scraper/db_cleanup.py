@@ -18,7 +18,7 @@ class CleanupOp:
     static_values: dict[str, any]
 
 
-async def cleanup(session: AsyncDbSession):
+async def db_cleanup(session: AsyncDbSession):
     """
     Core parts of the scraping logic depend on AuctionGroup.is_active being accurate, but this is not always the
     case, so we attempt to fix things up here with a few different approaches
