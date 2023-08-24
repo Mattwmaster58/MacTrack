@@ -7,12 +7,10 @@ const pydanticDatetime = z
   .string()
   .regex(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
 const pydanticDatetimeTransform = (
-  val: string | undefined,
+  val: string | null,
   ctx: z.RefinementCtx,
 ) => {
-  if (val === undefined) {
-    return undefined;
-  }
+  if (val === null) return null;
   const parsed = parseISO(val);
   if (!isValid(parsed)) {
     ctx.addIssue({
@@ -23,8 +21,8 @@ const pydanticDatetimeTransform = (
   }
   return parsed;
 };
-export const pydanticDatetimeParsedOptional = pydanticDatetime
-  .optional()
+export const pydanticDatetimeParsedNullable = pydanticDatetime
+  .nullable()
   .transform(pydanticDatetimeTransform);
 export const pydanticDatetimeParsed = pydanticDatetime.transform(
   pydanticDatetimeTransform as (val: string, ctx: RefinementCtx) => Date,
