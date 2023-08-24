@@ -1,15 +1,7 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import (
-    String,
-    Boolean,
-    Integer,
-    ForeignKey,
-    DateTime,
-    Float,
-    Enum
-)
+from sqlalchemy import String, Boolean, Integer, ForeignKey, DateTime, Float, Enum
 from sqlalchemy.orm import Mapped, mapped_column
 
 from data.base_model import Base
@@ -20,6 +12,7 @@ from data.mac_bid.alias_utils import create_ftx_idx_alias
 #     __tablename__ = "transfer_pair"
 #     source: Mapped[int] = mapped_column(ForeignKey(Location.id), primary_key=True)
 #     destination: Mapped[int] = mapped_column(ForeignKey(Location.id), primary_key=True)
+
 
 class LotCondition(str, enum.Enum):
     open_box = "OPEN BOX"
@@ -89,7 +82,8 @@ class AuctionGroup(Base):
     free_transfers: Mapped[bool] = mapped_column(Boolean, nullable=True)
     date_launched: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     date_completed: Mapped[datetime] = mapped_column(DateTime, nullable=True)
-    is_open: Mapped[bool] = mapped_column(Boolean, nullable=True, index=True)
+    # NOT useful to index this. see: https://www.mail-archive.com/sqlite-users@mailinglists.sqlite.org/msg63841.html
+    is_open: Mapped[bool] = mapped_column(Boolean, nullable=True)
     stagger_close_seconds: Mapped[int] = mapped_column(Integer, nullable=True)
     extension_window_seconds: Mapped[int] = mapped_column(Integer, nullable=True)
     time_extension_seconds: Mapped[int] = mapped_column(Integer, nullable=True)
@@ -114,14 +108,15 @@ class AuctionGroup(Base):
     location_name: Mapped[str] = mapped_column(String, nullable=True)
     building_id: Mapped[int] = mapped_column(ForeignKey(Building.id), nullable=True)
 
+    def __repr__(self) -> str:
+        return f"<AuctionGroup {self.id!r}>"
+
 
 class AuctionLot(Base):
     __tablename__ = "auctionlot"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    auction_id: Mapped[int] = mapped_column(
-        ForeignKey(AuctionGroup.id), primary_key=True
-    )
-    closed_date: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    auction_id: Mapped[int] = mapped_column(ForeignKey(AuctionGroup.id), primary_key=True)
+    closed_date: Mapped[datetime] = mapped_column(DateTime, nullable=True, index=True)
     expected_close_date: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     inventory_id: Mapped[int] = mapped_column(Integer, nullable=True)
     date_created: Mapped[datetime] = mapped_column(DateTime, nullable=True)
@@ -133,7 +128,7 @@ class AuctionLot(Base):
     total_bids: Mapped[int] = mapped_column(Integer, nullable=True)
     winning_customer_id: Mapped[int] = mapped_column(Integer, nullable=True)
     winning_bid_id: Mapped[str] = mapped_column(String, nullable=True)
-    winning_bid_amount: Mapped[int] = mapped_column(Float, nullable=True)
+    winning_bid_amount: Mapped[int] = mapped_column(Float, nullable=True, index=True)
     unique_bidders: Mapped[int] = mapped_column(Integer, nullable=True)
     product_name: Mapped[str] = mapped_column(String, nullable=True)
     upc: Mapped[str] = mapped_column(String, nullable=True)
@@ -152,6 +147,9 @@ class AuctionLot(Base):
     condition_name: Mapped[LotCondition] = mapped_column(Enum(LotCondition), nullable=True)
     category: Mapped[str] = mapped_column(String, nullable=True)
     image_url: Mapped[str] = mapped_column(String, nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<AuctionLot {self.id!r}>"
 
 
 # typing is purely for dx - IDE will (correctly) suggest columns of AuctionLot to us now
