@@ -11,7 +11,7 @@ This webapp aims to achieve 2 goals:
 This is subject to change, I don't even have a working E2E prototype
 
 Scraper
- - ALL datetime in UTC
+ - ~~ALL datetime in UTC~~ (unverified whether this is actually done)
  - sanity checks: how many lots were open before/after scrape
  - ~~CLI integration + async rewrite~~
  - queuing system (SAQ)?
@@ -23,6 +23,8 @@ Filters
  - node render process for notification emails
    - see: https://github.com/markfinger/python-react
  - quick view - view results of your filter
+ - join auctionlot_idx with auctionlot for faster querying
+   - the former is fast for fts, slow for everything else (nothing can be indexed besides text)
 
 Auth
  - ~~make it so that auth actually works~~
