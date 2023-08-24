@@ -19,6 +19,8 @@ Scraper
 
 Filters
  - manual running
+ - "term preview"
+   - chips on the cards, + and -, single line only
  - queuing system (SAQ)?
  - node render process for notification emails
    - see: https://github.com/markfinger/python-react
