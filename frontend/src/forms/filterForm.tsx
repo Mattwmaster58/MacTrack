@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import {
   getFormCoreElements,
   processInitialValues as processInitialCoreValues,
@@ -26,6 +26,7 @@ import {
   FilterSchema,
 } from "../types/filterSchema";
 import { AuthContext } from "../common/authContext";
+import { FilterPreviewModel } from "../components/filterPreviewModel";
 
 type Props = {
   onSubmit: (values: FilterOutputValues) => void;
@@ -79,8 +80,26 @@ const FilterForm = ({ initialValues, onSubmit }: Props) => {
     adminComponents = null;
   }
 
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewData, setPreviewData] = useState<
+    FilterOutputValues | undefined
+  >();
+  const setPreviewClosed = () => setPreviewOpen(false);
+  const handlePreviewSubmit = (vals: FilterOutputValues) => {
+    setPreviewData(vals);
+    setPreviewOpen(true);
+  };
+
   return (
     <Stack>
+      {previewData && (
+        <FilterPreviewModel
+          open={previewOpen}
+          handleClose={setPreviewClosed}
+          title={previewData.meta.name ?? "default value"}
+          data={previewData}
+        />
+      )}
       <FormControl>
         <form onSubmit={handleSubmit(onSubmit)}>
           <FormProvider {...methods}>
@@ -99,7 +118,10 @@ const FilterForm = ({ initialValues, onSubmit }: Props) => {
           <Stack justifyContent={"end"} direction={"row"}>
             <ButtonGroup variant={"contained"}>
               {adminComponents}
-              <LoadingButton loading={false}>
+              <LoadingButton
+                loading={false}
+                onClick={handleSubmit(handlePreviewSubmit)}
+              >
                 {"View historical results"}
               </LoadingButton>
               <LoadingButton loading={isSubmitting} type={"submit"}>

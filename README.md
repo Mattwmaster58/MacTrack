@@ -30,6 +30,7 @@ Auth
  - ~~make it so that auth actually works~~
    - ~~set current user if page reload~~
    - ~~direct to sign in page if logged out (when redirecting user, make sure we don't return them to /current-user)~~
+ - load current user on page refresh regardless of auth required or not
 
 General
  - deploy backend on GCP

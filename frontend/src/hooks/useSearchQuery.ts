@@ -7,11 +7,14 @@ import { AuctionLot } from "../types/AuctionLot";
 const useSearchQuery = (itemsFilterValues: FilterCoreOutputValues) => {
   return useQuery([ApiEndpoints.search, itemsFilterValues], {
     queryFn: async () => {
-      const { data } = await axios.get<AuctionLot[]>(ApiEndpoints.search, {
-        params: itemsFilterValues,
+      const { data } = await axios.post<AuctionLot[]>(ApiEndpoints.search, {
+        ...itemsFilterValues.core,
       });
       return data;
     },
+    refetchInterval: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 };
 
