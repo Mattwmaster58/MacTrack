@@ -47,5 +47,5 @@ def update(db_path: Path, skip_cleanup: bool):
     asyncio.run(_update(db_path, skip_cleanup))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     update()
