@@ -9,13 +9,13 @@ from sqlalchemy import DateTime
 from data.base_model import Base
 
 
-def filter_list_of_raw_kwargs(table: Type[Base], vals: list[dict[str, str]], normalize_from_est: bool = True):
+def filter_list_of_raw_kwargs(table: Type[Base], vals: list[dict[str, str]], normalize_est_to_utc: bool = True):
     # mac.bid database has times in UTC-5:00 (EST), we would prefer those values are in UTC instead
 
-    return [filter_raw_kwargs(table, x) for x in vals]
+    return [filter_raw_kwargs(table, x, normalize_est_to_utc) for x in vals]
 
 
-def filter_raw_kwargs(table: Type[Base], kwargs: dict[str, str], normalize_from_est: bool) -> dict:
+def filter_raw_kwargs(table: Type[Base], kwargs: dict[str, str], normalize_est_to_utc: bool) -> dict:
     new_kwargs = {}
     table_obj = table.__table__
     col_names = table_obj.columns.keys()
@@ -29,7 +29,7 @@ def filter_raw_kwargs(table: Type[Base], kwargs: dict[str, str], normalize_from_
         if isinstance(col_to_type[key].type, DateTime) and v is not None:
             try:
                 naive_datetime = datetime.strptime(v, "%Y-%m-%dT%H:%M:%S.%fZ")
-                if normalize_from_est:
+                if normalize_est_to_utc:
                     with_tzinfo = datetime.fromtimestamp(naive_datetime.timestamp(), tz=timezone("US/Eastern"))
                     new_kwargs[key] = with_tzinfo.astimezone(pytz.utc)
                 else:
