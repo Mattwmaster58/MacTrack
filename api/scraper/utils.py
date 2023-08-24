@@ -2,15 +2,20 @@ from datetime import datetime
 from itertools import islice
 from typing import Type
 
-from sqlalchemy import DateTime, Table
-from sqlalchemy.orm import DeclarativeBase
+import pytz
+from pytz import timezone
+
+from sqlalchemy import DateTime
+from data.base_model import Base
 
 
-def filter_list_of_raw_kwargs(table: Type[DeclarativeBase], vals: list[dict[str, str]]):
+def filter_list_of_raw_kwargs(table: Type[Base], vals: list[dict[str, str]], normalize_from_est: bool = True):
+    # mac.bid database has times in UTC-5:00 (EST), we would prefer those values are in UTC instead
+
     return [filter_raw_kwargs(table, x) for x in vals]
 
 
-def filter_raw_kwargs(table: Type[DeclarativeBase], kwargs) -> dict:
+def filter_raw_kwargs(table: Type[Base], kwargs: dict[str, str], normalize_from_est: bool) -> dict:
     new_kwargs = {}
     table_obj = table.__table__
     col_names = table_obj.columns.keys()
@@ -23,7 +28,12 @@ def filter_raw_kwargs(table: Type[DeclarativeBase], kwargs) -> dict:
         # special datetime handling case
         if isinstance(col_to_type[key].type, DateTime) and v is not None:
             try:
-                new_kwargs[key] = datetime.strptime(v, "%Y-%m-%dT%H:%M:%S.%fZ")
+                naive_datetime = datetime.strptime(v, "%Y-%m-%dT%H:%M:%S.%fZ")
+                if normalize_from_est:
+                    with_tzinfo = datetime.fromtimestamp(naive_datetime.timestamp(), tz=timezone("US/Eastern"))
+                    new_kwargs[key] = with_tzinfo.astimezone(pytz.utc)
+                else:
+                    new_kwargs[key] = naive_datetime
             except ValueError as e:
                 raise TypeError(f"{key} on class {table.__name__} failed: {type(e)}: {e}")
         else:
@@ -35,9 +45,10 @@ def batched(iterable, *, n):
     """
     Batch sequences into seperated iterables of length n
     We use this because we're limited on the amount of values we can insert in a single insert statement,
-    and bulk insert operations appear to lack the flexibility to specify conflict resolution (ON CONFLICT REPLACE etc)"""
+    and bulk insert operations appear to lack the flexibility to specify conflict resolution (ON CONFLICT REPLACE etc)
+    """
     if n < 1:
-        raise ValueError('n must be at least one')
+        raise ValueError("n must be at least one")
     it = iter(iterable)
     while batch := tuple(islice(it, n)):
         yield batch
