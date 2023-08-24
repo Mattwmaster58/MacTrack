@@ -47,7 +47,13 @@ def query_statement_from_filter_core(filter_core: FilterCore) -> Select:
         desired_item_conditions.append(AuctionLotIdx.condition_name == LotCondition.damaged)
     where_clauses.append(functools.reduce(operator.or_, desired_item_conditions))
 
-    stmt = select(AuctionLotIdx).where(*where_clauses)
+    stmt = (
+        select(AuctionLotIdx)
+        .where(*where_clauses)
+        .order_by(
+            AuctionLotIdx.is_open.desc(), AuctionLotIdx.closed_date.desc(), AuctionLotIdx.expected_close_date.desc()
+        )
+    )
     return stmt
 
 
