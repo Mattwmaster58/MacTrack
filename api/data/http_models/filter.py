@@ -12,8 +12,8 @@ Conditions = Literal["LIKE NEW", "DAMAGED", "OPEN BOX"]
 
 
 class BooleanFunction(Enum):
-    AND = "and"
-    OR = "or"
+    AND = "AND"
+    OR = "OR"
 
 
 class SimpleFtsQuery(BaseModel):
