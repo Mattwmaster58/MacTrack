@@ -60,8 +60,10 @@ class Notification(Base):
     __tablename__ = "notification"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     filter_id: Mapped[int] = mapped_column(ForeignKey(Filter.id))
-    updated: Mapped[datetime] = mapped_column(DateTime, onupdate=func.now(), server_default=func.now())
-    status: Mapped[NotificationStatus] = mapped_column(SQLAEnum(NotificationStatus))
+    status: Mapped[NotificationStatus] = mapped_column(SQLAEnum(NotificationStatus), default=NotificationStatus.PENDING)
+    exceeded_item_limit: Mapped[bool] = mapped_column(Boolean)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
 
 
 class NotificationItem(Base):
