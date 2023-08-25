@@ -12,7 +12,7 @@ from sqlalchemy import select
 
 from data.http_models.auth import UserAuthPayload, UserRegisterPayload, UserResponse
 from data.user import User
-from dependancies.transaction import provide_transaction
+from dependancies.transaction import provide_transaction, provide_transaction_ctx
 from typings import AsyncDbSession
 
 
@@ -26,7 +26,7 @@ def check_password(password: str, hashed_password: str) -> bool:
 
 async def retrieve_user_handler(session: dict[str, Any], connection: ASGIConnection) -> User | None:
     if user_claimed_id := session.get("user_id"):
-        async for tx in provide_transaction(connection.app.state):
+        async with provide_transaction_ctx(connection.app.state) as tx:
             return (await tx.execute(select(User).where(User.id == user_claimed_id))).scalar_one_or_none()
     return None
 
