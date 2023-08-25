@@ -13,6 +13,7 @@ from data.mac_bid.models import LotCondition
 
 
 def query_statement_from_filter_core(filter_core: FilterCore) -> Select:
+    # todo: everything is slower when querying on fts vtable - we should probably do a join with FTS here
     fts_data = filter_core.fts_query
     if len(fts_data.includes) == 0:
         raise ValueError("cannot form a query with no FTS include terms")
@@ -47,23 +48,22 @@ def query_statement_from_filter_core(filter_core: FilterCore) -> Select:
         desired_item_conditions.append(AuctionLotIdx.condition_name == LotCondition.damaged)
     where_clauses.append(functools.reduce(operator.or_, desired_item_conditions))
 
-    stmt = (
-        select(AuctionLotIdx)
-        .where(*where_clauses)
-        .order_by(
-            AuctionLotIdx.is_open.desc(), AuctionLotIdx.closed_date.desc(), AuctionLotIdx.expected_close_date.desc()
-        )
-    )
+    stmt = select(AuctionLotIdx).where(*where_clauses)
     return stmt
 
 
 async def items_from_filter_core(tx: AsyncSession, data: FilterCore) -> list[AuctionLot]:
     stmt = query_statement_from_filter_core(data)
     try:
-        rows = await tx.execute(stmt.limit(100))
+        rows = await tx.execute(
+            stmt.limit(100).order_by(
+                AuctionLotIdx.is_open.desc(), AuctionLotIdx.closed_date.desc(), AuctionLotIdx.expected_close_date.desc()
+            )
+        )
     except Exception:
         raise
-    return cast("list[AuctionLot]", rows.scalars().all())
+    scalar_rows = rows.scalars().all()
+    return cast("list[AuctionLot]", scalar_rows)
 
 
 @post("/search")
