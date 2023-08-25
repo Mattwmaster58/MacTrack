@@ -41,5 +41,5 @@ app = Litestar(
     on_startup=[init_db_from_app],
     plugins=[*db_plugins],
     route_handlers=[api_router],
-    stores={"sessions": FileStore(path=Path(__file__).parent / "session_data")},
+    stores={"sessions": FileStore(path=Path(__file__).parent / ".session_data")},
 )
