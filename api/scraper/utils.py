@@ -1,11 +1,13 @@
+from contextlib import contextmanager
 from datetime import datetime
 from itertools import islice
 from typing import Type
 
 import pytz
 from pytz import timezone
+from sqlalchemy import DateTime, bindparam, BindParameter
+from sqlalchemy.orm import InstrumentedAttribute
 
-from sqlalchemy import DateTime
 from data.base_model import Base
 
 
@@ -52,3 +54,40 @@ def batched(iterable, *, n):
     it = iter(iterable)
     while batch := tuple(islice(it, n)):
         yield batch
+
+
+def pick_non_pk_columns(
+    table: Type[Base], additional_excludes: list[InstrumentedAttribute]
+) -> list[InstrumentedAttribute]:
+    """
+    Returns a list of columns for a table,
+    excluding PK columns as well as any excludes specified in additional_excludes
+    The additional excludes MUST be InstrumentedAttribute instances, which is the type
+    you get when you do eg AuctionGroup.date_scraped
+    """
+    actual_table = table.__table__
+    excluded_cols = {*actual_table.primary_key.columns, *[x.property.columns[0] for x in additional_excludes]}
+    output_cols = []
+    for col in actual_table.columns:
+        if col not in excluded_cols:
+            output_cols.append(col)
+    return output_cols
+
+
+def generate_bindparams(cols: list[InstrumentedAttribute]) -> dict[str, BindParameter]:
+    return {c.name: bindparam(c.name) for c in cols}
+
+
+def key_rename_list_in_place(d: list[dict[str, any]], old: str, new: str) -> None:
+    for v in d:
+        key_rename_in_place(v, old, new)
+
+
+def key_rename_in_place(d: dict[str, any], old: str, new: str) -> None:
+    d[new] = d.pop(old)
+
+
+@contextmanager
+def batched_executor():
+    # todo: introspect the SQLITE_LIMIT_VARIABLE_NUMBER
+    pass

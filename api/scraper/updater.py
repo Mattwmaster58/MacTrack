@@ -2,12 +2,12 @@ import asyncio
 from datetime import datetime, timedelta
 from typing import Iterable
 
-from sqlalchemy import false, select, func, insert, Select
+from sqlalchemy import false, select, func, insert, Select, update, bindparam, text
 from tqdm import tqdm
 
 from data.mac_bid import Building, Location, AuctionGroup, AuctionLot
 from scraper.api_client import ApiClient
-from scraper.utils import batched
+from scraper.utils import batched, pick_non_pk_columns, generate_bindparams, key_rename_list_in_place
 from typings import AsyncDbSession
 
 
@@ -19,23 +19,38 @@ class MacBidUpdater:
         self.session = session
         self.client = ApiClient()
 
-    async def update_buildings(self):
+    async def sync_db(self):
+        """
+        Syncs database with mac.bid API, ensuring the correct order of operations is used as well
+        """
+        await self.update_locations()
+        await self.update_buildings()
+        # todo: sanity checks: how many lots were open before/after scrape
+        await self.update_live_auction_groups()
+        await self.update_live_auction_lots()
+        await self.update_final_auction_groups()
+        await self.update_final_auction_lots()
+
+    async def update_buildings(self) -> None:
         buildings = await self.client.get_buildings()
         res = await self.session.execute(insert(Building).values(buildings).prefix_with("OR IGNORE"))
         print(f"inserted <={res.rowcount} new buildings")
 
-    async def update_locations(self):
+    async def update_locations(self) -> None:
         locations = await self.client.get_locations()
         res = await self.session.execute(insert(Location).values(locations).prefix_with("OR IGNORE"))
         print(f"inserted <={res.rowcount} new locations")
 
-    async def update_auction_groups(self):
+    async def update_final_auction_groups(self) -> None:
         """
         updates missing auction groups by finding the last auction group we have scraped. we need to be careful we do
         not leave ourselves in a bad state where we insert a very recent auction upon erroring later on, this will
         prevent future updates from correctly finding the data left in between the auction and where the error
         occurred
         """
+        ppg = 1000
+        pg = 1
+
         stmt = (
             select(AuctionGroup.id)
             .where(AuctionGroup.is_open == false())
@@ -44,12 +59,6 @@ class MacBidUpdater:
         )
 
         last_scraped_group_id = (await self.session.execute(stmt)).scalar_one_or_none()
-        await self.update_final_auction_groups(last_scraped_group_id)
-        await self.update_live_auction_groups()
-
-    async def update_final_auction_groups(self, last_scraped_group_id):
-        ppg = 1000
-        pg = 1
 
         def check_for_auction_group(auction_groups_: list, group_id: int):
             if group_id is None:
@@ -80,22 +89,35 @@ class MacBidUpdater:
             print(f"going back further to find {last_scraped_group_id=} {pg=}")
             pg += 1
         print(f"inserting past auction groups {found_auction=}")
-        # todo: do proper batched insertions here
-        # I am not sure if it's possible to both batch and have this specific replacement logic
-        # this is definitely fast enough for now
-        rows = 0
+        inserted_rows = updated_rows = 0
         for batch in batched(all_groups, n=self.BULK_INSERT_CHUNK_SIZE):
-            res = await self.session.execute(insert(AuctionGroup).values(batch).prefix_with("OR IGNORE"))
-            rows += res.rowcount
-        print(f"inserted <={rows} new auction groups")
+            inserted_rows += (
+                await self.session.execute(insert(AuctionGroup).values(batch).prefix_with("OR IGNORE"))
+            ).rowcount
+            # todo: verify this behaviour is correct
+            # here, we do an update https://stackoverflow.com/a/20310838/3427299
+            # todo: find a better abstraction, this one is pretty bad
+            r = (await self.session.execute(text("PRAGMA SQLITE_LIMIT_VARIABLE_NUMBER"))).scalar_one_or_none()
+            cols_to_update = pick_non_pk_columns(AuctionGroup, [AuctionGroup.date_scraped])
+            update_bindparams = generate_bindparams(cols_to_update)
+            new_id_bindparam = "b_id"
+            follow_up_update_stmt = update(AuctionGroup).where(AuctionGroup.id == bindparam("b_id"))
+            key_rename_list_in_place(batch, "id", new_id_bindparam)
+            updated_rows += (await self.session.execute(follow_up_update_stmt, batch)).rowcount
 
-    async def update_live_auction_groups(self):
+        print(f"inserted <={inserted_rows}/updated <={updated_rows} new auction groups")
+
+    async def update_live_auction_groups(self) -> None:
+        print("updating live auction groups")
         total_groups = 0
         # typically only ~100 live groups at once
         live_groups = await self.client.get_live_auction_groups(pg=1, ppg=1000)
         for batch in batched(live_groups, n=self.BULK_INSERT_CHUNK_SIZE):
             res = await self.session.execute(insert(AuctionGroup).values(batch).prefix_with("OR IGNORE"))
+            # no need to do update here, we don't care too much about updated groups for live auctions
+            # the correct data will eventually show up in the final group
             total_groups += res.rowcount
+        print(f"inserted <= {total_groups} live auction groups")
         await self.session.commit()
 
     async def update_final_auction_lots(self) -> None:
