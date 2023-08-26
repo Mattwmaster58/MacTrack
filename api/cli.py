@@ -31,12 +31,7 @@ async def _update(db_path: Path, skip_cleanup: bool):
     mbc = MacBidUpdater(session)
     if not skip_cleanup:
         await db_cleanup(mbc.session)
-    await mbc.update_locations()
-    await mbc.update_buildings()
-    # todo: sanity checks: how many lots were open before/after scrape
-    await mbc.update_auction_groups()
-    await mbc.update_final_auction_lots()
-    await mbc.update_live_auction_lots()
+    await mbc.sync_db()
 
 
 @click.command()
