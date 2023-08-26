@@ -5,7 +5,7 @@ from litestar.handlers import BaseRouteHandler
 from sqlalchemy import select
 
 from data.user import Filter
-from scraper.notification import run_filter
+from notification.notification import run_filter
 from typings import AsyncDbSession
 
 
