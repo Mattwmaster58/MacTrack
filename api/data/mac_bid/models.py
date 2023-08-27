@@ -5,7 +5,7 @@ from sqlalchemy import String, Boolean, Integer, ForeignKey, DateTime, Float, En
 from sqlalchemy.orm import Mapped, mapped_column
 
 from data.base_model import Base
-from data.mac_bid.alias_utils import create_ftx_idx_alias
+from data.mac_bid.fts5 import create_fts_idx_alias
 
 
 # class TransferPair(Base):
@@ -153,4 +153,4 @@ class AuctionLot(Base):
 
 
 # typing is purely for dx - IDE will (correctly) suggest columns of AuctionLot to us now
-AuctionLotIdx: AuctionLot = create_ftx_idx_alias(AuctionLot, "id")
+AuctionLotIdx: AuctionLot = create_fts_idx_alias(AuctionLot, "id")

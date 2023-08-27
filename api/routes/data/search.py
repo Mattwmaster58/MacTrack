@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from data import AuctionLot
 from data.http_models.filter import FilterCore, BooleanFunction
 from data.mac_bid import AuctionLotIdx
+from data.mac_bid.fts5 import get_fts_table_name
 from data.mac_bid.models import LotCondition
 
 
@@ -30,7 +31,7 @@ def query_statement_from_filter_core(filter_core: FilterCore) -> Select:
     fts_serialized += f"({includes_serialized})"
     if excludes_serialized := BooleanFunction.OR.value.upper().join([f'"{term}"' for term in fts_data.excludes]):
         fts_serialized += f" NOT ({excludes_serialized})"
-    where_clauses.append(column(AuctionLotIdx.__tablename__).op("MATCH")(fts_serialized))
+    where_clauses.append(fts_match_op(AuctionLot)(fts_serialized))
 
     # price clauses
     if filter_core.min_retail_price > -1:
@@ -50,6 +51,10 @@ def query_statement_from_filter_core(filter_core: FilterCore) -> Select:
 
     stmt = select(AuctionLotIdx).where(*where_clauses)
     return stmt
+
+
+def fts_match_op(original_table):
+    return column(get_fts_table_name(original_table)).op("MATCH")
 
 
 async def items_from_filter_core(tx: AsyncSession, data: FilterCore) -> list[AuctionLot]:

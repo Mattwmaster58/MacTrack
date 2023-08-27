@@ -1,5 +1,38 @@
-from sqlalchemy import DDLElement, String, Column
+from typing import Type
+
+from sqlalchemy import DDLElement, String, Column, Table
 from sqlalchemy.ext.compiler import compiles
+from sqlalchemy.orm import InstrumentedAttribute, aliased
+
+from data import Base
+
+
+def get_fts_table_name(base_table: Type[Base]) -> str:
+    return f"{base_table.__tablename__}_idx"
+
+
+def create_fts_idx_alias(original_table: Type[Base], pk_name: str):
+    original_table_columns = []
+    original_table_pk: Column | None = None
+
+    for attr in dir(original_table):
+        attr_val = getattr(original_table, attr)
+        if not attr.startswith("__") and isinstance(attr_val, InstrumentedAttribute):
+            col = attr_val.property.columns[0]
+            if col.primary_key and col.name == pk_name:
+                original_table_pk = col
+            else:
+                original_table_columns.append(Column(col.name, col.type, nullable=col.nullable))
+
+    idx_table_name = get_fts_table_name(original_table)
+    auction_lot_idx = Table(
+        idx_table_name,
+        original_table.metadata,
+        Column("rowid", original_table_pk.type, key=original_table_pk.name, primary_key=True),
+        *original_table_columns,
+    )
+    aliased_table = aliased(original_table, auction_lot_idx, adapt_on_names=True, name=idx_table_name)
+    return aliased_table
 
 
 # hugely useful: https://stackoverflow.com/a/49917886/3427299
@@ -82,11 +115,6 @@ def __compiles_fts_table_and_triggers(element: CreateFtsIfNoneExistsWithTriggers
     END;
     """
     return text
-
-
-def create_aliased_table():
-    # iterate over columns
-    table_args = []
 
 
 create_fts_table_and_triggers = CreateFtsIfNoneExistsWithTriggers
