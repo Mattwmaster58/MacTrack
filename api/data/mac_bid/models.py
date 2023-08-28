@@ -4,7 +4,7 @@ from datetime import datetime
 from sqlalchemy import String, Boolean, Integer, ForeignKey, DateTime, Float, Enum
 from sqlalchemy.orm import Mapped, mapped_column
 
-from data.base_model import Base
+from data.base import Base
 from data.mac_bid.fts5 import create_fts_idx_alias
 
 

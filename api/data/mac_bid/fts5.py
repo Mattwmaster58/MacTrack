@@ -4,7 +4,7 @@ from sqlalchemy import DDLElement, String, Column, Table
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.orm import InstrumentedAttribute, aliased
 
-from data import Base
+from data.base import Base, EXCLUDE_FROM_CREATION_KEY
 
 
 def get_fts_table_name(base_table: Type[Base]) -> str:
@@ -31,6 +31,7 @@ def create_fts_idx_alias(original_table: Type[Base], pk_name: str):
         Column("rowid", original_table_pk.type, key=original_table_pk.name, primary_key=True),
         *original_table_columns,
     )
+    setattr(auction_lot_idx, EXCLUDE_FROM_CREATION_KEY, True)
     aliased_table = aliased(original_table, auction_lot_idx, adapt_on_names=True, name=idx_table_name)
     return aliased_table
 
@@ -40,8 +41,8 @@ def create_fts_idx_alias(original_table: Type[Base], pk_name: str):
 
 class CreateFtsIfNoneExistsWithTriggers(DDLElement):
     """
-    Represents a CREATE VIRTUAL TABLE ... USING fts5 statement, for indexing
-    a given table.
+    Represents a CREATE VIRTUAL TABLE ... USING fts5 statement, for creating an
+    FTS index on a table, along with the necessary create, update, and delete triggers
     """
 
     def __init__(self, table, fts_cols: set[Column], version=5):

@@ -5,8 +5,19 @@ from litestar.contrib.sqlalchemy.plugins import SQLAlchemyAsyncConfig, SQLAlchem
     SQLAlchemySerializationPlugin
 from litestar.contrib.sqlalchemy.plugins.init.config.sync import autocommit_before_send_handler
 
-from data import Base, create_fts_table_and_triggers, AuctionLot
+from data.base import Base, EXCLUDE_FROM_CREATION_KEY
+from data.mac_bid.fts5 import create_fts_table_and_triggers
+from data.mac_bid import AuctionLot
+# strictly to execute code so those tables get attached to the base and tables get created
+from data.user import *
 from typings import AsyncDbEngine
+
+
+def create_all_respecting_table_flags(bind: AsyncDbEngine) -> None:
+    """Creates all, but excludes those with the attr of the name of the value of EXCLUDE_FROM_CREATION_KEY set to True"""
+    # take note of the double negative here :|
+    tables = [x for x in Base.metadata.tables.values() if not getattr(x, EXCLUDE_FROM_CREATION_KEY, False)]
+    return Base.metadata.create_all(bind, tables)
 
 
 async def init_db_from_app(_app: Litestar) -> None:
@@ -15,7 +26,7 @@ async def init_db_from_app(_app: Litestar) -> None:
 
 async def init_db_from_engine(engine: AsyncDbEngine) -> None:
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+        await conn.run_sync(create_all_respecting_table_flags)
         fts_statements = create_fts_table_and_triggers(
             table=AuctionLot.__table__,
             fts_cols={AuctionLot.product_name, AuctionLot.title, AuctionLot.description},
@@ -27,9 +38,9 @@ async def init_db_from_engine(engine: AsyncDbEngine) -> None:
         await raw_conn.connection._connection.executescript(str(fts_statements))
 
 
-def create_async_db_config(db_path: Path):
+def create_async_db_config(db_path_: Path):
     return SQLAlchemyAsyncConfig(
-        connection_string=f"sqlite+aiosqlite:///{db_path}",
+        connection_string=f"sqlite+aiosqlite:///{db_path_}",
         before_send_handler=autocommit_before_send_handler,
     )
 

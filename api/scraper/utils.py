@@ -8,7 +8,7 @@ from pytz import timezone
 from sqlalchemy import DateTime, bindparam, BindParameter
 from sqlalchemy.orm import InstrumentedAttribute
 
-from data.base_model import Base
+from data.base import Base
 
 
 def filter_list_of_raw_kwargs(table: Type[Base], vals: list[dict[str, str]], normalize_est_to_utc: bool = True):

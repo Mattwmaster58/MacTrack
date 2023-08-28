@@ -5,8 +5,8 @@ from typing import Type
 
 from sqlalchemy import select, join, func, update
 
-from data import AuctionLot, Base
-from data.mac_bid import AuctionGroup
+from data.base import Base
+from data.mac_bid import AuctionGroup, AuctionLot
 from typings import AsyncDbSession
 
 
