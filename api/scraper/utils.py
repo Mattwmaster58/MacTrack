@@ -30,14 +30,16 @@ def filter_raw_kwargs(table: Type[Base], kwargs: dict[str, str], normalize_est_t
         # special datetime handling case
         if isinstance(col_to_type[key].type, DateTime) and v is not None:
             try:
-                naive_datetime = datetime.strptime(v, "%Y-%m-%dT%H:%M:%S.%fZ")
+                # todo: this is still incorrect, we need to make it agnostic of system time
+                naive_datetime = max(datetime.strptime(v, "%Y-%m-%dT%H:%M:%S.%fZ"), datetime.utcfromtimestamp(0))
                 if normalize_est_to_utc:
                     with_tzinfo = datetime.fromtimestamp(naive_datetime.timestamp(), tz=timezone("US/Eastern"))
                     new_kwargs[key] = with_tzinfo.astimezone(pytz.utc)
                 else:
                     new_kwargs[key] = naive_datetime
-            except ValueError as e:
-                raise TypeError(f"{key} on class {table.__name__} failed: {type(e)}: {e}")
+            except (ValueError, OSError) as e:
+                # oserror is possible from datetime error
+                raise TypeError(f"Setting {table.__name__}.{key} failed: {type(e)}: {e} with {v=}")
         else:
             new_kwargs[key] = v
     return new_kwargs
