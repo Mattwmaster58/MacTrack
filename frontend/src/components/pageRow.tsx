@@ -17,7 +17,7 @@ const PageRow = ({ limit, offset, total, onChange }: Props) => {
   };
 
   return (
-    <Stack direction={"row"}>
+    <Stack direction={"row"} justifyContent={"center"}>
       <Pagination count={count} defaultPage={page} onChange={onChangeWrap} />
     </Stack>
   );
