@@ -7,9 +7,19 @@ import { Add } from "@mui/icons-material";
 import { NavLink } from "react-router-dom";
 import Grid2 from "@mui/material/Unstable_Grid2";
 import { PageRow } from "../../components/pageRow";
+import { useState } from "react";
 
 const Filters = () => {
-  const { data, isLoading, isError } = useFiltersQuery(0, 0);
+  const [pagination, setPagination] = useState({ limit: 0, offset: 0 });
+  const { data, isLoading, isFetching, isError } = useFiltersQuery(
+    pagination.limit,
+    pagination.offset,
+  );
+
+  const onPageChange = (limit: number, offset: number) => {
+    console.log(limit, offset);
+    setPagination({ limit, offset });
+  };
 
   const filterCardsContainer = (
     <Stack>
@@ -20,12 +30,14 @@ const Filters = () => {
           </Grid2>
         ))}
       </Grid2>
-      <PageRow
-        limit={10}
-        offset={0}
-        total={55}
-        onChange={(limit, offset) => console.log(limit, offset)}
-      />
+      {!isLoading ? (
+        <PageRow
+          limit={pagination.limit}
+          offset={pagination.offset}
+          total={data?.total ?? 1}
+          onChange={onPageChange}
+        />
+      ) : null}
     </Stack>
   );
 
@@ -43,7 +55,7 @@ const Filters = () => {
 
   return (
     <TitledPage title={"Filters"} rightElement={rightElement}>
-      {isLoading ? loadingElem : filterCardsContainer}
+      {isFetching ? loadingElem : filterCardsContainer}
     </TitledPage>
   );
 };
