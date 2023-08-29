@@ -6,9 +6,8 @@ from litestar import post
 from sqlalchemy import select, column, Select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from data import AuctionLot
 from data.http_models.filter import FilterCore, BooleanFunction
-from data.mac_bid import AuctionLotIdx
+from data.mac_bid import AuctionLotIdx, AuctionLot
 from data.mac_bid.fts5 import get_fts_table_name
 from data.mac_bid.models import LotCondition
 
@@ -73,8 +72,8 @@ async def items_from_filter_core(tx: AsyncSession, data: FilterCore) -> list[Auc
 
 @post("/search")
 async def search(
-    tx: AsyncSession,
-    data: FilterCore,
+        tx: AsyncSession,
+        data: FilterCore,
 ) -> list[AuctionLot]:
     # todo: PAGINATE THIS
     items = await items_from_filter_core(tx, data)
