@@ -1,15 +1,23 @@
 import { FilterCoreOutputValues } from "../types/filterCoreSchema";
 import { useQuery } from "@tanstack/react-query";
 import { ApiEndpoints } from "../common/apiEndpoints";
-import { FilterData, FilterDataSchema } from "../types/filterSchema";
+import { FilterDataSchema } from "../types/filterSchema";
 import axios from "axios";
+import { GetPaginatedResponseSchema } from "../types/api";
+import { z } from "zod";
 
-const useFiltersQuery = () => {
-  return useQuery([ApiEndpoints.filter.list], {
-    queryFn: async (): Promise<FilterData[]> => {
+export const FiltersPaginatedResponseSchema =
+  GetPaginatedResponseSchema(FilterDataSchema);
+export type FiltersPaginationResponse = z.infer<
+  typeof FiltersPaginatedResponseSchema
+>;
+
+const useFiltersQuery = (limit: number, offset: number) => {
+  return useQuery([ApiEndpoints.filter.list, limit, offset], {
+    queryFn: async (): Promise<FiltersPaginationResponse> => {
       const { data } = await axios.get(ApiEndpoints.filter.list);
       // todo: proper typing for this
-      return data.map((f: FilterData) => FilterDataSchema.parse(f));
+      return FiltersPaginatedResponseSchema.parse(data);
     },
   });
 };
