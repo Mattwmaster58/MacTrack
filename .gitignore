@@ -1,3 +1,4 @@
 node_modules
 mac.bid.db
 .session_data
+config.toml
