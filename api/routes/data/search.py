@@ -6,9 +6,9 @@ from litestar import post
 from sqlalchemy import select, column, Select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from data import AuctionLot
 from data.http_models.filter import FilterCore, BooleanFunction
-from data.mac_bid import AuctionLotIdx
+from data.mac_bid import AuctionLotIdx, AuctionLot
+from data.mac_bid.fts5 import get_fts_table_name
 from data.mac_bid.models import LotCondition
 
 
@@ -34,7 +34,8 @@ def query_clauses_from_filter_core(filter_core):
     fts_serialized += f"({includes_serialized})"
     if excludes_serialized := BooleanFunction.OR.value.upper().join([f'"{term}"' for term in fts_data.excludes]):
         fts_serialized += f" NOT ({excludes_serialized})"
-    where_clauses.append(column(AuctionLotIdx.__tablename__).op("MATCH")(fts_serialized))
+    where_clauses.append(fts_match_op(AuctionLot)(fts_serialized))
+
     # price clauses
     if filter_core.min_retail_price > -1:
         where_clauses.append(AuctionLotIdx.retail_price >= filter_core.min_retail_price)
@@ -50,6 +51,10 @@ def query_clauses_from_filter_core(filter_core):
         desired_item_conditions.append(AuctionLotIdx.condition_name == LotCondition.damaged)
     where_clauses.append(functools.reduce(operator.or_, desired_item_conditions))
     return where_clauses
+
+
+def fts_match_op(original_table):
+    return column(get_fts_table_name(original_table)).op("MATCH")
 
 
 async def items_from_filter_core(tx: AsyncSession, data: FilterCore) -> list[AuctionLot]:
@@ -68,8 +73,8 @@ async def items_from_filter_core(tx: AsyncSession, data: FilterCore) -> list[Auc
 
 @post("/search")
 async def search(
-    tx: AsyncSession,
-    data: FilterCore,
+        tx: AsyncSession,
+        data: FilterCore,
 ) -> list[AuctionLot]:
     # todo: PAGINATE THIS
     items = await items_from_filter_core(tx, data)

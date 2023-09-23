@@ -6,7 +6,7 @@ from sqlalchemy import Integer, String, Boolean, ForeignKey, DateTime, func
 from sqlalchemy.orm import mapped_column, Mapped
 from sqlalchemy.types import TypeDecorator
 
-from data.base_model import Base
+from data.base import Base
 from data.http_models.filter import FilterCore
 from data.mac_bid import AuctionLot
 
