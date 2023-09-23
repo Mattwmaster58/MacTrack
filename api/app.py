@@ -7,11 +7,13 @@ from litestar.config.cors import CORSConfig
 from litestar.stores.file import FileStore
 
 from database import init_db_from_app, db_plugins
+from dependancies.config import provide_config, get_config
 from dependancies.transaction import provide_transaction
 from routes.auth import signup, login, create_session_auth, current_user
 from routes.data.search import search
 from routes.user.filter import router as filter_router
 
+_ = get_config()  # see if we can even load this before continuing
 cors_config = CORSConfig(allow_origins=["http://localhost:3000"], allow_credentials=True)
 # logging_config = StructLoggingConfig()
 
@@ -36,7 +38,7 @@ app = Litestar(
     compression_config=CompressionConfig(backend="brotli"),
     cors_config=cors_config,
     debug=True,
-    dependencies={"tx": provide_transaction},
+    dependencies={"tx": provide_transaction, "config": provide_config},
     on_app_init=[session_auth.on_app_init],
     on_startup=[init_db_from_app],
     plugins=[*db_plugins],

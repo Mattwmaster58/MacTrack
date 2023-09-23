@@ -14,14 +14,18 @@ from data.mac_bid.models import LotCondition
 
 def query_statement_from_filter_core(filter_core: FilterCore) -> Select:
     # todo: everything is slower when querying on fts vtable - we should probably do a join with FTS here
+    where_clauses = query_clauses_from_filter_core(filter_core)
+    stmt = select(AuctionLotIdx).where(*where_clauses)
+    return stmt
+
+
+def query_clauses_from_filter_core(filter_core):
     fts_data = filter_core.fts_query
     if len(fts_data.includes) == 0:
         raise ValueError("cannot form a query with no FTS include terms")
     if not any((filter_core.new_, filter_core.open_box, filter_core.damaged)):
         raise ValueError("must include at least one acceptable condition")
-
     where_clauses = []
-
     # fts clause
     fts_serialized = ""
     if not fts_data.include_description:
@@ -31,13 +35,11 @@ def query_statement_from_filter_core(filter_core: FilterCore) -> Select:
     if excludes_serialized := BooleanFunction.OR.value.upper().join([f'"{term}"' for term in fts_data.excludes]):
         fts_serialized += f" NOT ({excludes_serialized})"
     where_clauses.append(column(AuctionLotIdx.__tablename__).op("MATCH")(fts_serialized))
-
     # price clauses
     if filter_core.min_retail_price > -1:
         where_clauses.append(AuctionLotIdx.retail_price >= filter_core.min_retail_price)
     if filter_core.max_retail_price > -1:
         where_clauses.append(AuctionLotIdx.retail_price <= filter_core.max_retail_price)
-
     # item condition clauses
     desired_item_conditions = []
     if filter_core.new_:
@@ -47,9 +49,7 @@ def query_statement_from_filter_core(filter_core: FilterCore) -> Select:
     if filter_core.damaged:
         desired_item_conditions.append(AuctionLotIdx.condition_name == LotCondition.damaged)
     where_clauses.append(functools.reduce(operator.or_, desired_item_conditions))
-
-    stmt = select(AuctionLotIdx).where(*where_clauses)
-    return stmt
+    return where_clauses
 
 
 async def items_from_filter_core(tx: AsyncSession, data: FilterCore) -> list[AuctionLot]:
