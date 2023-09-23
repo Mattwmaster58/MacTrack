@@ -9,7 +9,7 @@ from data.config_model import SMTPOptions
 from data.mac_bid import AuctionGroup, AuctionLotIdx
 from data.user import Filter, Notification
 from data.user.models import NotificationItem, User, NotificationStatus
-from routes.data.search import query_statement_from_filter_core, query_clauses_from_filter_core
+from routes.data.search import query_clauses_from_filter_core
 from typings import AsyncDbSession
 
 FILTER_ITEM_LIMIT = 100
@@ -38,7 +38,9 @@ async def run_filter(session: AsyncDbSession, filter_: Filter) -> None:
     base_clauses = query_clauses_from_filter_core(filter_.payload)
     notification_items_query = select(AuctionLotIdx.id).where(*base_clauses)
     last_filter_run = (
-        await session.execute(select(Notification.created_at).order_by(Notification.created_at.desc()))
+        await session.execute(
+            select(Notification.created_at).order_by(Notification.created_at.desc())
+        )
     ).one_or_none()
     if last_filter_run is not None:
         # todo: log this is happening
@@ -55,12 +57,15 @@ async def run_filter(session: AsyncDbSession, filter_: Filter) -> None:
     await session.flush()
     breakpoint()  # should have notification.id
     session.add_all(
-        NotificationItem(notification_id=notification.id, lot_id=lid) for lid in auction_lot_ids[:FILTER_ITEM_LIMIT]
+        NotificationItem(notification_id=notification.id, lot_id=lid)
+        for lid in auction_lot_ids[:FILTER_ITEM_LIMIT]
     )
     await session.commit()
 
 
-async def dispatch_notification(session: AsyncDbSession, notification: Notification, smtp_options: SMTPOptions) -> None:
+async def dispatch_notification(
+    session: AsyncDbSession, notification: Notification, smtp_options: SMTPOptions
+) -> None:
     """
     Args:
         notification:
@@ -68,8 +73,13 @@ async def dispatch_notification(session: AsyncDbSession, notification: Notificat
     Returns:
 
     """
-    filter = (await session.execute(select(Filter).where(Filter.id == notification.filter_id))).scalar_one()
-    recipient_email = (await session.execute(select(User.email).where(User.id == filter.user_id))).scalar_one()
+    filter_obj = (
+        await session.execute(select(Filter).where(Filter.id == notification.filter_id))
+    ).scalar_one()
+
+    recipient_email = (
+        await session.execute(select(User.email).where(User.id == filter_obj.user_id))
+    ).scalar_one()
 
     subject = f'MacTrack: "{notification.filter_id}" has matched new items!'
     msg = MIMEMultipart()

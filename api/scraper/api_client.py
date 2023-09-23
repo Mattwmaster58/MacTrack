@@ -11,7 +11,7 @@ def create_prefixed_session(prefix=None):
     if prefix is None:
         prefix = ""
     else:
-        prefix = prefix.rstrip('/') + '/'
+        prefix = prefix.rstrip("/") + "/"
 
     def new_request(prefix, f, method, url, *args, **kwargs):
         return f(method, prefix + url, *args, **kwargs)
@@ -25,7 +25,9 @@ class ApiClient:
     API_BASE = "https://api.macdiscount.com/"
 
     def __init__(self):
-        self.client = httpx.AsyncClient(base_url=self.API_BASE, transport=httpx.AsyncHTTPTransport(retries=2))
+        self.client = httpx.AsyncClient(
+            base_url=self.API_BASE, transport=httpx.AsyncHTTPTransport(retries=2)
+        )
 
     async def get_auction_lots(self, group_id: int) -> list[dict]:
         resp = (await self.client.get(f"auctions/{group_id}")).json()
@@ -40,7 +42,9 @@ class ApiClient:
 
     async def get_live_auction_groups(self, pg: int, ppg: int) -> list[dict]:
         # see also: https://www.mac.bid/ mac.bid homepage
-        return await self._get_auction_groups(endpoint="auctionsummary", pg=pg, ppg=ppg, data_key="data")
+        return await self._get_auction_groups(
+            endpoint="auctionsummary", pg=pg, ppg=ppg, data_key="data"
+        )
 
     async def get_final_auction_groups(self, pg: int, ppg: int) -> list[dict]:
         # see also: https://www.mac.bid/past-auctions

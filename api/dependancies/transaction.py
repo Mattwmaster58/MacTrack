@@ -1,12 +1,12 @@
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
-from litestar.contrib.sqlalchemy.plugins import SQLAlchemyInitPlugin, SQLAlchemyAsyncConfig
+from litestar.contrib.sqlalchemy.plugins import SQLAlchemyAsyncConfig
 from litestar.datastructures import State
 from litestar.exceptions import ClientException
 from litestar.status_codes import HTTP_409_CONFLICT
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from typings import AsyncDbSession
 

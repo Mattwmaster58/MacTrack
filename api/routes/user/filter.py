@@ -22,7 +22,9 @@ class FilterListPaginator(AbstractAsyncOffsetPaginator[Filter]):
         return cast("int", await self.tx.scalar(stmt))
 
     async def get_items(self, limit: int, offset: int) -> list[FilterResponse]:
-        stmt = select(Filter).where(Filter.user_id == self.user.id).order_by(Filter.updated_at.desc())
+        stmt = (
+            select(Filter).where(Filter.user_id == self.user.id).order_by(Filter.updated_at.desc())
+        )
         filters = await self.tx.scalars(stmt.slice(offset, limit))
         return list(map(filter_response_from_filter_row, filters.all()))
 
@@ -31,18 +33,24 @@ def filter_response_from_filter_row(row: Filter) -> FilterResponse:
     return FilterResponse(
         core=row.payload,
         meta=FilterMetaResponse(
-            name=row.name, active=row.active, updated_at=row.updated_at, created_at=row.created_at, id=row.id
+            name=row.name,
+            active=row.active,
+            updated_at=row.updated_at,
+            created_at=row.created_at,
+            id=row.id,
         ),
     )
 
 
 @get("/list")
-async def list_filters(f_list_paginator: FilterListPaginator, limit: int = 10, offset: int = 0) -> PaginatedResponse[FilterResponse]:
+async def list_filters(
+    f_list_paginator: FilterListPaginator, limit: int = 10, offset: int = 0
+) -> PaginatedResponse[FilterResponse]:
     return PaginatedResponse(
         total=await f_list_paginator.get_total(),
         limit=limit,
         offset=offset,
-        data=await f_list_paginator.get_items(limit, offset)
+        data=await f_list_paginator.get_items(limit, offset),
     )
 
 
@@ -57,13 +65,17 @@ async def list_filter_by_id(request: Request, tx: AsyncDbSession, filter_id: int
 
 @post("/create")
 async def create_filter(request: Request, tx: AsyncDbSession, data: FilterPayload) -> BaseResponse:
-    new_filter = Filter(user_id=request.user.id, name=data.meta.name, active=True, payload=data.core)
+    new_filter = Filter(
+        user_id=request.user.id, name=data.meta.name, active=True, payload=data.core
+    )
     tx.add(new_filter)
     return BaseResponse(success=True)
 
 
 @put("/update/{filter_id:int}")
-async def update_filter(request: Request, tx: AsyncDbSession, filter_id: int, data: FilterPayload) -> BaseResponse:
+async def update_filter(
+    request: Request, tx: AsyncDbSession, filter_id: int, data: FilterPayload
+) -> BaseResponse:
     stmt = (
         update(Filter)
         .where((Filter.user_id == request.user.id) & (Filter.id == filter_id))

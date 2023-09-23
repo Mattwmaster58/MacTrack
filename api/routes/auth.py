@@ -12,7 +12,7 @@ from sqlalchemy import select
 
 from data.http_models.auth import UserAuthPayload, UserRegisterPayload, UserResponse
 from data.user import User
-from dependancies.transaction import provide_transaction, provide_transaction_ctx
+from dependancies.transaction import provide_transaction_ctx
 from typings import AsyncDbSession
 
 
@@ -27,19 +27,32 @@ def check_password(password: str, hashed_password: str) -> bool:
 async def retrieve_user_handler(session: dict[str, Any], connection: ASGIConnection) -> User | None:
     if user_claimed_id := session.get("user_id"):
         async with provide_transaction_ctx(connection.app.state) as tx:
-            return (await tx.execute(select(User).where(User.id == user_claimed_id))).scalar_one_or_none()
+            return (
+                await tx.execute(select(User).where(User.id == user_claimed_id))
+            ).scalar_one_or_none()
     return None
 
 
 @post("/sign-in")
-async def login(request: Request, tx: AsyncDbSession, data: UserAuthPayload) -> Response[UserResponse]:
-    user: User | None = (await tx.execute(select(User).where(User.username == data.username))).scalar_one_or_none()
+async def login(
+    request: Request, tx: AsyncDbSession, data: UserAuthPayload
+) -> Response[UserResponse]:
+    user: User | None = (
+        await tx.execute(select(User).where(User.username == data.username))
+    ).scalar_one_or_none()
     if user is None:
-        resp = Response(UserResponse(success=False, message="That user doesn't exist"), status_code=404)
+        resp = Response(
+            UserResponse(success=False, message="That user doesn't exist"), status_code=404
+        )
     elif not check_password(data.password, user.password):
-        resp = Response(UserResponse(success=False, message="Incorrect username or password"), status_code=401)
+        resp = Response(
+            UserResponse(success=False, message="Incorrect username or password"), status_code=401
+        )
     elif not user.approved:
-        resp = Response(UserResponse(success=False, message="Account is pending admin approval"), status_code=402)
+        resp = Response(
+            UserResponse(success=False, message="Account is pending admin approval"),
+            status_code=402,
+        )
     else:
         resp = Response(UserResponse(success=True, username=user.username), status_code=200)
         request.set_session({"user_id": user.id})
@@ -48,10 +61,14 @@ async def login(request: Request, tx: AsyncDbSession, data: UserAuthPayload) -> 
 
 
 @post("/register")
-async def signup(tx: AsyncDbSession, request: Request, data: UserRegisterPayload) -> Response[UserResponse]:
+async def signup(
+    tx: AsyncDbSession, request: Request, data: UserRegisterPayload
+) -> Response[UserResponse]:
     any_user = (await tx.execute(select(User.id).limit(1))).scalar_one_or_none()
     existing_user_email = (
-        await tx.execute(select(User.email).where((User.username == data.username) | (User.email == data.email)))
+        await tx.execute(
+            select(User.email).where((User.username == data.username) | (User.email == data.email))
+        )
     ).scalar_one_or_none()
 
     # todo: validate password?

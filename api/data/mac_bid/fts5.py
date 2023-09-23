@@ -32,7 +32,9 @@ def create_fts_idx_alias(original_table: Type[Base], pk_name: str):
         *original_table_columns,
     )
     setattr(auction_lot_idx, EXCLUDE_FROM_CREATION_KEY, True)
-    aliased_table = aliased(original_table, auction_lot_idx, adapt_on_names=True, name=idx_table_name)
+    aliased_table = aliased(
+        original_table, auction_lot_idx, adapt_on_names=True, name=idx_table_name
+    )
     return aliased_table
 
 
@@ -60,7 +62,7 @@ def __compiles_fts_table_and_triggers(element: CreateFtsIfNoneExistsWithTriggers
     sep = "\n"
 
     underlying_tbl_name = preparer.format_table(tbl)
-    fts_name = preparer.quote(f'{tbl.name}_idx')
+    fts_name = preparer.quote(f"{tbl.name}_idx")
 
     text = f"\nCREATE VIRTUAL TABLE IF NOT EXISTS {fts_name} USING fts{version}("
 
@@ -86,8 +88,8 @@ def __compiles_fts_table_and_triggers(element: CreateFtsIfNoneExistsWithTriggers
 
     for col in all_other_columns:
         formatted_col = preparer.format_column(col)
-        all_old_columns_with_pk_list.append(f'old.{formatted_col}')
-        all_new_columns_with_pk_list.append(f'new.{formatted_col}')
+        all_old_columns_with_pk_list.append(f"old.{formatted_col}")
+        all_new_columns_with_pk_list.append(f"new.{formatted_col}")
         all_non_pk_columns_list.append(formatted_col)
 
     all_non_pk_columns = ", ".join(all_non_pk_columns_list)

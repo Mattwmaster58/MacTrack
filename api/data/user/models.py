@@ -53,7 +53,9 @@ class Filter(Base):
     active: Mapped[bool] = mapped_column(Boolean, default=False)
     payload: Mapped[FilterCore] = mapped_column(FilterQueryDbType, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), onupdate=func.now()
+    )
 
 
 class Notification(Base):
@@ -65,7 +67,9 @@ class Notification(Base):
     )
     status_text: Mapped[str] = mapped_column(String, nullable=True)
     exceeded_item_limit: Mapped[bool] = mapped_column(Boolean, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), nullable=False
+    )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), onupdate=func.now(), nullable=False
     )

@@ -7,7 +7,12 @@ from tqdm import tqdm
 
 from data.mac_bid import Building, Location, AuctionGroup, AuctionLot
 from scraper.api_client import ApiClient
-from scraper.utils import batched, pick_non_pk_columns, generate_bindparams, key_rename_list_in_place
+from scraper.utils import (
+    batched,
+    pick_non_pk_columns,
+    generate_bindparams,
+    key_rename_list_in_place,
+)
 from typings import AsyncDbSession
 
 
@@ -33,12 +38,16 @@ class MacBidUpdater:
 
     async def update_buildings(self) -> None:
         buildings = await self.client.get_buildings()
-        res = await self.session.execute(insert(Building).values(buildings).prefix_with("OR IGNORE"))
+        res = await self.session.execute(
+            insert(Building).values(buildings).prefix_with("OR IGNORE")
+        )
         print(f"inserted <={res.rowcount} new buildings")
 
     async def update_locations(self) -> None:
         locations = await self.client.get_locations()
-        res = await self.session.execute(insert(Location).values(locations).prefix_with("OR IGNORE"))
+        res = await self.session.execute(
+            insert(Location).values(locations).prefix_with("OR IGNORE")
+        )
         print(f"inserted <={res.rowcount} new locations")
 
     async def update_final_auction_groups(self) -> None:
@@ -72,7 +81,8 @@ class MacBidUpdater:
         if (
             not found_auction
             and last_scraped_group_id is not None
-            and (max_group_id := max(map(lambda x: x["id"], cur_page_groups))) < last_scraped_group_id
+            and (max_group_id := max(map(lambda x: x["id"], cur_page_groups)))
+            < last_scraped_group_id
         ):
             raise ValueError(
                 f"{last_scraped_group_id=} is greater than the max "
@@ -92,12 +102,16 @@ class MacBidUpdater:
         inserted_rows = updated_rows = 0
         for batch in batched(all_groups, n=self.BULK_INSERT_CHUNK_SIZE):
             inserted_rows += (
-                await self.session.execute(insert(AuctionGroup).values(batch).prefix_with("OR IGNORE"))
+                await self.session.execute(
+                    insert(AuctionGroup).values(batch).prefix_with("OR IGNORE")
+                )
             ).rowcount
             # todo: verify this behaviour is correct
             # here, we do an update https://stackoverflow.com/a/20310838/3427299
             # todo: find a better abstraction, this one is pretty bad
-            r = (await self.session.execute(text("PRAGMA SQLITE_LIMIT_VARIABLE_NUMBER"))).scalar_one_or_none()
+            r = (
+                await self.session.execute(text("PRAGMA SQLITE_LIMIT_VARIABLE_NUMBER"))
+            ).scalar_one_or_none()
             cols_to_update = pick_non_pk_columns(AuctionGroup, [AuctionGroup.date_scraped])
             update_bindparams = generate_bindparams(cols_to_update)
             new_id_bindparam = "b_id"
@@ -113,7 +127,9 @@ class MacBidUpdater:
         # typically only ~100 live groups at once
         live_groups = await self.client.get_live_auction_groups(pg=1, ppg=1000)
         for batch in batched(live_groups, n=self.BULK_INSERT_CHUNK_SIZE):
-            res = await self.session.execute(insert(AuctionGroup).values(batch).prefix_with("OR IGNORE"))
+            res = await self.session.execute(
+                insert(AuctionGroup).values(batch).prefix_with("OR IGNORE")
+            )
             # no need to do update here, we don't care too much about updated groups for live auctions
             # the correct data will eventually show up in the final group
             total_groups += res.rowcount
@@ -142,7 +158,9 @@ class MacBidUpdater:
         # todo: is the above statement even true? i don't hink it is anymore but i haven't checked recently
         await self._update_lots_of_groups(
             select(AuctionGroup)
-            .where(AuctionGroup.is_open & ((AuctionGroup.date_scraped == None) | rescrape_condition))
+            .where(
+                AuctionGroup.is_open & ((AuctionGroup.date_scraped == None) | rescrape_condition)
+            )
             .order_by(AuctionGroup.closing_date.asc())
         )
 
@@ -158,7 +176,9 @@ class MacBidUpdater:
             if len(tasks) >= self.CONCURRENT_LOT_SCRAPE_LIMIT:
                 # wait until at least one task completes before adding a new one
                 # note the reassigning of the tasks variable here
-                finished_tasks, tasks = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+                finished_tasks, tasks = await asyncio.wait(
+                    tasks, return_when=asyncio.FIRST_COMPLETED
+                )
                 total_lots += await self._unwrap_lot_tasks(finished_tasks, task_to_group)
                 # todo: progress bar update here
             # since we're lazy loading here, we need to ensure asyncio happens in async context
@@ -176,7 +196,9 @@ class MacBidUpdater:
         # todo: progress bar update here
         print(f"updated {total_lots} lots")
 
-    async def _unwrap_lot_tasks(self, tasks: Iterable[asyncio.Future], task_to_group_mapping: dict) -> int:
+    async def _unwrap_lot_tasks(
+        self, tasks: Iterable[asyncio.Future], task_to_group_mapping: dict
+    ) -> int:
         total_lots_inserted = 0
         for t in tasks:
             group = task_to_group_mapping[t]
@@ -188,7 +210,9 @@ class MacBidUpdater:
                 except Exception as e:
                     print(f"exception occurred: {type(e)}: {e}. {group} failed")
             else:
-                raise ValueError("You should only be passing done futures to this internal function :(")
+                raise ValueError(
+                    "You should only be passing done futures to this internal function :("
+                )
         await self.session.commit()
         return total_lots_inserted
 

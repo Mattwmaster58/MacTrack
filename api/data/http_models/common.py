@@ -8,7 +8,7 @@ class BaseResponse(BaseModel):
     message: str = None
 
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class PaginatedResponse(BaseModel, Generic[T]):

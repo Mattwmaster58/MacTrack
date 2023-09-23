@@ -2,7 +2,8 @@ import tomllib
 from pathlib import Path
 
 from litestar.di import Provide
-from data.config_model import Config, SMTPOptions
+
+from data.config_model import Config
 
 
 def get_config() -> Config:

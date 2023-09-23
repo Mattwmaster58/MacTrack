@@ -43,7 +43,9 @@ async def db_cleanup(session: AsyncDbSession):
 
     now = datetime.utcnow()
     CREATED_DATE_TO_CLOSED_DAYS_DELTA_THRESHOLD = 14
-    CREATED_DATE_TO_CLOSED_DAYS_TIMEDELTA_THRESHOLD = timedelta(days=CREATED_DATE_TO_CLOSED_DAYS_DELTA_THRESHOLD)
+    CREATED_DATE_TO_CLOSED_DAYS_TIMEDELTA_THRESHOLD = timedelta(
+        days=CREATED_DATE_TO_CLOSED_DAYS_DELTA_THRESHOLD
+    )
 
     all_cleanup_ops = [
         CleanupOp(
@@ -71,7 +73,9 @@ async def db_cleanup(session: AsyncDbSession):
                 AuctionGroup.id
                 == (
                     select(AuctionGroup.id)
-                    .select_from(join(AuctionGroup, AuctionLot, AuctionGroup.id == AuctionLot.auction_id))
+                    .select_from(
+                        join(AuctionGroup, AuctionLot, AuctionGroup.id == AuctionLot.auction_id)
+                    )
                     .where(AuctionGroup.is_open)
                     .group_by(AuctionGroup.id)
                     .having(func.count(1).filter(AuctionLot.is_open) == 0)
@@ -83,7 +87,10 @@ async def db_cleanup(session: AsyncDbSession):
         CleanupOp(
             table=AuctionGroup,
             description="closing groups where date completed/abandoned is in the past",
-            and_clauses=[AuctionGroup.is_open, (now > AuctionGroup.closing_date) | (now > AuctionGroup.abandon_date)],
+            and_clauses=[
+                AuctionGroup.is_open,
+                (now > AuctionGroup.closing_date) | (now > AuctionGroup.abandon_date),
+            ],
             static_values={"is_open": False},
         ),
     ]
@@ -92,4 +99,6 @@ async def db_cleanup(session: AsyncDbSession):
         update_stmt = update(op.table).where(*op.and_clauses).values(**op.static_values)
         res = await session.execute(update_stmt)
         await session.commit()
-        print(f"{op.description} resulted in {res.rowcount} rows effected in {time.perf_counter() - start:.2f}s")
+        print(
+            f"{op.description} resulted in {res.rowcount} rows effected in {time.perf_counter() - start:.2f}s"
+        )

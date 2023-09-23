@@ -30,9 +30,13 @@ def query_clauses_from_filter_core(filter_core):
     fts_serialized = ""
     if not fts_data.include_description:
         fts_serialized += f"-{AuctionLot.description.name}:"
-    includes_serialized = fts_data.boolean_function.value.join([f'"{term}"' for term in fts_data.includes])
+    includes_serialized = fts_data.boolean_function.value.join(
+        [f'"{term}"' for term in fts_data.includes]
+    )
     fts_serialized += f"({includes_serialized})"
-    if excludes_serialized := BooleanFunction.OR.value.upper().join([f'"{term}"' for term in fts_data.excludes]):
+    if excludes_serialized := BooleanFunction.OR.value.upper().join(
+        [f'"{term}"' for term in fts_data.excludes]
+    ):
         fts_serialized += f" NOT ({excludes_serialized})"
     where_clauses.append(fts_match_op(AuctionLot)(fts_serialized))
 
@@ -62,7 +66,9 @@ async def items_from_filter_core(tx: AsyncSession, data: FilterCore) -> list[Auc
     try:
         rows = await tx.execute(
             stmt.limit(100).order_by(
-                AuctionLotIdx.is_open.desc(), AuctionLotIdx.closed_date.desc(), AuctionLotIdx.expected_close_date.desc()
+                AuctionLotIdx.is_open.desc(),
+                AuctionLotIdx.closed_date.desc(),
+                AuctionLotIdx.expected_close_date.desc(),
             )
         )
     except Exception:

@@ -11,13 +11,17 @@ from sqlalchemy.orm import InstrumentedAttribute
 from data.base import Base
 
 
-def filter_list_of_raw_kwargs(table: Type[Base], vals: list[dict[str, str]], normalize_est_to_utc: bool = True):
+def filter_list_of_raw_kwargs(
+    table: Type[Base], vals: list[dict[str, str]], normalize_est_to_utc: bool = True
+):
     # mac.bid database has times in UTC-5:00 (EST), we would prefer those values are in UTC instead
 
     return [filter_raw_kwargs(table, x, normalize_est_to_utc) for x in vals]
 
 
-def filter_raw_kwargs(table: Type[Base], kwargs: dict[str, str], normalize_est_to_utc: bool) -> dict:
+def filter_raw_kwargs(
+    table: Type[Base], kwargs: dict[str, str], normalize_est_to_utc: bool
+) -> dict:
     new_kwargs = {}
     table_obj = table.__table__
     col_names = table_obj.columns.keys()
@@ -33,7 +37,9 @@ def filter_raw_kwargs(table: Type[Base], kwargs: dict[str, str], normalize_est_t
                 dt_as_system_timezone = datetime.strptime(v, "%Y-%m-%dT%H:%M:%S.%fZ")
                 if normalize_est_to_utc:
                     # todo: check if this is correct, need to check why UTC correction add 4 minutes?
-                    new_kwargs[key] = dt_as_system_timezone.replace(tzinfo=timezone("US/Eastern")).astimezone(pytz.utc)
+                    new_kwargs[key] = dt_as_system_timezone.replace(
+                        tzinfo=timezone("US/Eastern")
+                    ).astimezone(pytz.utc)
                 else:
                     new_kwargs[key] = dt_as_system_timezone
             except (ValueError, OSError) as e:
@@ -67,7 +73,10 @@ def pick_non_pk_columns(
     you get when you do eg AuctionGroup.date_scraped
     """
     actual_table = table.__table__
-    excluded_cols = {*actual_table.primary_key.columns, *[x.property.columns[0] for x in additional_excludes]}
+    excluded_cols = {
+        *actual_table.primary_key.columns,
+        *[x.property.columns[0] for x in additional_excludes],
+    }
     output_cols = []
     for col in actual_table.columns:
         if col not in excluded_cols:

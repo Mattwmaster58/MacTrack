@@ -17,7 +17,9 @@ def admin_user_guard(connection: ASGIConnection, _: BaseRouteHandler) -> None:
 @post("/filter/manual_trigger/{filter_id:int}", guards=[admin_user_guard])
 async def manual_filter_trigger(request: Request, tx: AsyncDbSession, filter_id: int):
     filter = (
-        await tx.execute(select(Filter).where(Filter.id == filter_id, Filter.user_id == request.user.id))
+        await tx.execute(
+            select(Filter).where(Filter.id == filter_id, Filter.user_id == request.user.id)
+        )
     ).one_or_none()
     if filter is None:
         raise NotFoundException

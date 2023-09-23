@@ -7,6 +7,7 @@ from sqlalchemy.orm import DeclarativeBase
 # so we can set this flag on a table object to exclude it
 EXCLUDE_FROM_CREATION_KEY = "_skip_create"
 
+
 # Why AsyncAttrs mixin is required: https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html#asyncio-orm-avoid-lazyloads
 class Base(AsyncAttrs, DeclarativeBase):
     pass

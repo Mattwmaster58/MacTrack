@@ -28,7 +28,9 @@ cors_config = CORSConfig(allow_origins=["http://localhost:3000"], allow_credenti
 API_ROOT = "/api"
 other_routes = [current_user, filter_router]
 auth_excluded_routes = [search, login, signup]
-auth_excluded_paths = [API_ROOT + p for p in itertools.chain(*[x.paths for x in auth_excluded_routes])]
+auth_excluded_paths = [
+    API_ROOT + p for p in itertools.chain(*[x.paths for x in auth_excluded_routes])
+]
 session_auth = create_session_auth(auth_excluded_paths)
 api_routes = [*auth_excluded_routes, *other_routes]
 api_router = Router(path=API_ROOT, route_handlers=api_routes)

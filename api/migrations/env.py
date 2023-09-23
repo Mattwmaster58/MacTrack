@@ -60,7 +60,7 @@ def run_migrations_offline() -> None:
         dialect_opts={"paramstyle": "named"},
         include_object=include_object,
         compare_server_default=True,
-        render_as_batch=True
+        render_as_batch=True,
     )
 
     with context.begin_transaction():
@@ -86,7 +86,7 @@ def run_migrations_online() -> None:
             target_metadata=target_metadata,
             include_object=include_object,
             compare_server_default=True,
-            render_as_batch=True
+            render_as_batch=True,
         )
 
         with context.begin_transaction():
