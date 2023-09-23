@@ -73,8 +73,8 @@ async def items_from_filter_core(tx: AsyncSession, data: FilterCore) -> list[Auc
 
 @post("/search")
 async def search(
-        tx: AsyncSession,
-        data: FilterCore,
+    tx: AsyncSession,
+    data: FilterCore,
 ) -> list[AuctionLot]:
     # todo: PAGINATE THIS
     items = await items_from_filter_core(tx, data)
